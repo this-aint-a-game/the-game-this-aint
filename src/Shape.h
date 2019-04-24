@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 #include <tiny_obj_loader/tiny_obj_loader.h>
 

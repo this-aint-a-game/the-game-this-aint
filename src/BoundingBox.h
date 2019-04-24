@@ -1,7 +1,7 @@
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 
-#include <glm.hpp>
+#include <glm/glm.hpp>
 #include <stdlib.h>
 
 class BoundingBox

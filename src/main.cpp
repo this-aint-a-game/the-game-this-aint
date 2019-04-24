@@ -17,7 +17,7 @@ lab 1
 #include "Strawberry.h"
 
 // value_ptr for glm
-#include <gtc/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
