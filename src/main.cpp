@@ -246,7 +246,7 @@ public:
 	void initTex()
 	{
 		skyTexture = make_shared<Texture>();
-		skyTexture->setFilename(resourceDir + "/crazy.jpg");
+		skyTexture->setFilename(resourceDir + "/nightSky.jpg");
 		skyTexture->init();
 		skyTexture->setUnit(0);
 		skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
