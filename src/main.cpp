@@ -15,6 +15,7 @@ lab 1
 #include "GLTextureWriter.h"
 #include "Particle.h"
 #include "Strawberry.h"
+#include "Terrain.h"
 
 // value_ptr for glm
 #include <glm/gtc/type_ptr.hpp>
@@ -42,11 +43,13 @@ public:
 
 	// programs
 	shared_ptr<Program> shapeProg;
-	shared_ptr<Program> groundProg;
+	//shared_ptr<Program> groundProg;
 	shared_ptr<Program> particleProg;
 	shared_ptr<Program> skyProg;
 	shared_ptr<Program> deadTreesProg;
 	shared_ptr<Program> roosterProg;
+
+	Terrain *terrain = new Terrain();
 
 	// collection 
 	bool colStrawberries = false;
@@ -137,62 +140,59 @@ public:
 	double lastTime = glfwGetTime();
 	double deltaTime = 0;
 
-	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-	{
-		if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		{
+	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		else if (key == GLFW_KEY_A && action == GLFW_PRESS)
-		{
-			moveLeft = true;
-
-		}
-		else if (key == GLFW_KEY_D && action == GLFW_PRESS)
-		{
-			moveRight = true;
-
-		}
-		else if (key == GLFW_KEY_W && action == GLFW_PRESS)
-		{
-			moveForward = true;
-
-		}
-		else if (key == GLFW_KEY_S && action == GLFW_PRESS)
-		{
-			moveBackward = true;
-
-		}
-		else if (key == GLFW_KEY_A && action == GLFW_RELEASE)
-		{
-			moveLeft = false;
-
-		}
-		else if (key == GLFW_KEY_D && action == GLFW_RELEASE)
-		{
-			moveRight = false;
-
-		}
-		else if (key == GLFW_KEY_W && action == GLFW_RELEASE)
-		{
-			moveForward = false;
-
-		}
-		else if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-		{
-			moveBackward = false;
-
-		}
-		else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
-		{
-			sprint = true;
-
-		}
-		else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE)
-		{
-			sprint = false;
+		switch (key) {
+			case GLFW_KEY_A:
+				moveLeft = (action != GLFW_RELEASE);
+				break;
+			case GLFW_KEY_D:
+				moveRight = (action != GLFW_RELEASE);
+				break;
+			case GLFW_KEY_W:
+				moveForward = (action != GLFW_RELEASE);
+				break;
+			case GLFW_KEY_S:
+				moveBackward = (action != GLFW_RELEASE);
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				if (action == GLFW_PRESS) {
+					sprint = true;
+					break;
+				}
+				sprint = false;
+				break;
+			case GLFW_KEY_F:
+				if (action != GLFW_RELEASE) {
+					terrain->updateFreq(true);
+				}
+				break;
+			case GLFW_KEY_V:
+				if (action != GLFW_RELEASE) {
+					terrain->updateFreq(false);
+				}
+				break;
+			case GLFW_KEY_O:
+				if (action != GLFW_RELEASE) {
+					terrain->updateOctave();
+				}
+				break;
+			case GLFW_KEY_P:
+				if (action != GLFW_RELEASE) {
+					terrain->updatePower(true);
+				}
+				break;
+			case GLFW_KEY_M:
+				if (action != GLFW_RELEASE) {
+					terrain->updatePower(false);
+				}
+				break;
 		}
 	}
+
 
 	void scrollCallback(GLFWwindow* window, double deltaX, double deltaY)
 	{
@@ -263,11 +263,13 @@ public:
 		sunTexture->setUnit(1);
 		sunTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-	 	groundTexture = make_shared<Texture>();
+	 	/*
+		groundTexture = make_shared<Texture>();
 		groundTexture->setFilename(resourceDir + "/ground.jpg");
 		groundTexture->init();
 		groundTexture->setUnit(2);
 		groundTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
+	 	 */
 
 		deadTreeTexture = make_shared<Texture>();
 		deadTreeTexture->setFilename(resourceDir + "/nightSky.jpg");
@@ -286,30 +288,6 @@ public:
 		roosterTexture->init();
 		roosterTexture->setUnit(4);
 		roosterTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-	}
-
-	void groundSetUp()
-	{
-		//initialize the textures we might use
-		groundProg = make_shared<Program>();
-		groundProg->setVerbose(true);
-		groundProg->setShaderNames(
-				resourceDir + "/tex_vert.glsl",
-				resourceDir + "/tex_frag.glsl");
-		if (! groundProg->init())
-		{
-			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-			exit(1);
-		}
-		groundProg->addUniform("P");
-		groundProg->addUniform("V");
-		groundProg->addUniform("M");
-		groundProg->addUniform("Texture0");
-		groundProg->addUniform("texNum");
-		groundProg->addAttribute("vertPos");
-		groundProg->addAttribute("vertNor");
-		groundProg->addAttribute("vertTex");
-		groundProg->addUniform("lightPos");
 	}
 
 	void deadTreeSetUp()
@@ -437,10 +415,12 @@ public:
 		
 		skySetUp();
 		shapeSetUp();
-		groundSetUp();
+		//groundSetUp();
 		deadTreeSetUp();
 		roosterSetUp();
 		particleSetUp();
+		terrain->initTerrain();
+		terrain->generateGrid();
 	}
 
 	void initParticles()
@@ -485,7 +465,7 @@ public:
 		uploadMultipleShapes("/fruits/strawberries.obj", 1);
 
 		// for ground
-		initQuad();
+		//initQuad();
 
 		// creation for particles
 		CHECKED_GL_CALL(glGenVertexArrays(1, &ParticleVertexArrayID));
@@ -634,6 +614,7 @@ public:
 		std::sort(particles.begin(), particles.end(), sorter);
 	}
 
+	/*
 	void initQuad()
 	{
 		float g_groundSize = GROUND_SIZE;
@@ -687,7 +668,9 @@ public:
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
 	}
+	 */
 
+	/*
 	void renderGround()
 	{
 
@@ -710,6 +693,7 @@ public:
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(2);
 	}
+	 */
 
 	void render()
 	{
@@ -806,6 +790,10 @@ public:
 			ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
 		MatrixStack *userViewPtr = ViewUser.get();
 
+		auto Model = make_shared<MatrixStack>();
+		Model->pushMatrix();
+		Model->loadIdentity();
+
 		checkForFruit();
 		checkFruitCollisions();
 
@@ -814,13 +802,18 @@ public:
 		Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
 		MatrixStack *projectionPtr = Projection.get();
 
+		//terrain->initTerrain();
+		//terrain->generateGrid();
+		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+
+
 		CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
 		CHECKED_GL_CALL(glDisable(GL_BLEND));
 		drawSky(userViewPtr, projectionPtr);
 
 		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
 		drawScene(userViewPtr, projectionPtr);
-		drawGround(userViewPtr, projectionPtr);
+		//drawGround(userViewPtr, projectionPtr);
 
 		drawDeadTrees(userViewPtr, projectionPtr);
 
@@ -990,6 +983,7 @@ public:
 		roosterProg->unbind();
 	}
 
+	/*
 	void drawGround(MatrixStack* View, MatrixStack* Projection)
 	{
 		auto Model = make_shared<MatrixStack>();
@@ -1012,6 +1006,7 @@ public:
 		Model->popMatrix();
 		groundProg->unbind();
 	}
+	 */
 
 	void drawDeadTrees(MatrixStack* View, MatrixStack* Projection)
 	{
