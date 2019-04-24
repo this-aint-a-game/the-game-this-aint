@@ -22,10 +22,8 @@ lab 1
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
-#define MAX_FRUITS 50
 #define GROUND_SIZE 120
 #define RENDER_SPEED 0.5f
-#define SPAWN_RATE 1
 
 using namespace std;
 using namespace glm;
@@ -45,9 +43,8 @@ public:
 	shared_ptr<Program> shapeProg;
 	//shared_ptr<Program> groundProg;
 	shared_ptr<Program> particleProg;
+    shared_ptr<Program> deadTreesProg;
 	shared_ptr<Program> skyProg;
-	shared_ptr<Program> deadTreesProg;
-	shared_ptr<Program> roosterProg;
 
 	Terrain *terrain = new Terrain();
 
@@ -61,7 +58,6 @@ public:
 	shared_ptr<Texture> groundTexture;
 	shared_ptr<Texture> particleTexture;
 	shared_ptr<Texture> deadTreeTexture;
-	shared_ptr<Texture> roosterTexture;
 
 	//ground info
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
@@ -74,9 +70,7 @@ public:
 	// Shape to be used (from obj file)
 	shared_ptr<Shape> sphereShape;
 	shared_ptr<Shape> deadTree;
-	shared_ptr<Shape> rooster;
 
-	vector<shared_ptr<Shape>> blenderShapes;
     vector<shared_ptr<Shape>> strawberryShapes;
     int numOfStraw = 0;
 
@@ -252,7 +246,7 @@ public:
 	void initTex()
 	{
 		skyTexture = make_shared<Texture>();
-		skyTexture->setFilename(resourceDir + "/crazy.jpg");
+		skyTexture->setFilename(resourceDir + "/nightSky.jpg");
 		skyTexture->init();
 		skyTexture->setUnit(0);
 		skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -283,11 +277,6 @@ public:
 		particleTexture->setUnit(4);
 		particleTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);	
 
-		roosterTexture = make_shared<Texture>();
-		roosterTexture->setFilename(resourceDir + "/rooster.png");
-		roosterTexture->init();
-		roosterTexture->setUnit(4);
-		roosterTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	}
 
 	void deadTreeSetUp()
@@ -312,30 +301,6 @@ public:
 		deadTreesProg->addAttribute("vertNor");
 		deadTreesProg->addAttribute("vertTex");
 		deadTreesProg->addUniform("lightPos");
-	}
-
-	void roosterSetUp()
-	{
-		//initialize the textures we might use
-		roosterProg = make_shared<Program>();
-		roosterProg->setVerbose(true);
-		roosterProg->setShaderNames(
-				resourceDir + "/rooster_tex_vert.glsl",
-				resourceDir + "/rooster_tex_frag.glsl");
-		if (! roosterProg->init())
-		{
-			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-			exit(1);
-		}
-		roosterProg->addUniform("P");
-		roosterProg->addUniform("V");
-		roosterProg->addUniform("M");
-		roosterProg->addUniform("Texture0");
-		roosterProg->addUniform("texNum");
-		roosterProg->addAttribute("vertPos");
-		roosterProg->addAttribute("vertNor");
-		roosterProg->addAttribute("vertTex");
-		roosterProg->addUniform("lightPos");
 	}
 
 	void shapeSetUp()
@@ -417,7 +382,6 @@ public:
 		shapeSetUp();
 		//groundSetUp();
 		deadTreeSetUp();
-		roosterSetUp();
 		particleSetUp();
 		terrain->initTerrain();
 		terrain->generateGrid();
@@ -449,6 +413,37 @@ public:
 	}
 
 
+	void initSceneCollectibles()
+    {
+        for(int i = 0; i < 6; i++)
+        {
+            bool found_spot = false;
+            Strawberry *berry;
+            while (!found_spot)
+            {
+                berry = new Strawberry();
+                berry->initObject(strawMin, strawMax);
+                BoundingBox *otherBB = berry->getBB();
+                for (int i = 0; i < objects.size(); i++)
+                {
+                    berry = new Strawberry();
+                    berry->initObject(strawMin, strawMax);
+                    BoundingBox *otherBB = berry->getBB();
+                    if ((objects[i]->isCollided(otherBB)))
+                    {
+                        delete berry;
+                        delete otherBB;
+                    }
+                }
+                found_spot = true;
+                delete otherBB;
+            }
+
+            objects.push_back(berry);
+        }
+    }
+
+
 	void initGeom()
 	{
 		deadTree = make_shared<Shape>();
@@ -456,16 +451,11 @@ public:
 		deadTree->resize();
 		deadTree->init();
 
-		rooster = make_shared<Shape>();
-		rooster->loadMesh(resourceDir + "/Rooster.obj");
-		rooster->resize();
-		rooster->init();
-
-		uploadMultipleShapes("/blender.obj", 0);
-		uploadMultipleShapes("/fruits/strawberries.obj", 1);
+		uploadMultipleShapes("/fruits/strawberries.obj", 0);
 
 		// for ground
 		//initQuad();
+		initSceneCollectibles();
 
 		// creation for particles
 		CHECKED_GL_CALL(glGenVertexArrays(1, &ParticleVertexArrayID));
@@ -547,9 +537,6 @@ public:
                 switch (switchNum)
 				{
 					case 0:
-						blenderShapes.push_back(s);
-						break;
-					case 1:
 						strawMin = Gmin;
 						strawMax = Gmax;
 						strawberryShapes.push_back(s);
@@ -575,12 +562,6 @@ public:
 			pointColors[i * 4 + 1] = col.g + col.g / 10.f;
 			pointColors[i * 4 + 2] = col.b + col.b / 10.f;
 			pointColors[i * 4 + 3] = col.a;
-		}
-
-
-		for(int i = 0; i < objects.size(); i++)
-		{
-			objects[i]->update(dt);
 		}
 
 
@@ -708,32 +689,6 @@ public:
 
 		time_increment += (nowTime - lastTime);
 
-		if((time_increment >= SPAWN_RATE) && (numOfStraw < MAX_FRUITS))
-		{
-		    bool found_spot = false;
-			Strawberry* berry;
-		    while(!found_spot)
-            {
-                berry = new Strawberry();
-                berry->initObject(strawMin, strawMax);
-                BoundingBox* otherBB = berry->getBB();
-                for(int i = 0; i < objects.size(); i++)
-                {
-                    if ((objects[i]->isCollided(otherBB)))
-                    {
-                        delete berry;
-                        delete otherBB;
-                    }
-                }
-                found_spot = true;
-                delete otherBB;
-            }
-
-			objects.push_back(berry);
-			time_increment = 0;
-			numOfStraw++;
-		}
-
 		updateGeom(nowTime - lastTime);
 
 		lastTime = nowTime;
@@ -795,7 +750,6 @@ public:
 		Model->loadIdentity();
 
 		checkForFruit();
-		checkFruitCollisions();
 
 		auto Projection = make_shared<MatrixStack>();
 		Projection->pushMatrix();
@@ -816,11 +770,6 @@ public:
 		//drawGround(userViewPtr, projectionPtr);
 
 		drawDeadTrees(userViewPtr, projectionPtr);
-
-		if(!go)
-		{
-			drawRooster(holdCameraPos, userViewPtr, projectionPtr);
-		}
 		
 		CHECKED_GL_CALL(glEnable(GL_BLEND));
 		CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -873,24 +822,6 @@ public:
 		}
 	}
 
-	void checkFruitCollisions()
-	{
-		for(int i = 0; i < objects.size(); i++)
-		{
-		    for (int j = i+1; j < objects.size(); j++)
-			{
-				BoundingBox* otherBB = objects[j]->getBB();
-				if ((objects[i]->isCollided(otherBB)) && (!objects[i]->collected))
-				{
-					objects[i]->velocity *= -1.f;
-                    objects[j]->velocity *= -1.f;
-					objects[i]->hit_count++;
-                    objects[j]->hit_count++;
-				}
-				delete otherBB;
-			}
-		}
-	}
 
 	void drawParticles(MatrixStack* View, float aspect)
 	{
@@ -932,81 +863,6 @@ public:
 		Model->popMatrix();
 		particleProg->unbind();
 	}
-
-	void drawRooster(vec3 hold, MatrixStack* View, MatrixStack* Projection)
-	{
-
-		auto Model = make_shared<MatrixStack>();
-		roosterProg->bind();
-		glUniformMatrix4fv(roosterProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(roosterProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		glUniform3f(roosterProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
-
-		Model->pushMatrix();
-			Model->loadIdentity();
-
-			float DistPosX = hold.x - GROUND_SIZE;
-			float DistNegX = hold.x + GROUND_SIZE;
-			float DistPosZ = hold.z - GROUND_SIZE;
-
-			if(abs(DistPosX) <= 10.f)
-			{
-				Model->translate(vec3(508.f, 0, hold.z));
-				Model->rotate(180, vec3(0,1,0));
-			}
-			else if(abs(DistPosZ) <= 10.f)
-			{
-				Model->translate(vec3(hold.x, 0, 508.f));
-				Model->rotate(180, vec3(0,1,0));
-			}
-			else if(abs(DistNegX) <= 10.f)
-			{
-				Model->translate(vec3(-508.f, 0, hold.z));
-				Model->rotate(-180, vec3(0,1,0));
-			}
-			else
-			{
-				Model->translate(vec3(hold.x, 0, -508.f));
-
-			}
-
-			Model->pushMatrix();
-			glUniformMatrix4fv(roosterProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
-			roosterTexture->bind(roosterProg->getUniform("Texture0"));
-			glUniform1f(roosterProg->getUniform("texNum"), 1);
-			rooster->draw(roosterProg);
-			Model->popMatrix();	
-			roosterTexture->unbind();
-		
-				
-		Model->popMatrix();
-		roosterProg->unbind();
-	}
-
-	/*
-	void drawGround(MatrixStack* View, MatrixStack* Projection)
-	{
-		auto Model = make_shared<MatrixStack>();
-		groundProg->bind();
-		glUniformMatrix4fv(groundProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(groundProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		glUniform3f(groundProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
-
-		Model->pushMatrix();
-			Model->loadIdentity();
-				Model->pushMatrix();
-				glUniformMatrix4fv(groundProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
-				groundTexture->bind(groundProg->getUniform("Texture0"));
-				glUniform1f(groundProg->getUniform("texNum"), 500);
-				renderGround();
-				Model->popMatrix();	
-				groundTexture->unbind();
-
-
-		Model->popMatrix();
-		groundProg->unbind();
-	}
-	 */
 
 	void drawDeadTrees(MatrixStack* View, MatrixStack* Projection)
 	{
@@ -1131,36 +987,6 @@ public:
 			Model->popMatrix();
 
 		}
-
-	
-		// for blender
-		Model->pushMatrix();
-		Model->scale(vec3(0.2f,0.2f,0.2f));
-		Model->translate(vec3(0.0f, 0.0f, 500.0f));
-		Model->rotate(PI, vec3(0.0f, 1.0f, .0f));
-
-		for (size_t i = 0; i < blenderShapes.size(); i++)
-		{
-			if( i == 0)
-			{
-				SetMaterial(6, sProgPtr);
-			}
-			else if(i == 2)
-			{
-				SetMaterial(18, sProgPtr);
-			}
-			else
-			{
-                glUniform3f(sProgPtr->getUniform("MatAmb"), (0.25f + ((float)score/50.f)), 0.25f, 0.25f);
-                glUniform3f(sProgPtr->getUniform("MatDif"), (0.25f + ((float)score/50.f)), 0.4f, 0.4f);
-                glUniform3f(sProgPtr->getUniform("MatSpec"), (0.25f + ((float)score/50.f)), 0.774597f, 0.774597f);
-                glUniform1f(sProgPtr->getUniform("shine"), 76.8f);
-			}
-			
-			glUniformMatrix4fv(shapeProg->getUniform("M"), 1, GL_FALSE,value_ptr(Model->topMatrix()) );
-			blenderShapes[i]->draw(shapeProg);
-		}
-		Model->popMatrix();
 			
 
 		Model->popMatrix();
