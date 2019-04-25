@@ -12,10 +12,10 @@ public:
     glm::vec3 bbmin;
     glm::vec3 bbmax;
 
-    bool isCollided(BoundingBox* otherBB, glm::vec3 currentPos)
+    bool isCollided(BoundingBox* otherBB, glm::vec3 currentPos, glm::vec3 scale)
     {
-        glm::vec3 curmin = currentPos + bbmin;
-        glm::vec3 curmax = currentPos + bbmax;
+        glm::vec3 curmin = currentPos + (bbmin*scale) ;
+        glm::vec3 curmax = currentPos + (bbmax*scale);
 
         glm::vec3 othermin = otherBB->bbmin;
         glm::vec3 othermax = otherBB->bbmax;
@@ -27,10 +27,10 @@ public:
 
     };
 
-    bool isCollided(glm::vec3 camera, glm::vec3 currentPos)
+    bool isCollided(glm::vec3 camera, glm::vec3 currentPos, glm::vec3 scale)
     {
-        glm::vec3 curmin = currentPos + bbmin;
-        glm::vec3 curmax = currentPos + bbmax;
+        glm::vec3 curmin = currentPos + (bbmin*scale) ;
+        glm::vec3 curmax = currentPos + (bbmax*scale);
 
         if(!(((camera.x) > curmin.x) && ((camera.x) < curmax.x)))
         {

@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
+#include "MatrixStack.h"
 
 #include <tiny_obj_loader/tiny_obj_loader.h>
 

@@ -1,7 +1,9 @@
 /*
-Alexa Drenick
-Caroline Cullen 
-lab 1
+Alexa
+Caroline
+Doug
+Sam
+obtain.
 */
 
 #include <iostream>
@@ -16,13 +18,10 @@ lab 1
 #include "Particle.h"
 #include "Strawberry.h"
 #include "Terrain.h"
-
-// value_ptr for glm
-#include <glm/gtc/type_ptr.hpp>
+#include "Crystal.h"
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
-#define GROUND_SIZE 120
 #define RENDER_SPEED 0.5f
 
 using namespace std;
@@ -36,28 +35,24 @@ public:
 	WindowManager * windowManager = nullptr;
 	int width, height;
 	std::string resourceDir = "../resources";
-	int score;
+	bool red = false;
+    bool orange = false;
+    bool yellow = false;
+    bool green = false;
+    bool blue = false;
+	bool violet = false;
 	vector<GameObject*> objects;
 
 	// programs
 	shared_ptr<Program> shapeProg;
 	//shared_ptr<Program> groundProg;
 	shared_ptr<Program> particleProg;
-    shared_ptr<Program> deadTreesProg;
 	shared_ptr<Program> skyProg;
 
 	Terrain *terrain = new Terrain();
-
-	// collection 
-	bool colStrawberries = false;
-
-
-	// textures
 	shared_ptr<Texture> skyTexture;
 	shared_ptr<Texture> sunTexture;
-	shared_ptr<Texture> groundTexture;
 	shared_ptr<Texture> particleTexture;
-	shared_ptr<Texture> deadTreeTexture;
 
 	//ground info
 	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
@@ -68,14 +63,25 @@ public:
 	float worldScale = 1.0;
 
 	// Shape to be used (from obj file)
-	shared_ptr<Shape> sphereShape;
-	shared_ptr<Shape> deadTree;
-
+    vector<shared_ptr<Shape>> sphereShapes;
+    glm::vec3 spheremin = glm::vec3(0);
+    glm::vec3 spheremax = glm::vec3(0);
+    vector<shared_ptr<Shape>> crystal1Shapes;
+	glm::vec3 cryst1min = glm::vec3(0);
+	glm::vec3 cryst1max = glm::vec3(0);
+    vector<shared_ptr<Shape>> crystal2Shapes;
+	glm::vec3 cryst2min = glm::vec3(0);
+	glm::vec3 cryst2max = glm::vec3(0);
+    vector<shared_ptr<Shape>> crystal3Shapes;
+	glm::vec3 cryst3min = glm::vec3(0);
+	glm::vec3 cryst3max = glm::vec3(0);
     vector<shared_ptr<Shape>> strawberryShapes;
-    int numOfStraw = 0;
+	glm::vec3 strawMin = glm::vec3(0);
+	glm::vec3 strawMax = glm::vec3(0);
 
-    glm::vec3 strawMin = glm::vec3(0);
-    glm::vec3 strawMax = glm::vec3(0);
+    int numCrystals;
+
+
 
 	// Contains vertex information for OpenGL
 	GLuint GroundVertexArrayID;
@@ -124,11 +130,6 @@ public:
 	bool moveRight = false;
 	bool moveForward = false;
 	bool moveBackward = false;
-
-	int numDeadTrees;
-	vector<GLfloat> deadPositions;
-	vector<GLfloat> deadScales;
-	vector<GLfloat> deadRotations;
 
 	double time_increment = 0;
 	double lastTime = glfwGetTime();
@@ -257,50 +258,12 @@ public:
 		sunTexture->setUnit(1);
 		sunTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-	 	/*
-		groundTexture = make_shared<Texture>();
-		groundTexture->setFilename(resourceDir + "/ground.jpg");
-		groundTexture->init();
-		groundTexture->setUnit(2);
-		groundTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
-	 	 */
-
-		deadTreeTexture = make_shared<Texture>();
-		deadTreeTexture->setFilename(resourceDir + "/nightSky.jpg");
-		deadTreeTexture->init();
-		deadTreeTexture->setUnit(3);
-		deadTreeTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
 		particleTexture = make_shared<Texture>();
 		particleTexture->setFilename(resourceDir + "/alpha.bmp");
 		particleTexture->init();
 		particleTexture->setUnit(4);
 		particleTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);	
 
-	}
-
-	void deadTreeSetUp()
-	{
-		//initialize the textures we might use
-		deadTreesProg = make_shared<Program>();
-		deadTreesProg->setVerbose(true);
-		deadTreesProg->setShaderNames(
-				resourceDir + "/tex_vert.glsl",
-				resourceDir + "/tex_frag.glsl");
-		if (! deadTreesProg->init())
-		{
-			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-			exit(1);
-		}
-		deadTreesProg->addUniform("P");
-		deadTreesProg->addUniform("V");
-		deadTreesProg->addUniform("M");
-		deadTreesProg->addUniform("Texture0");
-		deadTreesProg->addUniform("texNum");
-		deadTreesProg->addAttribute("vertPos");
-		deadTreesProg->addAttribute("vertNor");
-		deadTreesProg->addAttribute("vertTex");
-		deadTreesProg->addUniform("lightPos");
 	}
 
 	void shapeSetUp()
@@ -380,8 +343,6 @@ public:
 		
 		skySetUp();
 		shapeSetUp();
-		//groundSetUp();
-		deadTreeSetUp();
 		particleSetUp();
 		terrain->initTerrain();
 		//terrain->generateGrid();
@@ -399,22 +360,10 @@ public:
 		}
 	}
 
-	void initDeadTrees()
-	{
-		numDeadTrees = randGen(50.f, 150.f);
-		
-		for(int i = 0; i < numDeadTrees; i++)
-		{
-			deadPositions.push_back(randGen(-GROUND_SIZE, GROUND_SIZE));
-			deadPositions.push_back(randGen(-GROUND_SIZE, GROUND_SIZE));
-			deadScales.push_back(randGen(6.0f, 13.0f));
-			deadRotations.push_back(randGen(0.0f, 180.0f));
-		}
-	}
-
 
 	void initSceneCollectibles()
     {
+        uploadMultipleShapes("/fruits/strawberries.obj", 0);
         for(int i = 0; i < 6; i++)
         {
             bool found_spot = false;
@@ -422,14 +371,14 @@ public:
             while (!found_spot)
             {
                 berry = new Strawberry();
-                berry->initObject(strawMin, strawMax);
+                berry->initObject(strawMin, strawMax, i, GameObject::strawberry);
                 BoundingBox *otherBB = berry->getBB();
-                for (int i = 0; i < objects.size(); i++)
+                for (int j = 0; j < objects.size(); j++)
                 {
                     berry = new Strawberry();
-                    berry->initObject(strawMin, strawMax);
+                    berry->initObject(strawMin, strawMax, i, GameObject::strawberry);
                     BoundingBox *otherBB = berry->getBB();
-                    if ((objects[i]->isCollided(otherBB)))
+                    if ((objects[j]->isCollided(otherBB)))
                     {
                         delete berry;
                         delete otherBB;
@@ -443,19 +392,84 @@ public:
         }
     }
 
+    void initSceneObjects()
+    {
+		uploadMultipleShapes("/crystal1.obj", 1);
+
+		uploadMultipleShapes("/crystal2.obj", 2);
+
+		uploadMultipleShapes("/crystal3.obj", 3);
+		numCrystals = rand() % 100;
+
+        for(int i = 0; i < numCrystals; i++)
+        {
+//            bool found_spot = false;
+            Crystal *crystal;
+
+//            while (!found_spot)
+//            {
+                crystal = new Crystal();
+                GameObject::objType crystal_type = selectRandomCrystal();
+                crystal = new Crystal();
+
+                if (crystal_type == GameObject::crystal1)
+                {
+                    crystal->initObject(cryst1min, cryst1max, i % 5, crystal_type);
+                }
+                else if (crystal_type == GameObject::crystal2)
+                {
+                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);
+                }
+                else if (crystal_type == GameObject::crystal3)
+                {
+                    crystal->initObject(cryst3min, cryst3max, i % 5, crystal_type);
+                }
+
+//                BoundingBox *otherBB = crystal->getBB();
+//                for (int j = 0; j < objects.size(); j++)
+//                {
+//                    BoundingBox *otherBB = crystal->getBB();
+//                    if ((objects[j]->isCollided(otherBB))) {
+//                        delete crystal;
+//                        delete otherBB;
+//                    }
+//                }
+//                found_spot = true;
+//                delete otherBB;
+
+//            }
+            objects.push_back(crystal);
+        }
+
+
+    }
+
+    GameObject::objType selectRandomCrystal()
+	{
+		int random = rand() % 2;
+
+		if(random == 0)
+		{
+			return GameObject::crystal1;
+		}
+		else if (random == 1)
+		{
+			return GameObject::crystal2;
+		}
+		else
+		{
+			return GameObject::crystal3;
+		}
+
+	}
 
 	void initGeom()
 	{
-		deadTree = make_shared<Shape>();
-		deadTree->loadMesh(resourceDir + "/deadTree.obj");
-		deadTree->resize();
-		deadTree->init();
-
-		uploadMultipleShapes("/fruits/strawberries.obj", 0);
 
 		// for ground
 		//initQuad();
 		initSceneCollectibles();
+        initSceneObjects();
 
 		// creation for particles
 		CHECKED_GL_CALL(glGenVertexArrays(1, &ParticleVertexArrayID));
@@ -471,12 +485,11 @@ public:
 		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pointColors), NULL, GL_STREAM_DRAW));
 		// creation for particles
 
-		sphereShape = make_shared<Shape>();
-		sphereShape->loadMesh(resourceDir + "/sphere.obj");
-		sphereShape->resize();
-		sphereShape->init();
 
 		terrain->generateGrid();
+
+		uploadMultipleShapes("/sphere.obj", 4);
+
 	}
 
     void uploadMultipleShapes(string objDir, int switchNum)
@@ -543,6 +556,22 @@ public:
 						strawMax = Gmax;
 						strawberryShapes.push_back(s);
 						break;
+					case 1:
+						cryst1max = Gmax;
+						cryst1min = Gmin;
+						crystal1Shapes.push_back(s);
+					case 2:
+						cryst2max = Gmax;
+						cryst2min = Gmin;
+						crystal2Shapes.push_back(s);
+					case 3:
+						cryst3max = Gmax;
+						cryst3min = Gmin;
+						crystal3Shapes.push_back(s);
+					case 4:
+						spheremax = Gmax;
+						spheremin = Gmin;
+						sphereShapes.push_back(s);
 				}
             }
         }
@@ -597,195 +626,6 @@ public:
 		std::sort(particles.begin(), particles.end(), sorter);
 	}
 
-	/*
-	void initQuad()
-	{
-		float g_groundSize = GROUND_SIZE;
-		float g_groundY = -1.5;
-
-		// A x-z plane at y = g_groundY of dim[-g_groundSize, g_groundSize]^2
-		float GrndPos[] = {
-			-g_groundSize, g_groundY, -g_groundSize,
-			-g_groundSize, g_groundY,  g_groundSize,
-			 g_groundSize, g_groundY,  g_groundSize,
-			 g_groundSize, g_groundY, -g_groundSize
-		};
-
-		float GrndNorm[] = {
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0
-		};
-
-		float GrndTex[] = {
-			0, 0, // back
-			0, 1,
-			1, 1,
-			1, 0
-		};
-
-		unsigned short idx[] = {0, 1, 2, 0, 2, 3};
-
-		GLuint GroundVertexArrayID;
-		//generate the VAO
-		glGenVertexArrays(1, &GroundVertexArrayID);
-		glBindVertexArray(GroundVertexArrayID);
-
-		gGiboLen = 6;
-		glGenBuffers(1, &GrndBuffObj);
-		glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GrndPos), GrndPos, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &GrndNorBuffObj);
-		glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GrndNorm), GrndNorm, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &GrndTexBuffObj);
-		glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GrndTex), GrndTex, GL_STATIC_DRAW);
-
-		glGenBuffers(1, &GIndxBuffObj);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
-	}
-	 */
-
-	/*
-	void renderGround()
-	{
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, GrndBuffObj);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, GrndNorBuffObj);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GIndxBuffObj);
-		glDrawElements(GL_TRIANGLES, gGiboLen, GL_UNSIGNED_SHORT, 0);
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(2);
-	}
-	 */
-
-	void render()
-	{
-
-		glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
-		glViewport(0, 0, width, height);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		double nowTime = glfwGetTime();
-//		deltaTime += (nowTime - lastTime);
-
-		time_increment += (nowTime - lastTime);
-
-		updateGeom(nowTime - lastTime);
-
-		lastTime = nowTime;
-
-		lightPos.x = cos(glfwGetTime()/12) * 500.f;
-		lightPos.z = sin(glfwGetTime()/12) * 500.f;
-
-		float aspect = width/(float)height;
-
-		x = cos(radians(phi))*cos(radians(theta));
-		y = sin(radians(phi));
-		z = cos(radians(phi))*sin(radians(theta));
-
-		vec3 forward = vec3(x, y, z);
-		vec3 up = vec3(0,1,0);
-		vec3 sides = cross(forward, up);
-
-		float actualSpeed = MOVEMENT_SPEED;
-		if(sprint)
-		{
-			actualSpeed *= 3;
-		}
-
-		vec3 holdCameraPos = cameraPos;
-	
-		if(moveForward)
-		{
-			holdCameraPos = cameraPos + (forward * actualSpeed);	
-		}
-		if(moveBackward)
-		{
-			holdCameraPos = cameraPos - (forward * actualSpeed);
-		}
-		if(moveLeft)
-		{
-			holdCameraPos = cameraPos - (sides * actualSpeed);
-		}
-		if(moveRight)
-		{
-			holdCameraPos = cameraPos + (sides * actualSpeed);
-		}
-
-		bool go = checkForEdge(holdCameraPos);
-
-		if(go)
-		{
-			cameraPos = holdCameraPos;
-		}
-
-		auto ViewUser = make_shared<MatrixStack>();
-		ViewUser->pushMatrix();
-			ViewUser->loadIdentity();
-			ViewUser->pushMatrix();
-			ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
-		MatrixStack *userViewPtr = ViewUser.get();
-
-		auto Model = make_shared<MatrixStack>();
-		Model->pushMatrix();
-		Model->loadIdentity();
-
-		checkForFruit();
-
-		auto Projection = make_shared<MatrixStack>();
-		Projection->pushMatrix();
-		Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
-		MatrixStack *projectionPtr = Projection.get();
-
-
-		CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
-		CHECKED_GL_CALL(glDisable(GL_BLEND));
-		drawSky(userViewPtr, projectionPtr);
-
-		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
-		drawScene(userViewPtr, projectionPtr);
-		//drawGround(userViewPtr, projectionPtr);
-
-		//drawDeadTrees(userViewPtr, projectionPtr);
-		
-		CHECKED_GL_CALL(glEnable(GL_BLEND));
-		CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-		CHECKED_GL_CALL(glPointSize(25.0f));
-		drawParticles(userViewPtr, aspect);
-
-        Model->pushMatrix();
-        Model->translate(vec3(-5, 0, -8));
-
-        terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
-        Model->popMatrix();
-
-
-		Projection->popMatrix();
-		ViewUser->popMatrix();
-		ViewUser->popMatrix();	
-	}
-
 	bool checkForEdge(vec3 hold)
 	{
         for(int i = 0; i < objects.size(); i++)
@@ -794,7 +634,7 @@ public:
             if ((pos.x < -GROUND_SIZE) || (pos.x > GROUND_SIZE) ||
                 (pos.z < -GROUND_SIZE) || (pos.z > GROUND_SIZE))
             {
-                objects[i]->velocity *= -1;
+
             }
         }
 
@@ -814,17 +654,49 @@ public:
 		}
 	}
 
-	void checkForFruit()
+	bool checkForObject(vec3 hold)
 	{
-		for(int i = 0; i < objects.size(); i++)
-		{
-			if((objects[i]->isCollided(cameraPos)) && (objects[i]->collected == false))
-			{
-			    objects[i]->collected = true;
-				score++;
-				cout << "Score: " << score << endl;
-			}
-		}
+        for(int i = 0; i < objects.size(); i++)
+        {
+            if (objects[i]->isCollided(hold))
+            {
+                if (dynamic_cast<Strawberry*>(objects[i]) != nullptr)
+                {
+                    auto s = dynamic_cast<Strawberry*>(objects[i]);
+                    int color = s->collect();
+                    if(color == 0)
+					{
+                    	red = true;
+					}
+                    else if(color == 1)
+					{
+                    	orange = true;
+					}
+                    else if(color == 2)
+					{
+                    	yellow = true;
+					}
+					else if(color == 3)
+					{
+						green = true;
+					}
+					else if(color == 4)
+					{
+						blue = true;
+					}
+					else if(color == 5)
+					{
+						violet = true;
+					}
+
+					objects.erase(objects.begin()+i);
+
+                }
+            }
+
+        }
+
+        return true;
 	}
 
 
@@ -869,40 +741,6 @@ public:
 		particleProg->unbind();
 	}
 
-	void drawDeadTrees(MatrixStack* View, MatrixStack* Projection)
-	{
-		auto Model = make_shared<MatrixStack>();
-
-		deadTreesProg->bind();
-		glUniformMatrix4fv(deadTreesProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(deadTreesProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		glUniform3f(deadTreesProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
-
-		Model->pushMatrix();
-			Model->loadIdentity();
-			for (int i = 0; i < numDeadTrees; i+=3)
-			{
-				/* draw left mesh */
-				GLfloat treeS = deadScales[i/3];
-				GLfloat treeR = deadRotations[i/3];
-				Model->pushMatrix();
-				Model->translate(vec3(deadPositions[i], treeS/1.60, deadPositions[i+2]));
-				Model->scale(vec3(treeS));
-				Model->rotate(treeR, vec3(0, 1, 0));
-				glUniformMatrix4fv(deadTreesProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
-				deadTreeTexture->bind(deadTreesProg->getUniform("Texture0"));
-				glUniform1f(deadTreesProg->getUniform("texNum"), 1);
-				deadTree->draw(deadTreesProg);
-				Model->popMatrix();
-				deadTreeTexture->unbind();
-			}
-				
-
-
-		Model->popMatrix();
-		deadTreesProg->unbind();
-	}
-
 	void drawSky(MatrixStack* View, MatrixStack* Projection)
 	{
 		auto Model = make_shared<MatrixStack>();
@@ -925,7 +763,7 @@ public:
 				glUniformMatrix4fv(skyProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
 				skyTexture->bind(skyProg->getUniform("Texture0"));
 				sunTexture->bind(skyProg->getUniform("Texture1"));
-				sphereShape->draw(skyProg);
+				sphereShapes[0]->draw(skyProg);
 				Model->popMatrix();	
 				skyTexture->unbind();
 				sunTexture->unbind();
@@ -939,9 +777,8 @@ public:
 	{
 
 		auto Model = make_shared<MatrixStack>();
-		Program *sProgPtr = shapeProg.get();
-
 		shapeProg->bind();
+
 		glUniformMatrix4fv(shapeProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		glUniformMatrix4fv(shapeProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
 		glUniform3f(shapeProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
@@ -951,45 +788,33 @@ public:
 
 		for(int i = 0; i < objects.size(); i++)
 		{
-			// for strawberries
-			Model->pushMatrix();
-			Model->translate(vec3(objects[i]->currentPos.x, 0.50f, objects[i]->currentPos.z));
-			Model->rotate(glfwGetTime()/2, vec3(0,1,0));
-			Model->scale(vec3(1.f,1.0f,1.0f));
-			for (size_t j = 0; j < strawberryShapes.size(); j++)
+            MatrixStack *modelptr = Model.get();
+
+            if(objects[i]->type == GameObject::strawberry)
 			{
-			    if(!(objects[i]->collected))
-                {
-                    if(j == 0)
-                    {
-                        if(objects[i]->hit_count%3 == 0)
-                        {
-                            SetMaterial(7, sProgPtr);
-                        }
-                        else
-                        {
-                            SetMaterial(objects[i]->hit_count%18, sProgPtr);
-                        }
-
-
-                    }
-                    else if (j == 2)
-                    {
-                        SetMaterial(8, sProgPtr);
-                    }
-                    else
-                    {
-                        SetMaterial(6, sProgPtr);
-                    }
-                }
-			    else
-                {
-                    SetMaterial(6, sProgPtr);
-                }
-				glUniformMatrix4fv(shapeProg->getUniform("M"), 1, GL_FALSE,value_ptr(Model->topMatrix()) );
-				strawberryShapes[j]->draw(shapeProg);
+				objects[i]->drawObject(modelptr, strawberryShapes, shapeProg);
 			}
-			Model->popMatrix();
+			else if(objects[i]->type == GameObject::crystal1)
+			{
+                CHECKED_GL_CALL(glEnable(GL_BLEND));
+                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+				objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg);
+                CHECKED_GL_CALL(glDisable(GL_BLEND));
+			}
+			else if(objects[i]->type == GameObject::crystal2)
+			{
+                CHECKED_GL_CALL(glEnable(GL_BLEND));
+                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
+				objects[i]->drawObject(modelptr, crystal2Shapes, shapeProg);
+                CHECKED_GL_CALL(glDisable(GL_BLEND));
+			}
+			else if(objects[i]->type == GameObject::crystal3)
+			{
+                CHECKED_GL_CALL(glEnable(GL_BLEND));
+                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
+                CHECKED_GL_CALL(glDisable(GL_BLEND));
+			}
 
 		}
 			
@@ -998,137 +823,112 @@ public:
 		shapeProg->unbind();
 	}
 
-	// TODO this should be in Program
-	void SetMaterial(int i, Program *prog)
-	{
-		switch (i)
-		{
+    void render()
+    {
 
-	    case 0: // flat grey
-		    glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
-		    glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);
-		    glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
-		    glUniform1f(prog->getUniform("shine"), 4.0);
-		    break;
-        case 1: // shiny blue plastic
-            glUniform3f(prog->getUniform("MatAmb"), 0.02, 0.04, 0.2);
-            glUniform3f(prog->getUniform("MatDif"), 0.0, 0.16, 0.9);
-            glUniform3f(prog->getUniform("MatSpec"), 0.14, 0.2, 0.8);
-            glUniform1f(prog->getUniform("shine"), 120.0);
-            break;
-	    case 2: // brass
-		    glUniform3f(prog->getUniform("MatAmb"), 0.3294, 0.2235, 0.02745);
-		    glUniform3f(prog->getUniform("MatDif"), 0.7804, 0.5686, 0.11373);
-		    glUniform3f(prog->getUniform("MatSpec"), 0.9922, 0.941176, 0.80784);
-		    glUniform1f(prog->getUniform("shine"), 27.9);
-		    break;
-        case 3: // pearl
-	        glUniform3f(prog->getUniform("MatAmb"), 0.25f, 0.20725f, 0.20725f);
-	        glUniform3f(prog->getUniform("MatDif"), 1.0f, 0.829f, 0.829f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.296648f, 0.296648f, 0.296648f);
-	        glUniform1f(prog->getUniform("shine"), 11.264f);
-	        break;
-	    case 4: // copper
-	        glUniform3f(prog->getUniform("MatAmb"),  0.19125f, 0.0735f, 0.0225f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.7038f, 0.27048f, 0.0828f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.256777f, 0.137622f, 0.086014f);
-	        glUniform1f(prog->getUniform("shine"), 12.8f);
-	        break;
-		case 5: // turqoise
-	        glUniform3f(prog->getUniform("MatAmb"),  0.1f, 0.18725f, 0.1745f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.396f, 0.74151f, 0.69102f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.297254f, 0.30829f, 0.306678f);
-	        glUniform1f(prog->getUniform("shine"), 12.8f);
-	        break;
-	    case 6: // obisdian
-	        glUniform3f(prog->getUniform("MatAmb"),  0.05375f, 0.05f, 0.06625f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.18275f, 0.17f, 0.22525f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.332741f, 0.328634f, 0.346435f);
-	        glUniform1f(prog->getUniform("shine"), 38.4f);
-	        break;
-	    case 7: // ruby
-	        glUniform3f(prog->getUniform("MatAmb"),  0.1745f, 0.01175f, 0.01175f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.61424f, 0.04136f, 0.04136f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.727811f, 0.626959f, 0.626959f);
-	        glUniform1f(prog->getUniform("shine"), 76.8f);
-	        break;
-	    case 8: // emerald
-	        glUniform3f(prog->getUniform("MatAmb"),  0.0215f, 0.1745f, 0.0215f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.07568f, 0.61424f, 0.07568f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.633f, 0.727811f, 0.633f);
-	        glUniform1f(prog->getUniform("shine"), 76.8f);
-	        break;
-	    case 9: // yellow plastic
-	        glUniform3f(prog->getUniform("MatAmb"),  0.05f,0.05f,0.0f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.5f,0.5f,0.4f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.7f,0.7f,0.04f);
-	        glUniform1f(prog->getUniform("shine"), 10.0f);
-	        break;
+        glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+        glViewport(0, 0, width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	    case 10: // blueberries
-	        glUniform3f(prog->getUniform("MatAmb"),  0.105882f, 0.058824f, 0.313725f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.227451f, 0.270588f, 0.741176f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.233333f, 0.233333f, 0.821569f);
-	        glUniform1f(prog->getUniform("shine"), 9.84615f);
-	        break;
+        double nowTime = glfwGetTime();
+//		deltaTime += (nowTime - lastTime);
 
-	    case 11: // lemon
-	        glUniform3f(prog->getUniform("MatAmb"), 0.4294, 0.4235, 0.02745);
-		    glUniform3f(prog->getUniform("MatDif"), 0.7804, 0.5686, 0.11373);
-		    glUniform3f(prog->getUniform("MatSpec"), 0.9922, 0.941176, 0.80784);
-		    glUniform1f(prog->getUniform("shine"), 27.9);
-	        break;
+        time_increment += (nowTime - lastTime);
 
-	    case 12: // orange
-	        glUniform3f(prog->getUniform("MatAmb"),  0.49125f, 0.135f, 0.0225f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.8038f, 0.37048f, 0.0828f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.556777f, 0.537622f, 0.286014f);
-	        glUniform1f(prog->getUniform("shine"), 12.8f);
-	        break;
+        updateGeom(nowTime - lastTime);
 
-	    case 13: // lime
-	        glUniform3f(prog->getUniform("MatAmb"),  0.0215f, 0.1745f, 0.0215f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.07568f, 0.61424f, 0.07568f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.633f, 0.727811f, 0.633f);
-	        glUniform1f(prog->getUniform("shine"), 76.8f);
-	        break;
+        lastTime = nowTime;
 
-	    case 15: // banana
-	        glUniform3f(prog->getUniform("MatAmb"),  0.05f,0.05f,0.0f);
-	        glUniform3f(prog->getUniform("MatDif"), 0.5f,0.5f,0.4f);
-	        glUniform3f(prog->getUniform("MatSpec"), 0.7f,0.7f,0.04f);
-	        glUniform1f(prog->getUniform("shine"), 35.0f);
-	        break;
+        lightPos.x = cos(glfwGetTime()/12) * 500.f;
+        lightPos.z = sin(glfwGetTime()/12) * 500.f;
 
-	    case 16: // pith
-	        glUniform3f(prog->getUniform("MatAmb"), 0.7294, 0.7235, 0.2745);
-		    glUniform3f(prog->getUniform("MatDif"), 0.7804, 0.5686, 0.11373);
-		    glUniform3f(prog->getUniform("MatSpec"), 0.9922, 0.941176, 0.80784);
-		    glUniform1f(prog->getUniform("shine"), 27.9);
-	        break;
+        float aspect = width/(float)height;
 
-	    case 17: // chrome
-	        glUniform3f(prog->getUniform("MatAmb"), 0.25f, 0.25f, 0.25f);
-		    glUniform3f(prog->getUniform("MatDif"), 0.4f, 0.4f, 0.4f);
-		    glUniform3f(prog->getUniform("MatSpec"), 0.774597f, 0.774597f, 0.774597f);
-		    glUniform1f(prog->getUniform("shine"), 76.8f);
-	        break;
+        x = cos(radians(phi))*cos(radians(theta));
+        y = sin(radians(phi));
+        z = cos(radians(phi))*sin(radians(theta));
 
-	    case 18: // black plastic
-	        glUniform3f(prog->getUniform("MatAmb"), 0.0f, 0.0f, 0.0f);
-		    glUniform3f(prog->getUniform("MatDif"), 0.01f, 0.01f, 0.01f);
-		    glUniform3f(prog->getUniform("MatSpec"), 0.50f, 0.50f, 0.50f);
-		    glUniform1f(prog->getUniform("shine"), 32.0f);
-	        break;
+        vec3 forward = vec3(x, y, z);
+        vec3 up = vec3(0,1,0);
+        vec3 sides = cross(forward, up);
 
-		}
-	}
+        float actualSpeed = MOVEMENT_SPEED;
+        if(sprint)
+        {
+            actualSpeed *= 3;
+        }
 
-	float randGen(float l, float h)
-	{
-		float r = rand() / (float) RAND_MAX;
-		return (1.0f - r) * l + r * h;
-	}
+        vec3 holdCameraPos = cameraPos;
+
+        if(moveForward)
+        {
+            holdCameraPos = cameraPos + (forward * actualSpeed);
+        }
+        if(moveBackward)
+        {
+            holdCameraPos = cameraPos - (forward * actualSpeed);
+        }
+        if(moveLeft)
+        {
+            holdCameraPos = cameraPos - (sides * actualSpeed);
+        }
+        if(moveRight)
+        {
+            holdCameraPos = cameraPos + (sides * actualSpeed);
+        }
+
+        bool go = checkForEdge(holdCameraPos);
+        go = checkForObject(holdCameraPos);
+
+        if(go)
+        {
+            cameraPos = holdCameraPos;
+        }
+
+        auto ViewUser = make_shared<MatrixStack>();
+        ViewUser->pushMatrix();
+        ViewUser->loadIdentity();
+        ViewUser->pushMatrix();
+        ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
+        MatrixStack *userViewPtr = ViewUser.get();
+
+
+
+        auto Projection = make_shared<MatrixStack>();
+        Projection->pushMatrix();
+        Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
+        MatrixStack *projectionPtr = Projection.get();
+
+        CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
+        drawSky(userViewPtr, projectionPtr);
+
+        CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
+        drawScene(userViewPtr, projectionPtr);
+
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
+
+		CHECKED_GL_CALL(glEnable(GL_BLEND));
+		CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		CHECKED_GL_CALL(glPointSize(25.0f));
+		drawParticles(userViewPtr, aspect);
+
+		auto Model = make_shared<MatrixStack>();
+		Model->pushMatrix();
+		Model->loadIdentity();
+
+		Model->pushMatrix();
+		Model->translate(vec3(-5, 0, -8));
+
+		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+		Model->popMatrix();
+
+
+		Projection->popMatrix();
+		ViewUser->popMatrix();
+		ViewUser->popMatrix();
+    }
 
 };
 
@@ -1144,7 +944,6 @@ int main(int argc, char **argv)
 	application->init();
 	application->initTex();
 	application->initParticles();
-	application->initDeadTrees();
 	application->initGeom();
 
 	// Loop until the user closes the window.
