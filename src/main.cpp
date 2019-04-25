@@ -692,7 +692,13 @@ public:
 					objects.erase(objects.begin()+i);
 
                 }
+                else
+                {
+                    return false;
+                }
             }
+
+
 
         }
 

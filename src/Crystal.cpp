@@ -17,7 +17,6 @@ void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>>
     Model->scale(this->scale);
     for (size_t j = 0; j < crystalShapes.size(); j++)
     {
-
             if(j == 0)
             {
                 SetMaterial(this->color, prog.get());
