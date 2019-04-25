@@ -63,9 +63,7 @@ public:
 	float worldScale = 1.0;
 
 	// Shape to be used (from obj file)
-    vector<shared_ptr<Shape>> sphereShapes;
-    glm::vec3 spheremin = glm::vec3(0);
-    glm::vec3 spheremax = glm::vec3(0);
+    shared_ptr<Shape> sphereShape;
     vector<shared_ptr<Shape>> crystal1Shapes;
 	glm::vec3 cryst1min = glm::vec3(0);
 	glm::vec3 cryst1max = glm::vec3(0);
@@ -80,18 +78,6 @@ public:
 	glm::vec3 strawMax = glm::vec3(0);
 
     int numCrystals;
-
-
-
-	// Contains vertex information for OpenGL
-	GLuint GroundVertexArrayID;
-
-	// Data necessary to give our triangle to OpenGL
-	GLuint VertexBufferID;
-
-	//geometry for texture render
-	GLuint quad_VertexArrayID;
-	GLuint quad_vertexbuffer;
 
 	//stuff necessary for particles
 	vector<std::shared_ptr<Particle>> particles;
@@ -130,10 +116,6 @@ public:
 	bool moveRight = false;
 	bool moveForward = false;
 	bool moveBackward = false;
-
-	double time_increment = 0;
-	double lastTime = glfwGetTime();
-	double deltaTime = 0;
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 
@@ -247,7 +229,7 @@ public:
 	void initTex()
 	{
 		skyTexture = make_shared<Texture>();
-		skyTexture->setFilename(resourceDir + "/nightSky.jpg");
+		skyTexture->setFilename(resourceDir + "/night.jpg");
 		skyTexture->init();
 		skyTexture->setUnit(0);
 		skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -395,9 +377,7 @@ public:
     void initSceneObjects()
     {
 		uploadMultipleShapes("/crystal1.obj", 1);
-
 		uploadMultipleShapes("/crystal2.obj", 2);
-
 		uploadMultipleShapes("/crystal3.obj", 3);
 		numCrystals = rand() % 100;
 
@@ -485,10 +465,11 @@ public:
 		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pointColors), NULL, GL_STREAM_DRAW));
 		// creation for particles
 
-
+        sphereShape = make_shared<Shape>();
+        sphereShape->loadMesh(resourceDir + "/sphere.obj");
+        sphereShape->resize();
+        sphereShape->init();
 		terrain->generateGrid();
-
-		uploadMultipleShapes("/sphere.obj", 4);
 
 	}
 
@@ -568,10 +549,6 @@ public:
 						cryst3max = Gmax;
 						cryst3min = Gmin;
 						crystal3Shapes.push_back(s);
-					case 4:
-						spheremax = Gmax;
-						spheremin = Gmin;
-						sphereShapes.push_back(s);
 				}
             }
         }
@@ -769,7 +746,7 @@ public:
 				glUniformMatrix4fv(skyProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
 				skyTexture->bind(skyProg->getUniform("Texture0"));
 				sunTexture->bind(skyProg->getUniform("Texture1"));
-				sphereShapes[0]->draw(skyProg);
+                sphereShape->draw(skyProg);
 				Model->popMatrix();	
 				skyTexture->unbind();
 				sunTexture->unbind();
@@ -829,7 +806,7 @@ public:
 		shapeProg->unbind();
 	}
 
-    void render()
+    void render(float deltaTime)
     {
 
         glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
@@ -837,17 +814,10 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        double nowTime = glfwGetTime();
-//		deltaTime += (nowTime - lastTime);
+        updateGeom(deltaTime);
 
-        time_increment += (nowTime - lastTime);
-
-        updateGeom(nowTime - lastTime);
-
-        lastTime = nowTime;
-
-        lightPos.x = cos(glfwGetTime()/12) * 500.f;
-        lightPos.z = sin(glfwGetTime()/12) * 500.f;
+        lightPos.x = cos(glfwGetTime()/40) * 500.f;
+        lightPos.z = sin(glfwGetTime()/40) * 500.f;
 
         float aspect = width/(float)height;
 
@@ -951,12 +921,21 @@ int main(int argc, char **argv)
 	application->initTex();
 	application->initParticles();
 	application->initGeom();
+    auto lastTime = chrono::high_resolution_clock::now();
 
 	// Loop until the user closes the window.
 	while (! glfwWindowShouldClose(windowManager->getHandle()))
 	{
+            // save current time for next frame
+            auto nextLastTime = chrono::high_resolution_clock::now();
+
+            // get time since last frame
+            float deltaTime =
+                    chrono::duration_cast<std::chrono::microseconds>(
+                            chrono::high_resolution_clock::now() - lastTime)
+                            .count();
 			// Render scene.
-			application->render();
+			application->render(deltaTime);
 
 			// Swap front and back buffers.
 			glfwSwapBuffers(windowManager->getHandle());

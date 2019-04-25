@@ -12,7 +12,7 @@ Crystal::Crystal()
 void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog)
 {
     Model->pushMatrix();
-    Model->translate(vec3(this->currentPos.x, -1.7f, this->currentPos.z));
+    Model->translate(vec3(this->currentPos.x, 0.f, this->currentPos.z));
     Model->rotate(4.5f, vec3(1,0,0));
     Model->scale(this->scale);
     for (size_t j = 0; j < crystalShapes.size(); j++)

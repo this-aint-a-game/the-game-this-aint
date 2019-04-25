@@ -2,7 +2,7 @@ build/
 x64/
 .vs/
 .vscode
-
+.DS_Store
 # Prerequisites
 *.d
 
