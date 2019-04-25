@@ -30,6 +30,7 @@ out float water;
 #define ONE 0.00390625 		// 1/256
 #define ONEHALF 0.001953125 // 0.5/256
 
+
 float snoise (vec2 P){
 
     // Skew and unskew factors

@@ -4,14 +4,12 @@
 Terrain::Terrain()
 {
     octave = 0;
-    freq = 6.0;
-    power = 1.0;
-    //generateGrid();
+    freq = 1.0;
+    power = 0.5;
 }
 
 void Terrain::initPermTexture(GLuint *ID)
 {
-    //char *pixels;
     char pixels[256 * 256 * 4];
 
     glActiveTexture(GL_TEXTURE1);
@@ -42,13 +40,15 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
 {
     prog->bind();
 
+
+
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, permTextureID);
     glUniform1i(prog->getUniform("permTexture"), 1);
 
     glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P));
     glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, glm::value_ptr(V));
-    glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(M));
+    glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, glm::value_ptr(M));
     glUniform3f(prog->getUniform("cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
     glUniform3f(prog->getUniform("lightPos"), -2.0, 2.0, 2.0); // TODO
 
@@ -56,64 +56,81 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
     glUniform1f(prog->getUniform("freq"), freq);
     glUniform1f(prog->getUniform("power"), power);
 
+    // flat grey
+    glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
+    glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);
+    glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
+    glUniform1f(prog->getUniform("shine"), 4.0);
+
+    // pearl
+    /*
+    glUniform3f(prog->getUniform("MatAmb"), 0.25f, 0.20725f, 0.20725f);
+    glUniform3f(prog->getUniform("MatDif"), 1.0f, 0.829f, 0.829f);
+    glUniform3f(prog->getUniform("MatSpec"), 0.296648f, 0.296648f, 0.296648f);
+    glUniform1f(prog->getUniform("shine"), 128.0f * 0.088f);
+    */
+
     draw();
 
     prog->unbind();
 }
 
+
 void Terrain::generateGrid()
 {
-    //std::cout << "66" << std::endl;
+
+    int VERTEX_COUNT = 300;
+    int SIZE = 25;
+
+    GLfloat vertices[300 * 300 * 3];
+    GLint indices[6 * (299) * (299)];
+
+    int vertexPointer = 0;
+    for (int i = 0; i < VERTEX_COUNT; i++)
+    {
+        for (int j = 0; j < VERTEX_COUNT; j++)
+        {
+            vertices[vertexPointer * 3] = (float)j / ((float)VERTEX_COUNT - 1) * SIZE;
+            vertices[vertexPointer * 3 + 1] = 0;
+            vertices[vertexPointer * 3 + 2] = (float)i / ((float)VERTEX_COUNT - 1) * SIZE;
+            vertexPointer++;
+        }
+    }
+
+    int pointer = 0;
+    for (int gz = 0; gz < VERTEX_COUNT - 1; gz++)
+    {
+        for (int gx = 0; gx < VERTEX_COUNT - 1; gx++)
+        {
+            int topLeft = (gz * VERTEX_COUNT) + gx;
+            int topRight = topLeft + 1;
+            int bottomLeft = ((gz + 1) * VERTEX_COUNT) + gx;
+            int bottomRight = bottomLeft + 1;
+
+            indices[pointer++] = topLeft;
+            indices[pointer++] = bottomLeft;
+            indices[pointer++] = topRight;
+            indices[pointer++] = topRight;
+            indices[pointer++] = bottomLeft;
+            indices[pointer++] = bottomRight;
+        }
+    }
+
     glGenVertexArrays(1, &vertexArrayID);
-    //std::cout << "68" << std::endl;
     glBindVertexArray(vertexArrayID);
-    //std::cout << "70" << std::endl;
-
-    std::vector<GLfloat> vertices;
-    std::vector<GLuint> indices;
-
-    //std::cout << "73" << std::endl;
-
-    float spacing = 2.f/(GRID_DIMENSION - 1.0f);
-
-    for (int i = 0; i < GRID_DIMENSION; i++)
-    {
-        for (int j = 0; j < GRID_DIMENSION; j++)
-        {
-            vertices.push_back(-1.0f + j*spacing);
-            vertices.push_back(-1.0f + i*spacing);
-        }
-    }
-
-    //std::cout << "86" << std::endl;
-
-    for (int i = 0; i < GRID_DIMENSION - 1; i++)
-    {
-        for (int j = 0; j < GRID_DIMENSION - 1; j++)
-        {
-            indices.push_back(i*GRID_DIMENSION + j);
-            indices.push_back(i*GRID_DIMENSION + j + 1);
-            indices.push_back((i + 1)*GRID_DIMENSION + j + 1);
-            indices.push_back((i + 1)*GRID_DIMENSION + j);
-        }
-    }
-
-    numIndices = indices.size();
-
-    //std::cout << "101" << std::endl;
 
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
     glGenBuffers(1, &vertexIndexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-
-    //std::cout << "114" << std::endl;
+    glBindVertexArray(0);
 }
 
 void Terrain::clean()
@@ -129,29 +146,22 @@ void Terrain::clean()
 void Terrain::draw()
 {
     glBindVertexArray(vertexArrayID);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 300 * 300 * 10, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
 void Terrain::initTerrain()
 {
-    //initialize the textures we might use
-    //std::cout << "127" << std::endl;
     prog = std::make_shared<Program>();
-    //std::cout << "129" << std::endl;
     prog->setVerbose(true);
-    //std::cout << "131" << std::endl;
     prog->setShaderNames(
             "../resources/terrain_vert.glsl",
             "../resources/terrain_frag.glsl");
-    //std::cout << "135" << std::endl;
     if (! prog->init())
     {
         std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
         exit(1);
     }
-    //std::cout << "141" << std::endl;
     prog->addUniform("P");
     prog->addUniform("V");
     prog->addUniform("M");
@@ -165,7 +175,6 @@ void Terrain::initTerrain()
     prog->addUniform("lightPos");
     prog->addUniform("cameraPos");
 
-    // TODO set key callbacks
     prog->addUniform("mode");
     prog->addUniform("freq");
     prog->addUniform("octave");
@@ -174,11 +183,8 @@ void Terrain::initTerrain()
     prog->addAttribute("vertPos");
     prog->addAttribute("vertNor");
 
-    // TODO
     //Initialize textures
     initPermTexture(&permTextureID);
-    //initSimplexTexture(&simplexTextureID);
-    //initGradTexture(&gradTextureID);
 }
 
 void Terrain::updateOctave()

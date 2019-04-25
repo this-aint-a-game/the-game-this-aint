@@ -114,7 +114,7 @@ public:
 	float theta = 90;
 	float prevX;
 	float prevY;
-	vec3 cameraPos = vec3(0.0, 0.0, -7.0);
+	vec3 cameraPos = vec3(0.0, 0.0, 0.0);
 	vec3 lightPos = vec3(0, 500.0, 0);
 
 	float x = PI/2;
@@ -384,7 +384,7 @@ public:
 		deadTreeSetUp();
 		particleSetUp();
 		terrain->initTerrain();
-		terrain->generateGrid();
+		//terrain->generateGrid();
 	}
 
 	void initParticles()
@@ -475,6 +475,8 @@ public:
 		sphereShape->loadMesh(resourceDir + "/sphere.obj");
 		sphereShape->resize();
 		sphereShape->init();
+
+		terrain->generateGrid();
 	}
 
     void uploadMultipleShapes(string objDir, int switchNum)
@@ -756,10 +758,6 @@ public:
 		Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
 		MatrixStack *projectionPtr = Projection.get();
 
-		//terrain->initTerrain();
-		//terrain->generateGrid();
-		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
-
 
 		CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
 		CHECKED_GL_CALL(glDisable(GL_BLEND));
@@ -769,12 +767,19 @@ public:
 		drawScene(userViewPtr, projectionPtr);
 		//drawGround(userViewPtr, projectionPtr);
 
-		drawDeadTrees(userViewPtr, projectionPtr);
+		//drawDeadTrees(userViewPtr, projectionPtr);
 		
 		CHECKED_GL_CALL(glEnable(GL_BLEND));
 		CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		CHECKED_GL_CALL(glPointSize(25.0f));
 		drawParticles(userViewPtr, aspect);
+
+        Model->pushMatrix();
+        Model->translate(vec3(-5, 0, -8));
+
+        terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+        Model->popMatrix();
+
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
@@ -993,6 +998,7 @@ public:
 		shapeProg->unbind();
 	}
 
+	// TODO this should be in Program
 	void SetMaterial(int i, Program *prog)
 	{
 		switch (i)

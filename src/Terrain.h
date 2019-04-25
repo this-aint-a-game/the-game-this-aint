@@ -42,7 +42,7 @@ class Terrain {
     GLuint vertexArrayID;
     GLuint vertexBuffer;
     GLuint vertexIndexBuffer;
-    GLuint numIndices;
+    //GLuint numIndices;
     GLuint permTextureID;
     int octave;
     float freq;
@@ -61,7 +61,7 @@ public:
     void updatePower(bool increase);
     void initTerrain();
     void generateGrid();
-
+    //Program* getProg() { return prog.get(); }
 
 };
 

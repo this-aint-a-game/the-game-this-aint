@@ -15,6 +15,7 @@ in vec4 pos;
 
 layout(location = 0) out vec4 color;
 
+
 void main()
 {
     vec3 norm = fragNor;
@@ -34,7 +35,7 @@ void main()
     if (water == 1.0){
         color = vec4(phong, 1.0)*vec4(0.216, 0.663, 0.835, 0.25);
     } else {
-        color = vec4(phong, 1.0)*vec4(0.128, 0.128, 0.128, 1.0);
+        color = vec4(phong, 1.0)*vec4(0.192, 0.192, 0.192, 1.0);
     }
 
 }
