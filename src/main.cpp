@@ -895,7 +895,7 @@ public:
 		Model->loadIdentity();
 
 		Model->pushMatrix();
-		Model->translate(vec3(-5, 0, -8));
+		Model->translate(vec3(-250, -5, 250));
 
 		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();

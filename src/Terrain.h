@@ -2,13 +2,20 @@
 #ifndef OBTAIN_TERRAIN_H
 #define OBTAIN_TERRAIN_H
 
-#define GRID_DIMENSION 4
+#define WIDTH 1000
+#define DEPTH 1000
+#define STEP 0.5f
+
+//#define VERTEX_COUNT 450 //300;
+//#define SIZE 50 //10;//25;
+
 #include <memory>
 #include "Program.h"
 #include "MatrixStack.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <algorithm>
 
 #include "GLSL.h"
 #include <glad/glad.h>
@@ -38,6 +45,13 @@ static int grad3[16][3] = {{0, 1, 1}, {0, 1, -1}, {0, -1, 1}, {0, -1, -1}, {1, 0
 
 class Terrain {
 
+    std::vector<glm::vec3> vertices;
+    unsigned *indices;
+    unsigned numIndices;
+    std::shared_ptr<Texture> terrainTexture;
+    //unsigned indexBuffer[3]; // TODO 3?
+
+
     std::shared_ptr<Program> prog;
     GLuint vertexArrayID;
     GLuint vertexBuffer;
@@ -48,10 +62,12 @@ class Terrain {
     float freq;
     float power;
 
-
+    void initTex();
+    void unbind();
     void clean();
     void draw();
     void initPermTexture(GLuint *ID);
+    void computeIndicesForClipVolume(float clipx0, float clipx1, float clipz0, float clipz1);
 
 public:
     Terrain();
@@ -61,6 +77,7 @@ public:
     void updatePower(bool increase);
     void initTerrain();
     void generateGrid();
+    void bindVAO();
     //Program* getProg() { return prog.get(); }
 
 };
