@@ -19,6 +19,7 @@ obtain.
 #include "Strawberry.h"
 #include "Terrain.h"
 #include "Crystal.h"
+#include "Camera.h"
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
@@ -31,6 +32,9 @@ class Application : public EventCallbacks
 {
 
 public:
+
+	Camera playerView;
+	bool releaseMouse;
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -815,6 +819,12 @@ public:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         updateGeom(deltaTime);
+
+		// need mouse position in order to use FP camera
+		double mousex = width / 4.0;
+		double mousey = height / 4.0;
+		if(!releaseMouse)
+			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
 
         lightPos.x = cos(glfwGetTime()/40) * 500.f;
         lightPos.z = sin(glfwGetTime()/40) * 500.f;
