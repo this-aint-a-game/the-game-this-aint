@@ -2,7 +2,7 @@
 Alexa
 Caroline
 Doug
-Sam
+
 obtain.
 */
 
@@ -141,31 +141,6 @@ public:
 					break;
 				}
 				sprint = false;
-				break;
-			case GLFW_KEY_F:
-				if (action != GLFW_RELEASE) {
-					terrain->updateFreq(true);
-				}
-				break;
-			case GLFW_KEY_V:
-				if (action != GLFW_RELEASE) {
-					terrain->updateFreq(false);
-				}
-				break;
-			case GLFW_KEY_O:
-				if (action != GLFW_RELEASE) {
-					terrain->updateOctave();
-				}
-				break;
-			case GLFW_KEY_P:
-				if (action != GLFW_RELEASE) {
-					terrain->updatePower(true);
-				}
-				break;
-			case GLFW_KEY_M:
-				if (action != GLFW_RELEASE) {
-					terrain->updatePower(false);
-				}
 				break;
 		}
 	}
@@ -895,7 +870,9 @@ public:
 		Model->loadIdentity();
 
 		Model->pushMatrix();
-		Model->translate(vec3(-250, -5, 250));
+		//Model->translate(vec3(-250, -5, 250)); // 1000 x 1000
+        //Model->translate(vec3(-125, -5, 125)); // 500 x 500
+		Model->translate(vec3(-62.5f, -5, 62.5f));
 
 		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
