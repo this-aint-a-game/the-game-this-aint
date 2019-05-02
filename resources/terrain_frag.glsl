@@ -5,8 +5,6 @@ uniform vec3 MatDif;
 uniform vec3 MatSpec;
 uniform float shine;
 
-//uniform sampler2D Texture;
-
 in vec3 fragNor;
 in vec3 iLightVec;
 in vec3 HVec;
