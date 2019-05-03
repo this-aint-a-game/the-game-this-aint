@@ -4,19 +4,21 @@
 #include "glm/vec4.hpp"
 #include "glm/mat4x4.hpp"
 
-class Camera
+class Player
 {
 public:
-    float angle;
-    float target;
-    Camera()
+    glm::vec3 position, yaw, pitch, targetPos, targetYaw, targetPitch;
+    int w, a, s, d;
+    Player()
     {
-        target = angle = 0.0;
+        w = a = s = d = 0;
+        yaw = pitch = glm::vec3(0, 0, 0);
+        position = glm::vec3(0, 0, 0);
+        targetPos = targetYaw = targetPitch = glm::vec3(0, 0, 0);
     }
     glm::mat4 update
     (
         double frametime, 
-        vec3 playerPos,
         int mousex, 
         int mousey,
         int width, 
