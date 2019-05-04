@@ -128,12 +128,26 @@ void Terrain::bindVAO()
 
 }
 
+float Terrain::getHeight(float x, float z)
+{
+    return calcHeight(x, z);
+}
+
+float Terrain::calcHeight(float x, float z)
+{
+    float n = mountain_range_noise(glm::vec3(x, 0, z));
+    return (0.5 + 0.5 * n) - 5;
+
+}
 
 void Terrain::generateGrid()
 {
-    for (int vx = 0; vx < WIDTH; vx++)
+    int start = -WIDTH/2;//0;
+    int finish = WIDTH/2;//0;
+
+    for (int vx = start; vx < finish; vx++)
     {
-        for (int vz = 0; vz < DEPTH; vz++)
+        for (int vz = start; vz < finish; vz++)
         {
             // float vy = height[vx * depth + vz);?
             // #define TERRAIN(t, w, d) t->height[(w) * t->depth + (d)]
@@ -141,8 +155,7 @@ void Terrain::generateGrid()
             float x = vx * STEP;
             float z = -vz * STEP;
 
-            float n = mountain_range_noise(glm::vec3(x, 0, z));
-            float y = (0.5 + 0.5 * n);
+            float y = calcHeight(x, z);
             //float y = 0.f;
 
             //glm::vec3 v0 = glm::vec3(vx * STEP, vy, -vz * STEP);

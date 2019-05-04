@@ -872,7 +872,7 @@ public:
 		Model->pushMatrix();
 		//Model->translate(vec3(-250, -5, 250)); // 1000 x 1000
         //Model->translate(vec3(-125, -5, 125)); // 500 x 500
-		Model->translate(vec3(-62.5f, -5, 62.5f));
+		//Model->translate(vec3(-62.5f, -5, 62.5f));
 
 		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();

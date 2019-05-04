@@ -1,4 +1,5 @@
 #include "Crystal.h"
+#include "Terrain.h"
 
 using namespace glm;
 
@@ -12,7 +13,7 @@ Crystal::Crystal()
 void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog)
 {
     Model->pushMatrix();
-    Model->translate(vec3(this->currentPos.x, 0.f, this->currentPos.z));
+    Model->translate(vec3(this->currentPos.x, this->currentPos.y, this->currentPos.z));
     Model->rotate(4.5f, vec3(1,0,0));
     Model->scale(this->scale);
     for (size_t j = 0; j < crystalShapes.size(); j++)
@@ -43,6 +44,7 @@ void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type)
 
     currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
     currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
+    currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z);
 
     switch(num)
     {
