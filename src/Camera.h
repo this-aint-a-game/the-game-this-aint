@@ -14,9 +14,9 @@ public:
         target = angle = 0.0;
     }
     glm::mat4 update
-    (
+    (     
+        glm::vec3 playerPos,
         double frametime, 
-        vec3 playerPos,
         int mousex, 
         int mousey,
         int width, 
