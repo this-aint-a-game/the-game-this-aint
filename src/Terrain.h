@@ -40,6 +40,7 @@ class Terrain {
     void clean();
     void draw();
     void computeIndicesForClipVolume(float clipx0, float clipx1, float clipz0, float clipz1);
+    static float calcHeight(float x, float z);
 
 public:
     Terrain();
@@ -47,6 +48,7 @@ public:
     void initTerrain();
     void generateGrid();
     void bindVAO();
+    static float getHeight(float x, float z);
 
 };
 
