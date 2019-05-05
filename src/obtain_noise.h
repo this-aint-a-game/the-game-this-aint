@@ -128,7 +128,6 @@ float mountain_noise(glm::vec3 position)
 
 float mountain_range_noise(glm::vec3 position)
 {
-<<<<<<< HEAD
     static int loadingCounter = 0;
     while(!(loadingCounter++ % 10000))
     {
@@ -138,9 +137,6 @@ float mountain_range_noise(glm::vec3 position)
         putchar('\n');
     }
 
-=======
-    std::cout << "loading" << std::endl;
->>>>>>> 86083d9ea1edaba19d678c7812d21c3d900a4740
     float octaves = 7;
     float persistence = 0.7;
     float frequency = 0.002;
