@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Terrain.h"
 #define MOVESPEED 0.5
 
 glm::mat4 Player::update(double frametime, int mousex, int mousey,
@@ -28,8 +29,9 @@ glm::mat4 Player::update(double frametime, int mousex, int mousey,
                 glm::rotate(glm::mat4(1), 3.14159f / 2.0f, glm::vec3(0,1,0))
                            *Ry);
     targetPos += lateralDir;
-    targetPos += glm::vec3(dir.x, dir.y, dir.z);
+    targetPos += glm::vec3(dir.x, 0, dir.z);
     position += -0.1f * position + 0.1f * targetPos;
+    position.y = Terrain::getHeight(position.x, position.z) + 0.2;
     
     glm::mat4 T = glm::translate(glm::mat4(1), position);
     return Rx * Ry * T;

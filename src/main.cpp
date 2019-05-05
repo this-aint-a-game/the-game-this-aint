@@ -19,6 +19,8 @@ obtain.
 #include "Strawberry.h"
 #include "Terrain.h"
 #include "Crystal.h"
+#include "Player.h"
+#include "Camera.h"
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
@@ -32,8 +34,12 @@ class Application : public EventCallbacks
 
 public:
 
+	Player player = Player();
+	Camera camera = Camera();
+
 	WindowManager * windowManager = nullptr;
 	int width, height;
+	bool releaseMouse = false;
 	std::string resourceDir = "../resources";
 	bool red = false;
     bool orange = false;
@@ -44,6 +50,8 @@ public:
 	vector<GameObject*> objects;
 
 	// programs
+	shared_ptr<Program> playerProg;
+	shared_ptr<Shape>   playerShape;
 	shared_ptr<Program> shapeProg;
 	//shared_ptr<Program> groundProg;
 	shared_ptr<Program> particleProg;
@@ -117,11 +125,13 @@ public:
 	bool moveForward = false;
 	bool moveBackward = false;
 
-	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+	{
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+		/*
 		switch (key) {
 			case GLFW_KEY_A:
 				moveLeft = (action != GLFW_RELEASE);
@@ -142,6 +152,54 @@ public:
 				}
 				sprint = false;
 				break;
+		}
+		*/
+
+		if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		{
+			player.w = 1;
+		}
+		if (key == GLFW_KEY_W && action == GLFW_RELEASE)
+		{
+			player.w = 0;
+		}
+		if (key == GLFW_KEY_S && action == GLFW_PRESS)
+		{
+			player.s = 1;
+		}
+		if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+		{
+			player.s = 0;
+		}
+		if (key == GLFW_KEY_A && action == GLFW_PRESS)
+		{
+			player.a = 1;
+		}
+		if (key == GLFW_KEY_A && action == GLFW_RELEASE)
+		{
+			player.a = 0;
+		}
+		if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		{
+			player.d = 1;
+		}
+		if (key == GLFW_KEY_D && action == GLFW_RELEASE)
+		{
+			player.d = 0;
+		}
+		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS)
+		{
+			    glfwSetInputMode(windowManager->getHandle(), 
+                      GLFW_CURSOR,
+                      GLFW_CURSOR_NORMAL);
+				releaseMouse = true;
+		}
+		if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE)
+		{
+			    glfwSetInputMode(windowManager->getHandle(), 
+                      GLFW_CURSOR,
+                      GLFW_CURSOR_DISABLED);
+			    releaseMouse = false;
 		}
 	}
 
@@ -246,6 +304,38 @@ public:
 	    shapeProg->addUniform("shine");
 		shapeProg->addAttribute("vertPos");
 		shapeProg->addAttribute("vertNor");
+	}
+
+	void initPlayer()
+	{
+		// This has to happen somewhere. Might as well be here
+		// to prevent main from getting clogged
+		glfwSetInputMode(windowManager->getHandle(), 
+        GLFW_CURSOR,
+        GLFW_CURSOR_DISABLED);
+
+		playerProg = make_shared<Program>();
+		playerProg->setVerbose(true);
+				playerProg->setShaderNames(
+				resourceDir + "/player_vert.glsl",
+				resourceDir + "/player_frag.glsl");				
+		if (! playerProg->init())
+		{
+			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+			exit(1);
+		}
+		playerProg->addUniform("P");
+		playerProg->addUniform("V");
+		playerProg->addUniform("M");
+		playerProg->addAttribute("vertPos");
+		playerProg->addAttribute("vertNor");
+		playerProg->addAttribute("vertTex");
+ 
+		// Initialize the obj mesh VBOs etc
+		playerShape = make_shared<Shape>();
+		playerShape->loadMesh(resourceDir + "/character.obj");
+		playerShape->resize();
+		playerShape->init();
 	}
 
 	void particleSetUp()
@@ -657,7 +747,6 @@ public:
         return true;
 	}
 
-
 	void drawParticles(MatrixStack* View, float aspect)
 	{
 		particleProg->bind();
@@ -781,6 +870,20 @@ public:
 		shapeProg->unbind();
 	}
 
+	void drawPlayer(MatrixStack* View, MatrixStack* Projection, mat4* M) 
+	{
+		playerProg->bind();
+
+		glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+		glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+		glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)M);
+		//glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+		playerShape->draw(playerProg);
+
+		playerProg->unbind();
+	}
+
     void render(float deltaTime)
     {
 
@@ -789,13 +892,23 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// need mouse position in order to use camera
+		double mousex = width / 4.0;
+		double mousey = height / 4.0;    
+		float aspect = width/(float)height;
+		if(!releaseMouse)
+			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
+
         updateGeom(deltaTime);
+
+		mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
+		playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
 
         lightPos.x = cos(glfwGetTime()/40) * 500.f;
         lightPos.z = sin(glfwGetTime()/40) * 500.f;
 
-        float aspect = width/(float)height;
 
+/*
         x = cos(radians(phi))*cos(radians(theta));
         y = sin(radians(phi));
         z = cos(radians(phi))*sin(radians(theta));
@@ -836,12 +949,19 @@ public:
         {
             cameraPos = holdCameraPos;
         }
+		*/
 
         auto ViewUser = make_shared<MatrixStack>();
         ViewUser->pushMatrix();
         ViewUser->loadIdentity();
         ViewUser->pushMatrix();
-        ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
+		ViewUser->multMatrix(camera.update(player.position, deltaTime * 0.000001f, mousex, mousey, width, height));
+
+		// reset mouse position to center of screen after finding difference. 
+		if(!releaseMouse)
+    		glfwSetCursorPos(windowManager->getHandle(), width / 4.0, height / 4.0);
+
+        //ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
         MatrixStack *userViewPtr = ViewUser.get();
 
 
@@ -877,6 +997,7 @@ public:
 		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
+		drawPlayer(userViewPtr, projectionPtr, &playerM);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
@@ -888,7 +1009,7 @@ public:
 int main(int argc, char **argv)
 {
 	Application *application = new Application();
-
+ 
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(1024, 1024);
 	windowManager->setEventCallbacks(application);
@@ -897,6 +1018,7 @@ int main(int argc, char **argv)
 	application->init();
 	application->initTex();
 	application->initParticles();
+	application->initPlayer();
 	application->initGeom();
     auto lastTime = chrono::high_resolution_clock::now();
 
@@ -911,6 +1033,10 @@ int main(int argc, char **argv)
                     chrono::duration_cast<std::chrono::microseconds>(
                             chrono::high_resolution_clock::now() - lastTime)
                             .count();
+			
+			// reset lastTime so that we can calculate the deltaTime
+			// on the next frame
+			lastTime = nextLastTime;
 			// Render scene.
 			application->render(deltaTime);
 
