@@ -13,8 +13,9 @@ public:
     {
         w = a = s = d = 0;
         yaw = pitch = glm::vec3(0, 0, 0);
-        position = glm::vec3(0, 0, 0);
-        targetPos = targetYaw = targetPitch = glm::vec3(0, 0, 0);
+        position = glm::vec3(-8.43903, 0, 9.66477);
+        targetPos = position;
+        targetYaw = targetPitch = glm::vec3(0, 0, 0);
     }
     glm::mat4 update
     (

@@ -9,7 +9,6 @@ glm::mat4 Player::update(double frametime, int mousex, int mousey,
     float lateralSpeed = 0;
     float yawAngle = 0;
     float pitchAngle = 0;
-
     if (w == 1)
         speed = MOVESPEED * frametime;
     else if (s == 1)
