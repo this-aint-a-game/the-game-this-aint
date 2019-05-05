@@ -152,6 +152,7 @@ public:
 				}
 				sprint = false;
 				break;
+<<<<<<< HEAD
 		}
 		*/
 
@@ -200,6 +201,8 @@ public:
                       GLFW_CURSOR,
                       GLFW_CURSOR_DISABLED);
 			    releaseMouse = false;
+=======
+>>>>>>> 86083d9ea1edaba19d678c7812d21c3d900a4740
 		}
 	}
 
