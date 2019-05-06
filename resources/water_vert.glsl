@@ -13,7 +13,6 @@ out vec3 iLightVec;
 out vec3 ViewVec;
 out vec3 HVec;
 out vec4 pos;
-out float water;
 
 void main()
 {
@@ -21,8 +20,6 @@ void main()
 
     gl_Position = P * V * M * vec4(vertPos.xyz, 1.0f);
     pos =  M * vec4(vertPos.xyz, 1.0f);
-
-    water = 0.0;
 
     fragNor = normalize(vertNor);
     iLightVec = normalize(lightPos - (V * M * vertPos).xyz);

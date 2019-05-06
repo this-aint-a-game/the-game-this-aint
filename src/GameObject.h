@@ -3,7 +3,7 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#define GROUND_SIZE 120
+#define GROUND_SIZE 120 // TODO change to terrain size
 
 #include <string>
 #include <vector>

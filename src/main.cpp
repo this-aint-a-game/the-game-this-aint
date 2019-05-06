@@ -18,6 +18,7 @@ obtain.
 #include "Particle.h"
 #include "Strawberry.h"
 #include "Terrain.h"
+#include "Water.h"
 #include "Crystal.h"
 #include "Player.h"
 #include "Camera.h"
@@ -34,8 +35,12 @@ class Application : public EventCallbacks
 
 public:
 
+    bool debug = true;
+
 	Player player = Player();
 	Camera camera = Camera();
+    Terrain *terrain = new Terrain();
+    Water *water = new Water();
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -53,11 +58,9 @@ public:
 	shared_ptr<Program> playerProg;
 	shared_ptr<Shape>   playerShape;
 	shared_ptr<Program> shapeProg;
-	//shared_ptr<Program> groundProg;
 	shared_ptr<Program> particleProg;
 	shared_ptr<Program> skyProg;
 
-	Terrain *terrain = new Terrain();
 	shared_ptr<Texture> skyTexture;
 	shared_ptr<Texture> sunTexture;
 	shared_ptr<Texture> particleTexture;
@@ -131,83 +134,74 @@ public:
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		/*
-		switch (key) {
-			case GLFW_KEY_A:
-				moveLeft = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_D:
-				moveRight = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_W:
-				moveForward = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_S:
-				moveBackward = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_LEFT_SHIFT:
-				if (action == GLFW_PRESS) {
-					sprint = true;
-					break;
-				}
-				sprint = false;
-				break;
-		}
-		*/
 
-		if (key == GLFW_KEY_W && action == GLFW_PRESS)
-		{
-			player.w = 1;
-		}
-		if (key == GLFW_KEY_W && action == GLFW_RELEASE)
-		{
-			player.w = 0;
-		}
-		if (key == GLFW_KEY_S && action == GLFW_PRESS)
-		{
-			player.s = 1;
-		}
-		if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-		{
-			player.s = 0;
-		}
-		if (key == GLFW_KEY_A && action == GLFW_PRESS)
-		{
-			player.a = 1;
-		}
-		if (key == GLFW_KEY_A && action == GLFW_RELEASE)
-		{
-			player.a = 0;
-		}
-		if (key == GLFW_KEY_D && action == GLFW_PRESS)
-		{
-			player.d = 1;
-		}
-		if (key == GLFW_KEY_D && action == GLFW_RELEASE)
-		{
-			player.d = 0;
-		}
-		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS)
-		{
-			    glfwSetInputMode(windowManager->getHandle(), 
-                      GLFW_CURSOR,
-                      GLFW_CURSOR_NORMAL);
-				releaseMouse = true;
-		}
-		if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE)
-		{
-			    glfwSetInputMode(windowManager->getHandle(), 
-                      GLFW_CURSOR,
-                      GLFW_CURSOR_DISABLED);
-			    releaseMouse = false;
-		}
+		if (debug) {
+            switch (key) {
+                case GLFW_KEY_A:
+                    moveLeft = (action != GLFW_RELEASE);
+                    break;
+                case GLFW_KEY_D:
+                    moveRight = (action != GLFW_RELEASE);
+                    break;
+                case GLFW_KEY_W:
+                    moveForward = (action != GLFW_RELEASE);
+                    break;
+                case GLFW_KEY_S:
+                    moveBackward = (action != GLFW_RELEASE);
+                    break;
+                case GLFW_KEY_LEFT_SHIFT:
+                    if (action == GLFW_PRESS) {
+                        sprint = true;
+                        break;
+                    }
+                    sprint = false;
+                    break;
+            }
+        }
+		else {
+            if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+                player.w = 1;
+            }
+            if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
+                player.w = 0;
+            }
+            if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+                player.s = 1;
+            }
+            if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+                player.s = 0;
+            }
+            if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+                player.a = 1;
+            }
+            if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
+                player.a = 0;
+            }
+            if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+                player.d = 1;
+            }
+            if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+                player.d = 0;
+            }
+            if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
+                glfwSetInputMode(windowManager->getHandle(),
+                                 GLFW_CURSOR,
+                                 GLFW_CURSOR_NORMAL);
+                releaseMouse = true;
+            }
+            if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE) {
+                glfwSetInputMode(windowManager->getHandle(),
+                                 GLFW_CURSOR,
+                                 GLFW_CURSOR_DISABLED);
+                releaseMouse = false;
+            }
+        }
 	}
-
 
 	void scrollCallback(GLFWwindow* window, double deltaX, double deltaY)
-	{
-		// cTheta += (float) deltaX;
-	}
+    {
+
+    }
 
 	void mouseCallback(GLFWwindow *window, int button, int action, int mods)
 	{
@@ -392,7 +386,7 @@ public:
 		shapeSetUp();
 		particleSetUp();
 		terrain->initTerrain();
-		//terrain->generateGrid();
+		water->initWater();
 	}
 
 	void initParticles()
@@ -485,8 +479,6 @@ public:
 //            }
             objects.push_back(crystal);
         }
-
-
     }
 
     GameObject::objType selectRandomCrystal()
@@ -534,7 +526,7 @@ public:
         sphereShape->loadMesh(resourceDir + "/sphere.obj");
         sphereShape->resize();
         sphereShape->init();
-		terrain->generateGrid();
+		//terrain->generateGrid();
 
 	}
 
@@ -739,9 +731,6 @@ public:
                     return false;
                 }
             }
-
-
-
         }
 
         return true;
@@ -862,9 +851,7 @@ public:
 				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
                 CHECKED_GL_CALL(glDisable(GL_BLEND));
 			}
-
 		}
-			
 
 		Model->popMatrix();
 		shapeProg->unbind();
@@ -896,6 +883,7 @@ public:
 		double mousex = width / 4.0;
 		double mousey = height / 4.0;    
 		float aspect = width/(float)height;
+
 		if(!releaseMouse)
 			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
 
@@ -907,64 +895,61 @@ public:
         lightPos.x = cos(glfwGetTime()/40) * 500.f;
         lightPos.z = sin(glfwGetTime()/40) * 500.f;
 
-
-/*
-        x = cos(radians(phi))*cos(radians(theta));
-        y = sin(radians(phi));
-        z = cos(radians(phi))*sin(radians(theta));
-
-        vec3 forward = vec3(x, y, z);
-        vec3 up = vec3(0,1,0);
-        vec3 sides = cross(forward, up);
-
-        float actualSpeed = MOVEMENT_SPEED;
-        if(sprint)
-        {
-            actualSpeed *= 3;
-        }
-
-        vec3 holdCameraPos = cameraPos;
-
-        if(moveForward)
-        {
-            holdCameraPos = cameraPos + (forward * actualSpeed);
-        }
-        if(moveBackward)
-        {
-            holdCameraPos = cameraPos - (forward * actualSpeed);
-        }
-        if(moveLeft)
-        {
-            holdCameraPos = cameraPos - (sides * actualSpeed);
-        }
-        if(moveRight)
-        {
-            holdCameraPos = cameraPos + (sides * actualSpeed);
-        }
-
-        bool go = checkForEdge(holdCameraPos);
-        go = checkForObject(holdCameraPos);
-
-        if(go)
-        {
-            cameraPos = holdCameraPos;
-        }
-		*/
-
         auto ViewUser = make_shared<MatrixStack>();
         ViewUser->pushMatrix();
         ViewUser->loadIdentity();
         ViewUser->pushMatrix();
-		ViewUser->multMatrix(camera.update(player.position, deltaTime * 0.000001f, mousex, mousey, width, height));
 
-		// reset mouse position to center of screen after finding difference. 
-		if(!releaseMouse)
-    		glfwSetCursorPos(windowManager->getHandle(), width / 4.0, height / 4.0);
+        if (!debug) {
+            ViewUser->multMatrix(
+                    camera.update(player.position, deltaTime * 0.000001f,
+                                  mousex, mousey, width, height));
 
-        //ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
+            // reset mouse position to center of screen after finding difference.
+
+            if (!releaseMouse)
+                glfwSetCursorPos(windowManager->getHandle(), width / 4.0,
+                                 height / 4.0);
+        } else {
+            x = cos(radians(phi)) * cos(radians(theta));
+            y = sin(radians(phi));
+            z = cos(radians(phi)) * sin(radians(theta));
+
+            vec3 forward = vec3(x, y, z);
+            vec3 up = vec3(0, 1, 0);
+            vec3 sides = cross(forward, up);
+
+            float actualSpeed = MOVEMENT_SPEED;
+            if (sprint) {
+                actualSpeed *= 3;
+            }
+
+            vec3 holdCameraPos = cameraPos;
+
+            if (moveForward) {
+                holdCameraPos = cameraPos + (forward * actualSpeed);
+            }
+            if (moveBackward) {
+                holdCameraPos = cameraPos - (forward * actualSpeed);
+            }
+            if (moveLeft) {
+                holdCameraPos = cameraPos - (sides * actualSpeed);
+            }
+            if (moveRight) {
+                holdCameraPos = cameraPos + (sides * actualSpeed);
+            }
+
+            bool go = checkForEdge(holdCameraPos);
+            go = checkForObject(holdCameraPos);
+
+            if (go) {
+                cameraPos = holdCameraPos;
+            }
+            ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z),
+                             forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
+        }
+
         MatrixStack *userViewPtr = ViewUser.get();
-
-
 
         auto Projection = make_shared<MatrixStack>();
         Projection->pushMatrix();
@@ -990,11 +975,10 @@ public:
 		Model->loadIdentity();
 
 		Model->pushMatrix();
-		//Model->translate(vec3(-250, -5, 250)); // 1000 x 1000
-        //Model->translate(vec3(-125, -5, 125)); // 500 x 500
-		//Model->translate(vec3(-62.5f, -5, 62.5f));
 
 		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+		water->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+
 		Model->popMatrix();
 
 		drawPlayer(userViewPtr, projectionPtr, &playerM);

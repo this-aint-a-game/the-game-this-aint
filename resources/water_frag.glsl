@@ -9,8 +9,6 @@ in vec3 fragNor;
 in vec3 iLightVec;
 in vec3 HVec;
 
-in float water;
-
 in vec4 pos;
 
 layout(location = 0) out vec4 color;
@@ -32,12 +30,8 @@ void main()
 
     vec3 specular = MatSpec*pow(clamp(dot(HVec, norm), 0, 1), shine);
 
-    vec3 phong = ambient + diffuse;// + specular;
+    vec3 phong = ambient + diffuse + specular;
 
-    if (water == 1.0){
-        color = vec4(phong, 1.0)*vec4(0.216, 0.663, 0.835, 0.25);
-    } else {
-        color = vec4(phong, 1.0);
-    }
+    color = vec4(phong, 1.0)*vec4(0.216, 0.663, 0.835, 0.25);
 
 }

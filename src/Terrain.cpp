@@ -5,6 +5,10 @@
 Terrain::Terrain()
 {
     vertexArrayID = 0;
+    generateGrid(INITIAL_WIDTH);
+
+    std::thread t = threadedGenerateGrid();
+    t.detach();
 }
 
 void Terrain::initTex()
@@ -39,13 +43,12 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
     prog->unbind();
 }
 
-void Terrain::computeIndicesForClipVolume(float clipx0, float clipx1, float clipz0, float clipz1)
+void Terrain::computeIndicesForClipVolume(int width, float clipx0, float clipx1, float clipz0, float clipz1)
 {
-    //std::cout << "81" << std::endl;
-    int minCol = std::max(std::min((clipx0 / (float)STEP), (float)(WIDTH - 2)), 0.f);
-    int maxCol = std::max(std::min((clipx1 +  STEP) / STEP, (float)(WIDTH - 2)), 0.f);
-    int minRow = std::max(std::min(-clipz1 / STEP, (float)(DEPTH - 1)), 0.f);
-    int maxRow = std::max(std::min(-(clipz0 - STEP) / STEP, (float)(DEPTH - 1)), 0.f);
+    int minCol = std::max(std::min((clipx0 / (float)STEP), (float)(width - 2)), 0.f);
+    int maxCol = std::max(std::min((clipx1 +  STEP) / STEP, (float)(width - 2)), 0.f);
+    int minRow = std::max(std::min(-clipz1 / STEP, (float)(width - 1)), 0.f);
+    int maxRow = std::max(std::min(-(clipz0 - STEP) / STEP, (float)(width - 1)), 0.f);
 
     if (minCol == maxCol || minRow == maxRow)
     {
@@ -61,42 +64,38 @@ void Terrain::computeIndicesForClipVolume(float clipx0, float clipx1, float clip
             // if not first strip, link to previous strip
             if (c > minCol && r == minRow)
             {
-                indices[index++] = c * DEPTH + r;
+                indices[index++] = c * width + r;
             }
-            indices[index++] = c * DEPTH + r;
-            indices[index++] = (c + 1) * DEPTH + r;
+            indices[index++] = c * width + r;
+            indices[index++] = (c + 1) * width + r;
 
             // link to next strip
             if (r == maxRow && c < maxCol)
             {
-                indices[index++] = (c + 1) * DEPTH + r;
+                indices[index++] = (c + 1) * width + r;
             }
         }
-        //std::cout << "indices: " << index << std::endl;
     }
     numIndices = index;
-    //std::cout << "114" << std::endl;
+    //std::cout << "numIndices: " << numIndices << std::endl;
 }
 
 void Terrain::bindVAO()
 {
-    //std::cout << "117" << std::endl;
     if (vertexArrayID == 0) {
         unsigned numVertices = vertices.size();
+
         unsigned vertexByteSize = sizeof(glm::vec3);
         unsigned vertexFloatSize = vertexByteSize / sizeof(float);
 
         unsigned bytes = numVertices * vertexByteSize;
-        //uint8_t *vertexData = g_new(uint8_t, bytes);
         void *vertexData = malloc(bytes);
-        //float *vertexDataCast = malloc(bytes);
 
         float *vertexDataCast = (float *) vertexData;
         for (int i = 0; i < numVertices; i++) {
             memcpy(&vertexDataCast[vertexFloatSize * i], &vertices[i],
                    vertexByteSize);
         }
-
 
         glGenBuffers(1, &vertexBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -124,8 +123,6 @@ void Terrain::bindVAO()
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
     }
-
-
 }
 
 float Terrain::getHeight(float x, float z)
@@ -137,49 +134,51 @@ float Terrain::calcHeight(float x, float z)
 {
     float n = mountain_range_noise(glm::vec3(x, 0, z));
     return (0.5 + 0.5 * n) - 5;
-
 }
 
-void Terrain::generateGrid()
+void Terrain::generateGrid(int width)
 {
-    int start = -WIDTH/2;//0;
-    int finish = WIDTH/2;//0;
+    int start = -width/2;//0;
+    int finish = width/2;//0;
+
+    std::vector <glm::vec3> tempV;
 
     for (int vx = start; vx < finish; vx++)
     {
         for (int vz = start; vz < finish; vz++)
         {
-            // float vy = height[vx * depth + vz);?
-            // #define TERRAIN(t, w, d) t->height[(w) * t->depth + (d)]
-            //float vy = 0;
             float x = vx * STEP;
             float z = -vz * STEP;
 
             float y = calcHeight(x, z);
-            //float y = 0.f;
 
-            //glm::vec3 v0 = glm::vec3(vx * STEP, vy, -vz * STEP);
             glm::vec3 v0 = glm::vec3(x, y, z);
 
-            // calculate normal?
-            vertices.push_back(v0); // add normal?
+            // TODO calculate normal
+
+            tempV.push_back(v0);
         }
     }
 
-    unsigned num_indices = (WIDTH - 1) * (DEPTH * 2) + (WIDTH - 2) + (DEPTH - 2);
+    unsigned num_indices = (width - 1) * (width * 2) + (width - 2) + (width - 2);
 
     float clipx0 = 0.f;
-    float clipx1 = (WIDTH - 1) * STEP;
+    float clipx1 = (width - 1) * STEP;
     float clipz1 = 0.f;
-    float clipz0 = -(DEPTH - 1) * STEP;
+    float clipz0 = -(width - 1) * STEP;
 
     //compute indices for clip volume
     indices = (unsigned *) malloc(num_indices * sizeof(unsigned));
-    computeIndicesForClipVolume(clipx0, clipx1, clipz0, clipz1);
+    computeIndicesForClipVolume(width, clipx0, clipx1, clipz0, clipz1);
 
     assert(num_indices == numIndices);
+    vertices = tempV;
+    vertexArrayID = 0;
+}
 
-    bindVAO();
+std::thread Terrain::threadedGenerateGrid()
+{
+    return std::thread([this] { this->generateGrid(); });
 }
 
 void Terrain::clean()
@@ -194,16 +193,9 @@ void Terrain::clean()
 
 void Terrain::draw()
 {
-    /*
-    glBindVertexArray(vertexArrayID);
-    glDrawElements(GL_TRIANGLES, VERTEX_COUNT * VERTEX_COUNT * 10, GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
-     */
-    // TODO offset?
     bindVAO();
     glDrawElements(GL_TRIANGLE_STRIP, numIndices, GL_UNSIGNED_INT, 0);
     unbind();
-
 }
 
 void Terrain::unbind()
@@ -229,9 +221,7 @@ void Terrain::initTerrain()
     prog->addUniform("V");
     prog->addUniform("M");
 
-    //prog->addUniform("permTexture");
     //prog->addUniform("Texture");
-
     //initTex();
 
     prog->addUniform("MatAmb");
@@ -241,14 +231,7 @@ void Terrain::initTerrain()
     prog->addUniform("lightPos");
     prog->addUniform("cameraPos");
 
-    //prog->addUniform("mode");
-    //prog->addUniform("freq");
-    //prog->addUniform("octave");
-    //prog->addUniform("power");
 
     prog->addAttribute("vertPos");
     //prog->addAttribute("vertNor");
-
-    //Initialize textures
-    //initPermTexture(&permTextureID);
 }
