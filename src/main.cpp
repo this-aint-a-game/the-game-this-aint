@@ -2,7 +2,7 @@
 Alexa
 Caroline
 Doug
-Sam
+
 obtain.
 */
 
@@ -19,6 +19,10 @@ obtain.
 #include "Strawberry.h"
 #include "Terrain.h"
 #include "Crystal.h"
+#include "Player.h"
+#include "Camera.h"
+#include "Lighting.h"
+
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
@@ -32,8 +36,14 @@ class Application : public EventCallbacks
 
 public:
 
+	Player player = Player();
+	Camera camera = Camera();
+
 	WindowManager * windowManager = nullptr;
 	int width, height;
+
+	bool releaseMouse = false;
+
 	std::string resourceDir = "../resources";
 	bool red = false;
     bool orange = false;
@@ -43,12 +53,15 @@ public:
 	bool violet = false;
 	vector<GameObject*> objects;
 
+
 	// programs
+	shared_ptr<Program> playerProg;
+	shared_ptr<Shape>   playerShape;
 	shared_ptr<Program> shapeProg;
-	//shared_ptr<Program> groundProg;
 	shared_ptr<Program> particleProg;
 	shared_ptr<Program> skyProg;
 
+    Lighting* lighting = new Lighting();
 	Terrain *terrain = new Terrain();
 	shared_ptr<Texture> skyTexture;
 	shared_ptr<Texture> sunTexture;
@@ -117,56 +130,59 @@ public:
 	bool moveForward = false;
 	bool moveBackward = false;
 
-	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+
+	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+	{
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		switch (key) {
-			case GLFW_KEY_A:
-				moveLeft = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_D:
-				moveRight = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_W:
-				moveForward = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_S:
-				moveBackward = (action != GLFW_RELEASE);
-				break;
-			case GLFW_KEY_LEFT_SHIFT:
-				if (action == GLFW_PRESS) {
-					sprint = true;
-					break;
-				}
-				sprint = false;
-				break;
-			case GLFW_KEY_F:
-				if (action != GLFW_RELEASE) {
-					terrain->updateFreq(true);
-				}
-				break;
-			case GLFW_KEY_V:
-				if (action != GLFW_RELEASE) {
-					terrain->updateFreq(false);
-				}
-				break;
-			case GLFW_KEY_O:
-				if (action != GLFW_RELEASE) {
-					terrain->updateOctave();
-				}
-				break;
-			case GLFW_KEY_P:
-				if (action != GLFW_RELEASE) {
-					terrain->updatePower(true);
-				}
-				break;
-			case GLFW_KEY_M:
-				if (action != GLFW_RELEASE) {
-					terrain->updatePower(false);
-				}
-				break;
+
+		if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		{
+			player.w = 1;
+		}
+		if (key == GLFW_KEY_W && action == GLFW_RELEASE)
+		{
+			player.w = 0;
+		}
+		if (key == GLFW_KEY_S && action == GLFW_PRESS)
+		{
+			player.s = 1;
+		}
+		if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+		{
+			player.s = 0;
+		}
+		if (key == GLFW_KEY_A && action == GLFW_PRESS)
+		{
+			player.a = 1;
+		}
+		if (key == GLFW_KEY_A && action == GLFW_RELEASE)
+		{
+			player.a = 0;
+		}
+		if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		{
+			player.d = 1;
+		}
+		if (key == GLFW_KEY_D && action == GLFW_RELEASE)
+		{
+			player.d = 0;
+		}
+		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS)
+		{
+			    glfwSetInputMode(windowManager->getHandle(), 
+                      GLFW_CURSOR,
+                      GLFW_CURSOR_NORMAL);
+				releaseMouse = true;
+		}
+		if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE)
+		{
+			    glfwSetInputMode(windowManager->getHandle(), 
+                      GLFW_CURSOR,
+                      GLFW_CURSOR_DISABLED);
+			    releaseMouse = false;
 		}
 	}
 
@@ -235,7 +251,7 @@ public:
 		skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		sunTexture = make_shared<Texture>();
-		sunTexture->setFilename(resourceDir + "/crazy.jpg");
+		sunTexture->setFilename(resourceDir + "/night.jpg");
 		sunTexture->init();
 		sunTexture->setUnit(1);
 		sunTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -266,11 +282,44 @@ public:
 		shapeProg->addUniform("M");
 		shapeProg->addUniform("MatAmb");
 		shapeProg->addUniform("MatDif");
-		shapeProg->addUniform("lightPos");
 	    shapeProg->addUniform("MatSpec");
 	    shapeProg->addUniform("shine");
 		shapeProg->addAttribute("vertPos");
 		shapeProg->addAttribute("vertNor");
+        shapeProg->addUniform("lighting");
+        shapeProg->addUniform("numberLights");
+	}
+
+	void initPlayer()
+	{
+		// This has to happen somewhere. Might as well be here
+		// to prevent main from getting clogged
+		glfwSetInputMode(windowManager->getHandle(), 
+        GLFW_CURSOR,
+        GLFW_CURSOR_DISABLED);
+
+		playerProg = make_shared<Program>();
+		playerProg->setVerbose(true);
+				playerProg->setShaderNames(
+				resourceDir + "/player_vert.glsl",
+				resourceDir + "/player_frag.glsl");
+		if (! playerProg->init())
+		{
+			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+			exit(1);
+		}
+		playerProg->addUniform("P");
+		playerProg->addUniform("V");
+		playerProg->addUniform("M");
+		playerProg->addAttribute("vertPos");
+		playerProg->addAttribute("vertNor");
+		playerProg->addAttribute("vertTex");
+ 
+		// Initialize the obj mesh VBOs etc
+		playerShape = make_shared<Shape>();
+		playerShape->loadMesh(resourceDir + "/character.obj");
+		playerShape->resize();
+		playerShape->init();
 	}
 
 	void particleSetUp()
@@ -342,7 +391,6 @@ public:
 		}
 	}
 
-
 	void initSceneCollectibles()
     {
         uploadMultipleShapes("/fruits/strawberries.obj", 0);
@@ -377,8 +425,8 @@ public:
     void initSceneObjects()
     {
 		uploadMultipleShapes("/crystal1.obj", 1);
-		uploadMultipleShapes("/crystal2.obj", 2);
-		uploadMultipleShapes("/crystal3.obj", 3);
+//		uploadMultipleShapes("/crystal2.obj", 2);
+//		uploadMultipleShapes("/crystal3.obj", 3);
 		numCrystals = rand() % 100;
 
         for(int i = 0; i < numCrystals; i++)
@@ -389,21 +437,22 @@ public:
 //            while (!found_spot)
 //            {
                 crystal = new Crystal();
-                GameObject::objType crystal_type = selectRandomCrystal();
+//                GameObject::objType crystal_type = selectRandomCrystal();
+                GameObject::objType crystal_type = GameObject::crystal1;
                 crystal = new Crystal();
 
                 if (crystal_type == GameObject::crystal1)
                 {
                     crystal->initObject(cryst1min, cryst1max, i % 5, crystal_type);
                 }
-                else if (crystal_type == GameObject::crystal2)
-                {
-                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);
-                }
-                else if (crystal_type == GameObject::crystal3)
-                {
-                    crystal->initObject(cryst3min, cryst3max, i % 5, crystal_type);
-                }
+//                else if (crystal_type == GameObject::crystal2)
+//                {
+//                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);
+//                }
+//                else if (crystal_type == GameObject::crystal3)
+//                {
+//                    crystal->initObject(cryst3min, cryst3max, i % 5, crystal_type);
+//                }
 
 //                BoundingBox *otherBB = crystal->getBB();
 //                for (int j = 0; j < objects.size(); j++)
@@ -426,7 +475,7 @@ public:
 
     GameObject::objType selectRandomCrystal()
 	{
-		int random = rand() % 2;
+		int random = rand() % 3;
 
 		if(random == 0)
 		{
@@ -671,6 +720,8 @@ public:
                 }
                 else
                 {
+//                    cameraPos.x += -1.0f;
+//                    cameraPos.z += -1.0f;
                     return false;
                 }
             }
@@ -682,12 +733,10 @@ public:
         return true;
 	}
 
-
 	void drawParticles(MatrixStack* View, float aspect)
 	{
 		particleProg->bind();
 		updateParticles();
-
 
 		auto Model = make_shared<MatrixStack>();
 		Model->pushMatrix();
@@ -741,8 +790,8 @@ public:
 		Model->pushMatrix();
 			Model->loadIdentity();
 				Model->pushMatrix();
-				Model->rotate(cos(glfwGetTime()/10), vec3(0,1,0));
-				Model->scale(vec3(100, 100.f, 100));
+				Model->rotate(cos(glfwGetTime()/1000), vec3(0,1,0));
+				Model->scale(vec3(GROUND_SIZE + 0.f, GROUND_SIZE + 0.f, GROUND_SIZE + 0.f));
 				glUniformMatrix4fv(skyProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
 				skyTexture->bind(skyProg->getUniform("Texture0"));
 				sunTexture->bind(skyProg->getUniform("Texture1"));
@@ -764,7 +813,8 @@ public:
 
 		glUniformMatrix4fv(shapeProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		glUniformMatrix4fv(shapeProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		glUniform3f(shapeProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+        glUniform1f(shapeProg->getUniform("numberLights"), lighting->numberLights);
+		lighting->bind(shapeProg->getUniform("lighting"));
 
 		Model->pushMatrix();
 		Model->loadIdentity();
@@ -780,30 +830,46 @@ public:
 			else if(objects[i]->type == GameObject::crystal1)
 			{
                 CHECKED_GL_CALL(glEnable(GL_BLEND));
-                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
 				objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg);
                 CHECKED_GL_CALL(glDisable(GL_BLEND));
 			}
-			else if(objects[i]->type == GameObject::crystal2)
-			{
-                CHECKED_GL_CALL(glEnable(GL_BLEND));
-                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-				objects[i]->drawObject(modelptr, crystal2Shapes, shapeProg);
-                CHECKED_GL_CALL(glDisable(GL_BLEND));
-			}
-			else if(objects[i]->type == GameObject::crystal3)
-			{
-                CHECKED_GL_CALL(glEnable(GL_BLEND));
-                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
-                CHECKED_GL_CALL(glDisable(GL_BLEND));
-			}
+//			else if(objects[i]->type == GameObject::crystal2)
+//			{
+//                CHECKED_GL_CALL(glEnable(GL_BLEND));
+//                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
+//				objects[i]->drawObject(modelptr, crystal2Shapes, shapeProg);
+//                CHECKED_GL_CALL(glDisable(GL_BLEND));
+//			}
+//			else if(objects[i]->type == GameObject::crystal3)
+//            {
+//                CHECKED_GL_CALL(glEnable(GL_BLEND));
+//                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+//				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
+//                CHECKED_GL_CALL(glDisable(GL_BLEND));
+//			}
 
 		}
-			
+
 
 		Model->popMatrix();
+		lighting->unbind();
 		shapeProg->unbind();
+
+	}
+
+	void drawPlayer(MatrixStack* View, MatrixStack* Projection, mat4* M) 
+	{
+		playerProg->bind();
+
+		glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+		glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+		glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)M);
+		//glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+		playerShape->draw(playerProg);
+
+		playerProg->unbind();
 	}
 
     void render(float deltaTime)
@@ -814,61 +880,36 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+		// need mouse position in order to use camera
+		double mousex = width / 4.0;
+		double mousey = height / 4.0;    
+		float aspect = width/(float)height;
+		if(!releaseMouse)
+			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
+
         updateGeom(deltaTime);
 
-        lightPos.x = cos(glfwGetTime()/40) * 500.f;
-        lightPos.z = sin(glfwGetTime()/40) * 500.f;
+		mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
+		playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
 
-        float aspect = width/(float)height;
+        lightPos.x = cos(glfwGetTime()/100) * 500.f;
+        lightPos.z = sin(glfwGetTime()/100) * 500.f;
 
-        x = cos(radians(phi))*cos(radians(theta));
-        y = sin(radians(phi));
-        z = cos(radians(phi))*sin(radians(theta));
 
-        vec3 forward = vec3(x, y, z);
-        vec3 up = vec3(0,1,0);
-        vec3 sides = cross(forward, up);
-
-        float actualSpeed = MOVEMENT_SPEED;
-        if(sprint)
-        {
-            actualSpeed *= 3;
-        }
-
-        vec3 holdCameraPos = cameraPos;
-
-        if(moveForward)
-        {
-            holdCameraPos = cameraPos + (forward * actualSpeed);
-        }
-        if(moveBackward)
-        {
-            holdCameraPos = cameraPos - (forward * actualSpeed);
-        }
-        if(moveLeft)
-        {
-            holdCameraPos = cameraPos - (sides * actualSpeed);
-        }
-        if(moveRight)
-        {
-            holdCameraPos = cameraPos + (sides * actualSpeed);
-        }
-
-        bool go = checkForEdge(holdCameraPos);
-        go = checkForObject(holdCameraPos);
-
-        if(go)
-        {
-            cameraPos = holdCameraPos;
-        }
 
         auto ViewUser = make_shared<MatrixStack>();
         ViewUser->pushMatrix();
         ViewUser->loadIdentity();
         ViewUser->pushMatrix();
-        ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
-        MatrixStack *userViewPtr = ViewUser.get();
+		ViewUser->multMatrix(camera.update(player.position, deltaTime * 0.000001f, mousex, mousey, width, height));
 
+		// reset mouse position to center of screen after finding difference. 
+		if(!releaseMouse)
+    		glfwSetCursorPos(windowManager->getHandle(), width / 4.0, height / 4.0);
+
+        //ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z), forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
+        MatrixStack *userViewPtr = ViewUser.get();
 
 
         auto Projection = make_shared<MatrixStack>();
@@ -880,26 +921,33 @@ public:
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         drawSky(userViewPtr, projectionPtr);
 
+
+//        CHECKED_GL_CALL(glEnable(GL_BLEND));
+//        glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
+//        CHECKED_GL_CALL(glPointSize(25.0f));
+//        drawParticles(userViewPtr, aspect);
+//        CHECKED_GL_CALL(glDisable(GL_BLEND));
+
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         drawScene(userViewPtr, projectionPtr);
 
-        CHECKED_GL_CALL(glDisable(GL_BLEND));
 
-		CHECKED_GL_CALL(glEnable(GL_BLEND));
-		CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-		CHECKED_GL_CALL(glPointSize(25.0f));
-		drawParticles(userViewPtr, aspect);
+        CHECKED_GL_CALL(glEnable(GL_BLEND));
+        CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        CHECKED_GL_CALL(glPointSize(25.0f));
+        drawParticles(userViewPtr, aspect);
 
-		auto Model = make_shared<MatrixStack>();
-		Model->pushMatrix();
-		Model->loadIdentity();
 
-		Model->pushMatrix();
-		Model->translate(vec3(-5, 0, -8));
+        auto Model = make_shared<MatrixStack>();
+        Model->pushMatrix();
+        Model->loadIdentity();
+        Model->pushMatrix();
 
-		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
-		Model->popMatrix();
+        CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
+        terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
+        Model->popMatrix();
 
+		drawPlayer(userViewPtr, projectionPtr, &playerM);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
@@ -911,7 +959,7 @@ public:
 int main(int argc, char **argv)
 {
 	Application *application = new Application();
-
+ 
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(1024, 1024);
 	windowManager->setEventCallbacks(application);
@@ -920,7 +968,9 @@ int main(int argc, char **argv)
 	application->init();
 	application->initTex();
 	application->initParticles();
+	application->initPlayer();
 	application->initGeom();
+	application->lighting->init();
     auto lastTime = chrono::high_resolution_clock::now();
 
 	// Loop until the user closes the window.
@@ -934,6 +984,11 @@ int main(int argc, char **argv)
                     chrono::duration_cast<std::chrono::microseconds>(
                             chrono::high_resolution_clock::now() - lastTime)
                             .count();
+
+			// reset lastTime so that we can calculate the deltaTime
+			// on the next frame
+			lastTime = nextLastTime;
+
 			// Render scene.
 			application->render(deltaTime);
 

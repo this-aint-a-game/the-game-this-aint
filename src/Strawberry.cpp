@@ -1,4 +1,5 @@
 #include "Strawberry.h"
+#include "Terrain.h"
 
 Strawberry::Strawberry()
 {
@@ -11,7 +12,7 @@ Strawberry::Strawberry()
 void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog)
 {
 	Model->pushMatrix();
-	Model->translate(glm::vec3(this->currentPos.x, 0.50f, this->currentPos.z));
+	Model->translate(glm::vec3(this->currentPos.x, this->currentPos.y + 0.5f, this->currentPos.z));
 //	Model->rotate(glfwGetTime()/2, vec3(0,1,0));
 	Model->scale(this->scale);
 	for (size_t j = 0; j < strawberryShapes.size(); j++)
@@ -47,36 +48,38 @@ void Strawberry::initObject(glm::vec3 min, glm::vec3 max, int num, objType type)
 
 	currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
 	currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
+	currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z);
 
 	switch(num)
 	{
 		case 0:
 			//red
-			color = 7;
+			color = 0;
 			break;
 		case 1:
 			//orange
-			color = 12;
+			color = 1;
 			break;
 		case 2:
 			//yellow
-			color = 11;
+			color = 2;
 			break;
 		case 3:
 			//green
-			color = 13;
+			color = 3;
 			break;
 		case 4:
 			//blue
-			color = 1;
+			color = 4;
 			break;
 		case 5:
 			//violet
-			color = 10;
+			color = 5;
 			break;
 	}
 
 }
+
 
 int Strawberry::collect()
 {
