@@ -21,7 +21,7 @@ void Terrain::initTex()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos)
+void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting* lighting)
 {
     prog->bind();
 
@@ -29,13 +29,14 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
     glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, glm::value_ptr(V));
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, glm::value_ptr(M));
     glUniform3f(prog->getUniform("cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-    glUniform3f(prog->getUniform("lightPos"), -2.0, 2.0, 2.0); // TODO
+    glUniform1f(prog->getUniform("numberLights"), lighting->numberLights);
+    lighting->bind(prog->getUniform("lighting"));
 
     // flat grey
-    glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
-    glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);
-    glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
-    glUniform1f(prog->getUniform("shine"), 4.0);
+    glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
+    glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
+    glUniform3f(prog->getUniform("MatSpec"), 0.0, 0.0, 0.0);
+    glUniform1f(prog->getUniform("shine"), 0.0);
 
     draw();
 
@@ -149,7 +150,6 @@ void Terrain::generateGrid(int width)
         {
             float x = vx * STEP;
             float z = -vz * STEP;
-
             float y = calcHeight(x, z);
 
             glm::vec3 v0 = glm::vec3(x, y, z);
@@ -228,8 +228,9 @@ void Terrain::initTerrain()
     prog->addUniform("MatDif");
     prog->addUniform("MatSpec");
     prog->addUniform("shine");
-    prog->addUniform("lightPos");
+    prog->addUniform("lighting");
     prog->addUniform("cameraPos");
+    prog->addUniform("numberLights");
 
 
     prog->addAttribute("vertPos");

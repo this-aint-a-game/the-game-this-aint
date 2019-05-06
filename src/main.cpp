@@ -22,6 +22,8 @@ obtain.
 #include "Crystal.h"
 #include "Player.h"
 #include "Camera.h"
+#include "Lighting.h"
+
 
 #define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
@@ -44,7 +46,9 @@ public:
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
+
 	bool releaseMouse = false;
+
 	std::string resourceDir = "../resources";
 	bool red = false;
     bool orange = false;
@@ -54,12 +58,15 @@ public:
 	bool violet = false;
 	vector<GameObject*> objects;
 
+
 	// programs
 	shared_ptr<Program> playerProg;
 	shared_ptr<Shape>   playerShape;
 	shared_ptr<Program> shapeProg;
 	shared_ptr<Program> particleProg;
 	shared_ptr<Program> skyProg;
+
+    Lighting* lighting = new Lighting();
 
 	shared_ptr<Texture> skyTexture;
 	shared_ptr<Texture> sunTexture;
@@ -127,6 +134,7 @@ public:
 	bool moveRight = false;
 	bool moveForward = false;
 	bool moveBackward = false;
+
 
 	void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
@@ -262,7 +270,7 @@ public:
 		skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		sunTexture = make_shared<Texture>();
-		sunTexture->setFilename(resourceDir + "/crazy.jpg");
+		sunTexture->setFilename(resourceDir + "/night.jpg");
 		sunTexture->init();
 		sunTexture->setUnit(1);
 		sunTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -293,11 +301,12 @@ public:
 		shapeProg->addUniform("M");
 		shapeProg->addUniform("MatAmb");
 		shapeProg->addUniform("MatDif");
-		shapeProg->addUniform("lightPos");
 	    shapeProg->addUniform("MatSpec");
 	    shapeProg->addUniform("shine");
 		shapeProg->addAttribute("vertPos");
 		shapeProg->addAttribute("vertNor");
+        shapeProg->addUniform("lighting");
+        shapeProg->addUniform("numberLights");
 	}
 
 	void initPlayer()
@@ -312,7 +321,7 @@ public:
 		playerProg->setVerbose(true);
 				playerProg->setShaderNames(
 				resourceDir + "/player_vert.glsl",
-				resourceDir + "/player_frag.glsl");				
+				resourceDir + "/player_frag.glsl");
 		if (! playerProg->init())
 		{
 			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
@@ -401,7 +410,6 @@ public:
 		}
 	}
 
-
 	void initSceneCollectibles()
     {
         uploadMultipleShapes("/fruits/strawberries.obj", 0);
@@ -436,8 +444,8 @@ public:
     void initSceneObjects()
     {
 		uploadMultipleShapes("/crystal1.obj", 1);
-		uploadMultipleShapes("/crystal2.obj", 2);
-		uploadMultipleShapes("/crystal3.obj", 3);
+//		uploadMultipleShapes("/crystal2.obj", 2);
+//		uploadMultipleShapes("/crystal3.obj", 3);
 		numCrystals = rand() % 100;
 
         for(int i = 0; i < numCrystals; i++)
@@ -448,21 +456,22 @@ public:
 //            while (!found_spot)
 //            {
                 crystal = new Crystal();
-                GameObject::objType crystal_type = selectRandomCrystal();
+//                GameObject::objType crystal_type = selectRandomCrystal();
+                GameObject::objType crystal_type = GameObject::crystal1;
                 crystal = new Crystal();
 
                 if (crystal_type == GameObject::crystal1)
                 {
                     crystal->initObject(cryst1min, cryst1max, i % 5, crystal_type);
                 }
-                else if (crystal_type == GameObject::crystal2)
-                {
-                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);
-                }
-                else if (crystal_type == GameObject::crystal3)
-                {
-                    crystal->initObject(cryst3min, cryst3max, i % 5, crystal_type);
-                }
+//                else if (crystal_type == GameObject::crystal2)
+//                {
+//                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);
+//                }
+//                else if (crystal_type == GameObject::crystal3)
+//                {
+//                    crystal->initObject(cryst3min, cryst3max, i % 5, crystal_type);
+//                }
 
 //                BoundingBox *otherBB = crystal->getBB();
 //                for (int j = 0; j < objects.size(); j++)
@@ -483,7 +492,7 @@ public:
 
     GameObject::objType selectRandomCrystal()
 	{
-		int random = rand() % 2;
+		int random = rand() % 3;
 
 		if(random == 0)
 		{
@@ -728,6 +737,8 @@ public:
                 }
                 else
                 {
+//                    cameraPos.x += -1.0f;
+//                    cameraPos.z += -1.0f;
                     return false;
                 }
             }
@@ -740,7 +751,6 @@ public:
 	{
 		particleProg->bind();
 		updateParticles();
-
 
 		auto Model = make_shared<MatrixStack>();
 		Model->pushMatrix();
@@ -794,8 +804,8 @@ public:
 		Model->pushMatrix();
 			Model->loadIdentity();
 				Model->pushMatrix();
-				Model->rotate(cos(glfwGetTime()/10), vec3(0,1,0));
-				Model->scale(vec3(100, 100.f, 100));
+				Model->rotate(cos(glfwGetTime()/1000), vec3(0,1,0));
+				Model->scale(vec3(GROUND_SIZE + 0.f, GROUND_SIZE + 0.f, GROUND_SIZE + 0.f));
 				glUniformMatrix4fv(skyProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
 				skyTexture->bind(skyProg->getUniform("Texture0"));
 				sunTexture->bind(skyProg->getUniform("Texture1"));
@@ -817,7 +827,8 @@ public:
 
 		glUniformMatrix4fv(shapeProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
 		glUniformMatrix4fv(shapeProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		glUniform3f(shapeProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+        glUniform1f(shapeProg->getUniform("numberLights"), lighting->numberLights);
+		lighting->bind(shapeProg->getUniform("lighting"));
 
 		Model->pushMatrix();
 		Model->loadIdentity();
@@ -833,28 +844,31 @@ public:
 			else if(objects[i]->type == GameObject::crystal1)
 			{
                 CHECKED_GL_CALL(glEnable(GL_BLEND));
-                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
 				objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg);
                 CHECKED_GL_CALL(glDisable(GL_BLEND));
 			}
-			else if(objects[i]->type == GameObject::crystal2)
-			{
-                CHECKED_GL_CALL(glEnable(GL_BLEND));
-                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-				objects[i]->drawObject(modelptr, crystal2Shapes, shapeProg);
-                CHECKED_GL_CALL(glDisable(GL_BLEND));
-			}
-			else if(objects[i]->type == GameObject::crystal3)
-			{
-                CHECKED_GL_CALL(glEnable(GL_BLEND));
-                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
-                CHECKED_GL_CALL(glDisable(GL_BLEND));
-			}
+//			else if(objects[i]->type == GameObject::crystal2)
+//			{
+//                CHECKED_GL_CALL(glEnable(GL_BLEND));
+//                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
+//				objects[i]->drawObject(modelptr, crystal2Shapes, shapeProg);
+//                CHECKED_GL_CALL(glDisable(GL_BLEND));
+//			}
+//			else if(objects[i]->type == GameObject::crystal3)
+//            {
+//                CHECKED_GL_CALL(glEnable(GL_BLEND));
+//                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+//				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
+//                CHECKED_GL_CALL(glDisable(GL_BLEND));
+//			}
+
 		}
 
 		Model->popMatrix();
+		lighting->unbind();
 		shapeProg->unbind();
+
 	}
 
 	void drawPlayer(MatrixStack* View, MatrixStack* Projection, mat4* M) 
@@ -879,6 +893,7 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 		// need mouse position in order to use camera
 		double mousex = width / 4.0;
 		double mousey = height / 4.0;    
@@ -892,8 +907,8 @@ public:
 		mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
 		playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
 
-        lightPos.x = cos(glfwGetTime()/40) * 500.f;
-        lightPos.z = sin(glfwGetTime()/40) * 500.f;
+        lightPos.x = cos(glfwGetTime()/100) * 500.f;
+        lightPos.z = sin(glfwGetTime()/100) * 500.f;
 
         auto ViewUser = make_shared<MatrixStack>();
         ViewUser->pushMatrix();
@@ -960,23 +975,29 @@ public:
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         drawSky(userViewPtr, projectionPtr);
 
+
+//        CHECKED_GL_CALL(glEnable(GL_BLEND));
+//        glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
+//        CHECKED_GL_CALL(glPointSize(25.0f));
+//        drawParticles(userViewPtr, aspect);
+//        CHECKED_GL_CALL(glDisable(GL_BLEND));
+
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         drawScene(userViewPtr, projectionPtr);
 
-        CHECKED_GL_CALL(glDisable(GL_BLEND));
 
-		CHECKED_GL_CALL(glEnable(GL_BLEND));
-		CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-		CHECKED_GL_CALL(glPointSize(25.0f));
-		drawParticles(userViewPtr, aspect);
+        CHECKED_GL_CALL(glEnable(GL_BLEND));
+        CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        CHECKED_GL_CALL(glPointSize(25.0f));
+        drawParticles(userViewPtr, aspect);
 
 		auto Model = make_shared<MatrixStack>();
 		Model->pushMatrix();
 		Model->loadIdentity();
-
 		Model->pushMatrix();
 
-		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
+		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
 		water->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 
 		Model->popMatrix();
@@ -1004,6 +1025,7 @@ int main(int argc, char **argv)
 	application->initParticles();
 	application->initPlayer();
 	application->initGeom();
+	application->lighting->init();
     auto lastTime = chrono::high_resolution_clock::now();
 
 	// Loop until the user closes the window.
@@ -1017,10 +1039,11 @@ int main(int argc, char **argv)
                     chrono::duration_cast<std::chrono::microseconds>(
                             chrono::high_resolution_clock::now() - lastTime)
                             .count();
-			
+
 			// reset lastTime so that we can calculate the deltaTime
 			// on the next frame
 			lastTime = nextLastTime;
+
 			// Render scene.
 			application->render(deltaTime);
 
