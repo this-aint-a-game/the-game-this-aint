@@ -10,12 +10,8 @@ class Crystal : public GameObject
 
 public:
 
-    void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay*);
-    void update(float);
-    bool isCollided(glm::vec3);
-    bool isCollided(BoundingBox*);
-    void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>,  std::shared_ptr<Program>);
-    BoundingBox* getBB();
+    void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay * ccg);
+    void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>,  std::shared_ptr<Program>, glm::vec3 view);
 
     Crystal();
     virtual ~Crystal() {};

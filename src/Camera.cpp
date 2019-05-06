@@ -17,7 +17,12 @@ glm::mat4 Camera::update(glm::vec3 playerPos, double frametime,
                         CAMERA_DISTANCE,
                         sin(angle) * CAMERA_DISTANCE);
     
-    glm::vec3 position = playerPos + offsets;
+    position = playerPos + offsets;
 
     return glm::lookAt(position, playerPos, glm::vec3(0,1,0));
+}
+
+glm::vec3 Camera::getPosition()
+{
+    return position;
 }

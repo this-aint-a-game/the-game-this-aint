@@ -5,10 +5,13 @@
 #ifndef COLORCOLLECTGAMEPLAY_H
 #define COLORCOLLECTGAMEPLAY_H
 
+#include <iostream>
+
 
 class ColorCollectGameplay {
 
 public:
+
     bool red = false;
     bool orange = false;
     bool yellow = false;
@@ -27,69 +30,27 @@ public:
     {
         if(color == 0)
         {
-            if(red)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return red;
         }
         else if(color ==1)
         {
-            if(orange)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return orange;
         }
         else if(color ==2)
         {
-            if(yellow)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return yellow;
         }
         else if(color ==3)
         {
-            if(green)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return green;
         }
         else if(color ==4)
         {
-            if(blue)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return blue;
         }
         else if(color ==5)
         {
-            if(violet)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return violet;
         } else{
             return false;
         }

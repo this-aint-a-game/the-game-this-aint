@@ -1,8 +1,9 @@
 #include "Player.h"
 #include "Terrain.h"
+#include "Strawberry.h"
 #define MOVESPEED 0.5
 
-glm::mat4 Player::update(double frametime, int mousex, int mousey,
+glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
                             int width, int height)
 {
     float speed = 0;
@@ -30,13 +31,15 @@ glm::mat4 Player::update(double frametime, int mousex, int mousey,
     targetPos += lateralDir;
     targetPos += glm::vec3(dir.x, 0, dir.z);
     position += -0.1f * position + 0.1f * targetPos;
-    position.y = Terrain::getHeight(position.x, position.z) + 0.2;
+    position.y = Terrain::getHeight(position.x, position.z) + 0.4;
+
+    currentPos = position;
     
     glm::mat4 T = glm::translate(glm::mat4(1), position);
     return Rx * Ry * T;
 }
 
-void Player::initPlayer()
+void Player::initPlayer(ColorCollectGameplay * ccg)
 {
     playerProg = std::make_shared<Program>();
     playerProg->setVerbose(true);
@@ -60,18 +63,56 @@ void Player::initPlayer()
     playerShape->loadMesh("../Resources/character.obj");
     playerShape->resize();
     playerShape->init();
+
+    initObject(playerShape->min, playerShape->max, 0, GameObject::player, ccg);
 }
 
-void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4* M)
+void Player::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay * ccg)
+{
+    this->bb = new BoundingBox(min, max);
+}
+
+void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection)
 {
     playerProg->bind();
 
     glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
     glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-    glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)M);
+    glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
     //glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
     playerShape->draw(playerProg);
 
     playerProg->unbind();
+}
+
+void Player::updateView(double frametime, int mousex, int mousey, int width, int height)
+{
+    model = updateModelMatrix(frametime, mousex, mousey, width, height);
+    model *= glm::scale(glm::mat4(1), glm::vec3(0.2,0.2,0.2));
+}
+
+bool Player::checkForCollisions(std::vector<GameObject*> & objs)
+{
+    //std::cout << "97" << std::endl;
+    for(int i = 0; i < objs.size(); i++)
+    {
+        if (objs[i]->isCollided(getBB()))
+        {
+            //std::cout << "102" << std::endl;
+            if (dynamic_cast<Strawberry*>(objs[i]) != nullptr)
+            {
+                //std::cout << "105" << std::endl;
+                auto s = dynamic_cast<Strawberry*>(objs[i]);
+                std::cout << "collecting" << std::endl;
+                s->collect();
+
+                // TODO free?
+                objs.erase(objs.begin()+i);
+            }
+            return true;
+        }
+    }
+    //std::cout << "115" << std::endl;
+    return false;
 }

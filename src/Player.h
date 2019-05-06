@@ -7,11 +7,23 @@
 #include "Program.h"
 #include "MatrixStack.h"
 #include "Shape.h"
+#include "GameObject.h"
+#include "ColorCollectGameplay.h"
 
-class Player
+class Player : public GameObject
 {
     std::shared_ptr<Program> playerProg;
     std::shared_ptr<Shape>   playerShape;
+    glm::mat4 model;
+
+    glm::mat4 updateModelMatrix
+            (
+                    double frametime,
+                    int mousex,
+                    int mousey,
+                    int width,
+                    int height
+            );
 
 public:
     glm::vec3 position, yaw, pitch, targetPos, targetYaw, targetPitch;
@@ -24,15 +36,16 @@ public:
         targetPos = position;
         targetYaw = targetPitch = glm::vec3(0, 0, 0);
     }
-    glm::mat4 update
-    (
-        double frametime, 
-        int mousex, 
-        int mousey,
-        int width, 
-        int height
-    );
 
-    void initPlayer();
-    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4* M);
+    void updateView(double frametime, int mousex, int mousey, int width, int height);
+
+    void initPlayer(ColorCollectGameplay * ccg);
+    void drawPlayer(MatrixStack* View, MatrixStack* Projection);
+
+    // TODO this should be less specific
+    void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay * ccg);
+    // TODO this should be less specific
+    void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
+
+    bool checkForCollisions(std::vector<GameObject*> & objs);
 };

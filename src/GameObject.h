@@ -19,22 +19,36 @@ class GameObject
 {
 
 public:
-    enum objType{strawberry, crystal1, crystal2, crystal3};
+    enum objType{strawberry, crystal1, crystal2, crystal3, player};
 
-    virtual void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay*) = 0;
-    virtual void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>) = 0;
-    virtual void update(float) = 0;
-    virtual bool isCollided(glm::vec3) = 0;
-    virtual bool isCollided(BoundingBox*) = 0;
-    virtual BoundingBox* getBB() = 0;
+    // TODO take num and type out of this call
+    virtual void initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay * ccg) = 0;
+    virtual void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) = 0;
 
     glm::vec3 currentPos;
     glm::vec3 scale;
+
     int color;
     objType type;
     std::shared_ptr<Program> prog;
     ColorCollectGameplay* ccg;
 
+    bool isCollided(glm::vec3 v)
+    {
+        return bb->isCollided(v, currentPos, this->scale);
+    }
+
+    bool isCollided(BoundingBox *box)
+    {
+        return bb->isCollided(box, currentPos, this->scale);
+    }
+
+    virtual BoundingBox* getBB()
+    {
+        return bb->get(currentPos);
+    }
+
+    // TODO should this be in ColorCollectGameplay?
     void SetMaterial(int i, Program *prog)
     {
         switch (i)
@@ -68,18 +82,32 @@ public:
                 break;
 
             case 4: // GAME BLUE
+
+                /*
                 glUniform3f(prog->getUniform("MatAmb"), 0.049, 0.576, 0.617);
                 glUniform3f(prog->getUniform("MatDif"), 0.049, 0.576, 0.617);
                 glUniform3f(prog->getUniform("MatSpec"), 0.049, 0.676, 0.717);
+                */
+
+                glUniform3f(prog->getUniform("MatAmb"), 0.08, 0.67, 0.8);
+                glUniform3f(prog->getUniform("MatDif"), 0.08, 0.67, 0.8);
+                glUniform3f(prog->getUniform("MatSpec"), 0.18, 0.77, 0.9);
                 glUniform1f(prog->getUniform("shine"), 47.0f);
+
                 break;
 
 
             case 5: // GAME VIOLET
-                glUniform3f(prog->getUniform("MatAmb"), 0.445f, 0.194f, 0.488f);
-                glUniform3f(prog->getUniform("MatDif"), 0.445f, 0.194f, 0.488f);
-                glUniform3f(prog->getUniform("MatSpec"), 0.545f, 0.294f, 0.588f);
-                glUniform1f(prog->getUniform("shine"), 47.0f);
+                glUniform3f(prog->getUniform("MatAmb"), 0.11f, 0.00f, 0.25f);
+                glUniform3f(prog->getUniform("MatDif"), 0.11f, 0.00f, 0.25f);
+                glUniform3f(prog->getUniform("MatSpec"), 0.21f, 0.1f, 0.35f);
+                glUniform1f(prog->getUniform("shine"), 47.f);
+
+                //glUniform3f(prog->getUniform("MatAmb"), 0.445f, 0.194f, 0.488f);
+                //glUniform3f(prog->getUniform("MatDif"), 0.445f, 0.194f, 0.488f);
+                //glUniform3f(prog->getUniform("MatSpec"), 0.545f, 0.294f, 0.588f);
+                //glUniform1f(prog->getUniform("shine"), 47.0f);
+
                 break;
 
         }
@@ -92,7 +120,7 @@ public:
     }
 
 
-    GameObject() {};
+    GameObject() { };
     virtual ~GameObject() {};
 
 protected:

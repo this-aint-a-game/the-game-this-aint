@@ -9,7 +9,7 @@ Strawberry::Strawberry()
     collected = false;
 }
 
-void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog)
+void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view)
 {
 	Model->pushMatrix();
 	Model->translate(glm::vec3(this->currentPos.x, this->currentPos.y + 0.5f, this->currentPos.z));
@@ -25,20 +25,27 @@ void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shap
 		{
 			SetMaterial(6, prog.get());
 		}
+        glUniform3f(prog->getUniform("view"), view.x, view.y, view.z);
 		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
 		strawberryShapes[j]->draw(prog);
 	}
 	Model->popMatrix();
 }
+
+void Strawberry::setPosition(float x, float z)
+{
+	currentPos.x = x;
+	currentPos.z = z;
+	currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z);
+
+}
+
+// TODO take num out of this call
 void Strawberry::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay* ccg)
 {
 	this->bb = new BoundingBox(min, max);
 	this->type = type;
 	this->ccg = ccg;
-
-	currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
-	currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
-	currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z);
 
 	switch(num)
 	{
@@ -70,28 +77,27 @@ void Strawberry::initObject(glm::vec3 min, glm::vec3 max, int num, objType type,
 
 }
 
-
-int Strawberry::collect()
+void Strawberry::collect()
 {
-	return this->color;
+    switch(color)
+	{
+		case 0:
+			ccg->collectRed();
+			break;
+		case 1:
+			ccg->collectOrange();
+			break;
+		case 2:
+			ccg->collectYellow();
+			break;
+		case 3:
+			ccg->collectGreen();
+			break;
+		case 4:
+			ccg->collectBlue();
+			break;
+		case 5:
+			ccg->collectViolet();
+			break;
+	}
 }
-
-void Strawberry::update(float dt)
-{
-}
-
-bool Strawberry::isCollided(glm::vec3 camera)
-{
-    return bb->isCollided(camera, currentPos, this->scale);
-}
-
-bool Strawberry::isCollided(BoundingBox *box)
-{
-	return bb->isCollided(box, currentPos, this->scale);
-}
-
-BoundingBox* Strawberry::getBB()
-{
-	return bb->get(currentPos);
-}
-

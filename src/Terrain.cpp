@@ -2,8 +2,9 @@
 #include "Terrain.h"
 #include "obtain_noise.h"
 
-Terrain::Terrain()
+Terrain::Terrain(ColorCollectGameplay * ccg)
 {
+    this->ccg = ccg;
     vertexArrayID = 0;
     generateGrid(INITIAL_WIDTH);
 
@@ -21,22 +22,29 @@ void Terrain::initTex()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting* lighting)
-{
+void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting* lighting) {
     prog->bind();
 
     glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P));
     glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, glm::value_ptr(V));
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, glm::value_ptr(M));
-    glUniform3f(prog->getUniform("cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+    glUniform3f(prog->getUniform("cameraPos"), cameraPos.x, cameraPos.y,
+                cameraPos.z);
     glUniform1f(prog->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(prog->getUniform("lighting"));
 
     // flat grey
-    glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
-    glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
-    glUniform3f(prog->getUniform("MatSpec"), 0.0, 0.0, 0.0);
-    glUniform1f(prog->getUniform("shine"), 0.0);
+    if (ccg->checkColor(5)) {
+        glUniform3f(prog->getUniform("MatAmb"), 0.11f, 0.00f, 0.25f);
+        glUniform3f(prog->getUniform("MatDif"), 0.11f, 0.00f, 0.25f);
+        //glUniform3f(prog->getUniform("MatSpec"), 0.21f, 0.1f, 0.35f);
+    }
+    else
+    {
+        glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
+        glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
+        //glUniform3f(prog->getUniform("MatSpec"), 0.0, 0.0, 0.0);
+    }
 
     draw();
 
@@ -227,7 +235,7 @@ void Terrain::initTerrain()
     prog->addUniform("MatAmb");
     prog->addUniform("MatDif");
     prog->addUniform("MatSpec");
-    prog->addUniform("shine");
+    //prog->addUniform("shine");
     prog->addUniform("lighting");
     prog->addUniform("cameraPos");
     prog->addUniform("numberLights");

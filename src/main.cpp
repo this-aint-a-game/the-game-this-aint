@@ -41,12 +41,12 @@ class Application : public EventCallbacks
 
 public:
 
-	Player player = Player();
+    ColorCollectGameplay * gameplay = new ColorCollectGameplay();
+    Player player = Player();
 	Camera camera = Camera();
-	Terrain terrain = Terrain();
-	Water water = Water();
+	Terrain terrain = Terrain(gameplay);
+	Water water = Water(gameplay);
 	Sky sky = Sky();
-	ColorCollectGameplay* gameplay = new ColorCollectGameplay();
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -129,6 +129,16 @@ public:
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
+		if (key == GLFW_KEY_G && action == GLFW_PRESS)
+        {
+		    if (debug)
+            {
+		        debug = false;
+            } else {
+		        debug = true;
+		    }
+        }
+
 		if (debug) {
             switch (key) {
                 case GLFW_KEY_A:
@@ -177,19 +187,19 @@ public:
             if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
                 player.d = 0;
             }
-            if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
-                glfwSetInputMode(windowManager->getHandle(),
-                                 GLFW_CURSOR,
-                                 GLFW_CURSOR_NORMAL);
-                releaseMouse = true;
-            }
-            if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE) {
-                glfwSetInputMode(windowManager->getHandle(),
-                                 GLFW_CURSOR,
-                                 GLFW_CURSOR_DISABLED);
-                releaseMouse = false;
-            }
         }
+		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
+			glfwSetInputMode(windowManager->getHandle(),
+							 GLFW_CURSOR,
+							 GLFW_CURSOR_NORMAL);
+			releaseMouse = true;
+		}
+		if (key == GLFW_KEY_BACKSPACE && action == GLFW_RELEASE) {
+			glfwSetInputMode(windowManager->getHandle(),
+							 GLFW_CURSOR,
+							 GLFW_CURSOR_DISABLED);
+			releaseMouse = false;
+		}
 	}
 
 	void scrollCallback(GLFWwindow* window, double deltaX, double deltaY)
@@ -279,6 +289,7 @@ public:
 		shapeProg->addUniform("MatDif");
 	    shapeProg->addUniform("MatSpec");
 	    shapeProg->addUniform("shine");
+		shapeProg->addUniform("view");
 		shapeProg->addAttribute("vertPos");
 		shapeProg->addAttribute("vertNor");
         shapeProg->addUniform("lighting");
@@ -334,31 +345,48 @@ public:
 	void initSceneCollectibles()
     {
         uploadMultipleShapes("/fruits/strawberries.obj", 0);
+
+		Strawberry * first = new Strawberry();
+		first->initObject(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
+		first->setPosition(-8, 12);
+		objects.push_back(first);
+
+        /*
         for(int i = 0; i < 6; i++)
         {
             bool found_spot = false;
             Strawberry *berry;
             while (!found_spot)
             {
+                std::cout << "362" << std::endl;
                 berry = new Strawberry();
                 berry->initObject(strawMin, strawMax, i, GameObject::strawberry, gameplay);
                 BoundingBox *otherBB = berry->getBB();
+                std::cout << "366" << std::endl;
                 for (int j = 0; j < objects.size(); j++)
                 {
+                    std::cout << "369" << std::endl;
                     berry = new Strawberry();
                     berry->initObject(strawMin, strawMax, i, GameObject::strawberry, gameplay);
                     BoundingBox *otherBB = berry->getBB();
+                    std::cout << "373" << std::endl;
+
                     if ((objects[j]->isCollided(otherBB)))
                     {
+                        std::cout << "376" << std::endl;
                         delete berry;
                         delete otherBB;
                     }
+                    std::cout << "380" << std::endl;
                 }
+                std::cout << "382" << std::endl;
                 found_spot = true;
                 delete otherBB;
             }
             objects.push_back(berry);
         }
+         */
+        //std::cout << "384" << std::endl;
     }
 
     void initSceneObjects()
@@ -366,7 +394,7 @@ public:
 		uploadMultipleShapes("/crystal1.obj", 1);
 //		uploadMultipleShapes("/crystal2.obj", 2);
 //		uploadMultipleShapes("/crystal3.obj", 3);
-		numCrystals = rand() % 100;
+		numCrystals = clamp(rand() % 100, 5, 15);
 
         for(int i = 0; i < numCrystals; i++)
         {
@@ -430,9 +458,7 @@ public:
 
 	void initGeom()
 	{
-		// for ground
-		//initQuad();
-        player.initPlayer();
+        player.initPlayer(gameplay);
 		initSceneCollectibles();
         initSceneObjects();
 
@@ -609,56 +635,6 @@ public:
 		}
 	}
 
-	bool checkForObject(vec3 hold)
-	{
-        for(int i = 0; i < objects.size(); i++)
-        {
-            if (objects[i]->isCollided(hold))
-            {
-                if (dynamic_cast<Strawberry*>(objects[i]) != nullptr)
-                {
-                    auto s = dynamic_cast<Strawberry*>(objects[i]);
-                    int color = s->collect();
-                    if(color == 0)
-					{
-                    	gameplay->collectRed();
-					}
-                    else if(color == 1)
-					{
-                        gameplay->collectOrange();
-					}
-                    else if(color == 2)
-					{
-                        gameplay->collectYellow();
-					}
-					else if(color == 3)
-					{
-                        gameplay->collectGreen();
-					}
-					else if(color == 4)
-					{
-                        gameplay->collectBlue();
-					}
-					else if(color == 5)
-					{
-                        gameplay->collectViolet();
-					}
-
-					objects.erase(objects.begin()+i);
-
-                }
-                else
-                {
-//                    cameraPos.x += -1.0f;
-//                    cameraPos.z += -1.0f;
-                    return false;
-                }
-            }
-        }
-
-        return true;
-	}
-
 	void drawParticles(MatrixStack* View, float aspect)
 	{
 		particleProg->bind();
@@ -719,13 +695,13 @@ public:
 
             if(objects[i]->type == GameObject::strawberry)
 			{
-				objects[i]->drawObject(modelptr, strawberryShapes, shapeProg);
+				objects[i]->drawObject(modelptr, strawberryShapes, shapeProg, camera.getPosition());
 			}
 			else if(objects[i]->type == GameObject::crystal1)
 			{
                 CHECKED_GL_CALL(glEnable(GL_BLEND));
                 glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-				objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg);
+				objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg, camera.getPosition());
                 CHECKED_GL_CALL(glDisable(GL_BLEND));
 			}
 //			else if(objects[i]->type == GameObject::crystal2)
@@ -770,8 +746,13 @@ public:
 
         updateGeom(deltaTime);
 
-		mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
-		playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
+        if (!player.checkForCollisions(objects))
+        {
+			player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
+							  height);
+		}
+        //mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
+		//playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
         lightPos.z = sin(glfwGetTime()/100) * 500.f;
@@ -820,12 +801,16 @@ public:
                 holdCameraPos = cameraPos + (sides * actualSpeed);
             }
 
+            /*
             bool go = checkForEdge(holdCameraPos);
             go = checkForObject(holdCameraPos);
 
             if (go) {
                 cameraPos = holdCameraPos;
             }
+            */
+
+			cameraPos = holdCameraPos;
             ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z),
                              forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
         }
@@ -868,7 +853,7 @@ public:
 
 		Model->popMatrix();
 
-		player.drawPlayer(userViewPtr, projectionPtr, &playerM);
+		player.drawPlayer(userViewPtr, projectionPtr);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
@@ -890,13 +875,9 @@ int main(int argc, char **argv)
 	application->initTex();
 	application->initParticles();
 
-    if (!debug)
-    {
-        glfwSetInputMode(windowManager->getHandle(), GLFW_CURSOR,
-                         GLFW_CURSOR_DISABLED);
-    }
+    glfwSetInputMode(windowManager->getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	application->initGeom();
+    application->initGeom();
 	application->lighting->init();
     auto lastTime = chrono::high_resolution_clock::now();
 

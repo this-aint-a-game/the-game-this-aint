@@ -32,6 +32,6 @@ void main()
 
     vec3 phong = ambient + diffuse + specular;
 
-    color = vec4(phong, 1.0)*vec4(0.216, 0.663, 0.835, 0.25);
+    color = vec4(phong, 1.0)*vec4(1., 1., 1., 0.25);//*vec4(0.216, 0.663, 0.835, 0.25);
 
 }

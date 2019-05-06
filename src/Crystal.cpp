@@ -10,7 +10,7 @@ Crystal::Crystal()
     this->scale = vec3(0.007f,0.007f,0.007f);
 }
 
-void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog)
+void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog, glm::vec3 view)
 {
     Model->pushMatrix();
     Model->translate(vec3(this->currentPos.x, this->currentPos.y, this->currentPos.z));
@@ -29,6 +29,7 @@ void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>>
             glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);
             glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
             glUniform1f(prog->getUniform("shine"), 4.0);
+            glUniform3f(prog->getUniform("view"), view.x, view.y, view.z);
         }
 
         glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
@@ -41,7 +42,7 @@ void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>>
 //		    glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
 //		    glUniform1f(prog->getUniform("shine"), 4.0);
 //break;
-void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay* ccg)
+void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay * ccg)
 {
     this->bb = new BoundingBox(min, max);
     this->type = type;
@@ -80,24 +81,3 @@ void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, Co
     }
 
 }
-
-
-void Crystal::update(float dt)
-{
-}
-
-bool Crystal::isCollided(glm::vec3 camera)
-{
-    return bb->isCollided(camera, currentPos, this->scale);
-}
-
-bool Crystal::isCollided(BoundingBox *box)
-{
-    return bb->isCollided(box, currentPos, this->scale);
-}
-
-BoundingBox* Crystal::getBB()
-{
-    return bb->get(currentPos);
-}
-

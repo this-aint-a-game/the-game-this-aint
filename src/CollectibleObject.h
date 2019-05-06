@@ -11,7 +11,7 @@ class CollectibleObject : public GameObject
 public:
 
     bool collected;
-    virtual int collect() = 0;
+    virtual void collect() = 0;
 
     CollectibleObject() {};
     virtual ~CollectibleObject() {};

@@ -9,6 +9,8 @@ class Camera
 public:
     float angle;
     float target;
+    glm::vec3 position;
+
     Camera()
     {
         target = angle = 0.0;
@@ -22,4 +24,6 @@ public:
         int width, 
         int height
     );
+
+    glm::vec3 getPosition();
 };

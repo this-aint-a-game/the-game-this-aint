@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <thread>
 #include "Lighting.h"
+#include "ColorCollectGameplay.h"
 
 #include "GLSL.h"
 #include <glad/glad.h>
@@ -23,6 +24,8 @@
 #include "GLTextureWriter.h"
 
 class Terrain {
+
+    ColorCollectGameplay * ccg;
 
     std::vector<glm::vec3> vertices;
     unsigned *indices;
@@ -47,7 +50,7 @@ class Terrain {
     void clean();
 
 public:
-    Terrain();
+    Terrain(ColorCollectGameplay * ccg);
     void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting*);
     void initTerrain();
     static float getHeight(float x, float z);
