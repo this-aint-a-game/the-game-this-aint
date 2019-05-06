@@ -54,11 +54,5 @@ void main()
         }
     }
 
-    if (water == 1.0){
-        color = vec4(finalColor, 1.0)*vec4(0.216, 0.663, 0.835, 0.25);
-    } else {
-        color = vec4(finalColor, 1.0);
-    }
-
-
+    color = vec4(finalColor, 1.0);
 }

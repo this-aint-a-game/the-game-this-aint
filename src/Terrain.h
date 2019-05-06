@@ -38,19 +38,20 @@ class Terrain {
 
     void initTex();
     void unbind();
-    void clean();
     void draw();
     void computeIndicesForClipVolume(int width, float clipx0, float clipx1, float clipz0, float clipz1);
     static float calcHeight(float x, float z);
     std::thread threadedGenerateGrid();
     void generateGrid(int width = WIDTH);
     void bindVAO();
+    void clean();
 
 public:
     Terrain();
     void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting*);
     void initTerrain();
     static float getHeight(float x, float z);
+    ~Terrain() { clean(); }
 
 };
 

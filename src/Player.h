@@ -4,8 +4,15 @@
 #include "glm/vec4.hpp"
 #include "glm/mat4x4.hpp"
 
+#include "Program.h"
+#include "MatrixStack.h"
+#include "Shape.h"
+
 class Player
 {
+    std::shared_ptr<Program> playerProg;
+    std::shared_ptr<Shape>   playerShape;
+
 public:
     glm::vec3 position, yaw, pitch, targetPos, targetYaw, targetPitch;
     int w, a, s, d;
@@ -25,4 +32,7 @@ public:
         int width, 
         int height
     );
+
+    void initPlayer();
+    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4* M);
 };

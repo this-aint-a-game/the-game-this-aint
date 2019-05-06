@@ -35,3 +35,43 @@ glm::mat4 Player::update(double frametime, int mousex, int mousey,
     glm::mat4 T = glm::translate(glm::mat4(1), position);
     return Rx * Ry * T;
 }
+
+void Player::initPlayer()
+{
+    playerProg = std::make_shared<Program>();
+    playerProg->setVerbose(true);
+    playerProg->setShaderNames(
+            "../Resources/player_vert.glsl",
+            "../Resources/player_frag.glsl");
+    if (! playerProg->init())
+    {
+        std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+        exit(1);
+    }
+    playerProg->addUniform("P");
+    playerProg->addUniform("V");
+    playerProg->addUniform("M");
+    playerProg->addAttribute("vertPos");
+    playerProg->addAttribute("vertNor");
+    playerProg->addAttribute("vertTex");
+
+    // Initialize the obj mesh VBOs etc
+    playerShape = std::make_shared<Shape>();
+    playerShape->loadMesh("../Resources/character.obj");
+    playerShape->resize();
+    playerShape->init();
+}
+
+void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4* M)
+{
+    playerProg->bind();
+
+    glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+    glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+    glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)M);
+    //glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+
+    playerShape->draw(playerProg);
+
+    playerProg->unbind();
+}

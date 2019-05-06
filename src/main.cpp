@@ -23,6 +23,7 @@ obtain.
 #include "Player.h"
 #include "Camera.h"
 #include "Lighting.h"
+#include "Sky.h"
 
 
 #define PI 3.1415
@@ -32,17 +33,18 @@ obtain.
 using namespace std;
 using namespace glm;
 
+bool debug = true;
+
 class Application : public EventCallbacks
 {
 
 public:
 
-    bool debug = true;
-
 	Player player = Player();
 	Camera camera = Camera();
-    Terrain *terrain = new Terrain();
-    Water *water = new Water();
+    Terrain terrain = Terrain();
+    Water water = Water();
+    Sky sky = Sky();
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -58,30 +60,15 @@ public:
 	bool violet = false;
 	vector<GameObject*> objects;
 
-
 	// programs
-	shared_ptr<Program> playerProg;
-	shared_ptr<Shape>   playerShape;
 	shared_ptr<Program> shapeProg;
 	shared_ptr<Program> particleProg;
-	shared_ptr<Program> skyProg;
 
     Lighting* lighting = new Lighting();
 
-	shared_ptr<Texture> skyTexture;
-	shared_ptr<Texture> sunTexture;
 	shared_ptr<Texture> particleTexture;
 
-	//ground info
-	GLuint GrndBuffObj, GrndNorBuffObj, GrndTexBuffObj, GIndxBuffObj;
-	int gGiboLen;
-
-	//transforms for the world
-	vec3 worldTrans = vec3(0);
-	float worldScale = 1.0;
-
 	// Shape to be used (from obj file)
-    shared_ptr<Shape> sphereShape;
     vector<shared_ptr<Shape>> crystal1Shapes;
 	glm::vec3 cryst1min = glm::vec3(0);
 	glm::vec3 cryst1max = glm::vec3(0);
@@ -112,11 +99,8 @@ public:
 	float h = 0.01f;
 	glm::vec3 g = glm::vec3(0.0f, -0.01f, 0.0f);
 
-
-	bool FirstTime = true;
 	bool sprint = false;
 	bool Moving = false;
-	int gMat = 0;
 
 	bool mouseDown = false;
 
@@ -263,17 +247,7 @@ public:
 	// Code to load in textures
 	void initTex()
 	{
-		skyTexture = make_shared<Texture>();
-		skyTexture->setFilename(resourceDir + "/night.jpg");
-		skyTexture->init();
-		skyTexture->setUnit(0);
-		skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-		sunTexture = make_shared<Texture>();
-		sunTexture->setFilename(resourceDir + "/night.jpg");
-		sunTexture->init();
-		sunTexture->setUnit(1);
-		sunTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		sky.initTex();
 
 		particleTexture = make_shared<Texture>();
 		particleTexture->setFilename(resourceDir + "/alpha.bmp");
@@ -309,38 +283,6 @@ public:
         shapeProg->addUniform("numberLights");
 	}
 
-	void initPlayer()
-	{
-		// This has to happen somewhere. Might as well be here
-		// to prevent main from getting clogged
-		glfwSetInputMode(windowManager->getHandle(), 
-        GLFW_CURSOR,
-        GLFW_CURSOR_DISABLED);
-
-		playerProg = make_shared<Program>();
-		playerProg->setVerbose(true);
-				playerProg->setShaderNames(
-				resourceDir + "/player_vert.glsl",
-				resourceDir + "/player_frag.glsl");
-		if (! playerProg->init())
-		{
-			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-			exit(1);
-		}
-		playerProg->addUniform("P");
-		playerProg->addUniform("V");
-		playerProg->addUniform("M");
-		playerProg->addAttribute("vertPos");
-		playerProg->addAttribute("vertNor");
-		playerProg->addAttribute("vertTex");
- 
-		// Initialize the obj mesh VBOs etc
-		playerShape = make_shared<Shape>();
-		playerShape->loadMesh(resourceDir + "/character.obj");
-		playerShape->resize();
-		playerShape->init();
-	}
-
 	void particleSetUp()
 	{
 		particleProg = make_shared<Program>();
@@ -360,29 +302,6 @@ public:
 		particleProg->addAttribute("vertPos");
 	}
 
-	void skySetUp()
-	{
-		skyProg = make_shared<Program>();
-		skyProg->setVerbose(true);
-		skyProg->setShaderNames(
-				resourceDir + "/sky_tex_vert.glsl",
-				resourceDir + "/sky_tex_frag.glsl");
-		if (! skyProg->init())
-		{
-			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-			exit(1);
-		}
-		skyProg->addUniform("P");
-		skyProg->addUniform("V");
-		skyProg->addUniform("M");
-		skyProg->addUniform("Texture0");
-		skyProg->addUniform("Texture1");
-		skyProg->addUniform("lightPos");
-		skyProg->addAttribute("vertPos");
-		skyProg->addAttribute("vertNor");
-		skyProg->addAttribute("vertTex");
-	}
-
 	void init()
 	{
 		glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
@@ -391,11 +310,11 @@ public:
 		glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		
-		skySetUp();
+		sky.skySetUp();
 		shapeSetUp();
 		particleSetUp();
-		terrain->initTerrain();
-		water->initWater();
+		terrain.initTerrain();
+		water.initWater();
 	}
 
 	void initParticles()
@@ -436,7 +355,6 @@ public:
                 found_spot = true;
                 delete otherBB;
             }
-
             objects.push_back(berry);
         }
     }
@@ -514,6 +432,7 @@ public:
 
 		// for ground
 		//initQuad();
+        player.initPlayer();
 		initSceneCollectibles();
         initSceneObjects();
 
@@ -530,13 +449,6 @@ public:
 		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particleColorBuffer));
 		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pointColors), NULL, GL_STREAM_DRAW));
 		// creation for particles
-
-        sphereShape = make_shared<Shape>();
-        sphereShape->loadMesh(resourceDir + "/sphere.obj");
-        sphereShape->resize();
-        sphereShape->init();
-		//terrain->generateGrid();
-
 	}
 
     void uploadMultipleShapes(string objDir, int switchNum)
@@ -787,38 +699,6 @@ public:
 		particleProg->unbind();
 	}
 
-	void drawSky(MatrixStack* View, MatrixStack* Projection)
-	{
-		auto Model = make_shared<MatrixStack>();
-		skyProg->bind();
-
-		mat4 newView = View->topMatrix();
-
-		newView[3][0] = 0.0;
-		newView[3][1] = 0.0;
-		newView[3][2] = 0.0;
-
-		glUniformMatrix4fv(skyProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(skyProg->getUniform("V"), 1, GL_FALSE, value_ptr(newView));
-		glUniform3f(skyProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
-		Model->pushMatrix();
-			Model->loadIdentity();
-				Model->pushMatrix();
-				Model->rotate(cos(glfwGetTime()/1000), vec3(0,1,0));
-				Model->scale(vec3(GROUND_SIZE + 0.f, GROUND_SIZE + 0.f, GROUND_SIZE + 0.f));
-				glUniformMatrix4fv(skyProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
-				skyTexture->bind(skyProg->getUniform("Texture0"));
-				sunTexture->bind(skyProg->getUniform("Texture1"));
-                sphereShape->draw(skyProg);
-				Model->popMatrix();	
-				skyTexture->unbind();
-				sunTexture->unbind();
-
-
-		Model->popMatrix();
-		skyProg->unbind();
-	}
-
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
 
@@ -869,20 +749,6 @@ public:
 		lighting->unbind();
 		shapeProg->unbind();
 
-	}
-
-	void drawPlayer(MatrixStack* View, MatrixStack* Projection, mat4* M) 
-	{
-		playerProg->bind();
-
-		glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-		glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)M);
-		//glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
-
-		playerShape->draw(playerProg);
-
-		playerProg->unbind();
 	}
 
     void render(float deltaTime)
@@ -973,7 +839,7 @@ public:
 
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glDisable(GL_BLEND));
-        drawSky(userViewPtr, projectionPtr);
+        sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
 
 
 //        CHECKED_GL_CALL(glEnable(GL_BLEND));
@@ -997,12 +863,12 @@ public:
 		Model->pushMatrix();
 
 		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
-		terrain->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
-		water->render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
+		terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
+		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 
 		Model->popMatrix();
 
-		drawPlayer(userViewPtr, projectionPtr, &playerM);
+		player.drawPlayer(userViewPtr, projectionPtr, &playerM);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
@@ -1023,7 +889,13 @@ int main(int argc, char **argv)
 	application->init();
 	application->initTex();
 	application->initParticles();
-	application->initPlayer();
+
+    if (!debug)
+    {
+        glfwSetInputMode(windowManager->getHandle(), GLFW_CURSOR,
+                         GLFW_CURSOR_DISABLED);
+    }
+
 	application->initGeom();
 	application->lighting->init();
     auto lastTime = chrono::high_resolution_clock::now();
