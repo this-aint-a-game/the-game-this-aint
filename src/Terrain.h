@@ -13,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <algorithm>
+#include "Lighting.h"
 
 #include "GLSL.h"
 #include <glad/glad.h>
@@ -44,7 +45,7 @@ class Terrain {
 
 public:
     Terrain();
-    void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos);
+    void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting*);
     void initTerrain();
     void generateGrid();
     void bindVAO();
