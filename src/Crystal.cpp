@@ -50,31 +50,32 @@ void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type)
     {
         case 0:
             //red
-            color = 7;
+            color = 0;
             break;
         case 1:
             //orange
-            color = 12;
+            color = 1;
             break;
         case 2:
             //yellow
-            color = 11;
+            color = 2;
             break;
         case 3:
             //green
-            color = 13;
+            color = 3;
             break;
         case 4:
             //blue
-            color = 1;
+            color = 4;
             break;
         case 5:
             //violet
-            color = 10;
+            color = 5;
             break;
     }
 
 }
+
 
 void Crystal::update(float dt)
 {
