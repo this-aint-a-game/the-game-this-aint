@@ -1,9 +1,9 @@
 #include "Camera.h"
 #include <stdio.h>
-#define MOVESPEED 0.005
+#define MOVESPEED 0.05
 #define SENSITIVITY 0.008
 #define CAMERA_SPRING 5
-#define CAMERA_DISTANCE 2
+#define CAMERA_DISTANCE 1
 
 glm::mat4 Camera::update(glm::vec3 playerPos, double frametime, 
                         int mousex, int mousey,

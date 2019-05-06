@@ -9,6 +9,7 @@
 #include "Program.h"
 #include "Texture.h"
 #include "WindowManager.h"
+#include "ColorCollectGameplay.h"
 
 
 float randFloat(float l, float h)

@@ -16,31 +16,36 @@ void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>>
     Model->translate(vec3(this->currentPos.x, this->currentPos.y, this->currentPos.z));
     Model->rotate(4.5f, vec3(1,0,0));
     Model->scale(this->scale);
+
     for (size_t j = 0; j < crystalShapes.size(); j++)
     {
-            if(j == 0)
-            {
-                SetMaterial(this->color, prog.get());
-            }
-            else if (j == 2)
-            {
-                SetMaterial(8, prog.get());
-            }
-            else
-            {
-                SetMaterial(6, prog.get());
-            }
+        if(ccg->checkColor(this->color))
+        {
+            SetMaterial(this->color, prog.get());
+        }
+        else
+        {
+            glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
+            glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);
+            glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
+            glUniform1f(prog->getUniform("shine"), 4.0);
+        }
 
         glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
         crystalShapes[j]->draw(prog);
     }
     Model->popMatrix();
 }
-
-void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type)
+//glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
+//		    glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);
+//		    glUniform3f(prog->getUniform("MatSpec"), 0.3, 0.3, 0.4);
+//		    glUniform1f(prog->getUniform("shine"), 4.0);
+//break;
+void Crystal::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay* ccg)
 {
     this->bb = new BoundingBox(min, max);
     this->type = type;
+    this->ccg = ccg;
 
     currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
     currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);

@@ -24,6 +24,7 @@ obtain.
 #include "Camera.h"
 #include "Lighting.h"
 #include "Sky.h"
+#include "ColorCollectGameplay.h"
 
 
 #define PI 3.1415
@@ -42,9 +43,10 @@ public:
 
 	Player player = Player();
 	Camera camera = Camera();
-    Terrain terrain = Terrain();
-    Water water = Water();
-    Sky sky = Sky();
+	Terrain terrain = Terrain();
+	Water water = Water();
+	Sky sky = Sky();
+	ColorCollectGameplay* gameplay = new ColorCollectGameplay();
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -53,10 +55,10 @@ public:
 
 	std::string resourceDir = "../resources";
 	bool red = false;
-    bool orange = false;
-    bool yellow = false;
-    bool green = false;
-    bool blue = false;
+	bool orange = false;
+	bool yellow = false;
+	bool green = false;
+	bool blue = false;
 	bool violet = false;
 	vector<GameObject*> objects;
 
@@ -64,7 +66,7 @@ public:
 	shared_ptr<Program> shapeProg;
 	shared_ptr<Program> particleProg;
 
-    Lighting* lighting = new Lighting();
+	Lighting* lighting = new Lighting();
 
 	shared_ptr<Texture> particleTexture;
 
@@ -339,12 +341,12 @@ public:
             while (!found_spot)
             {
                 berry = new Strawberry();
-                berry->initObject(strawMin, strawMax, i, GameObject::strawberry);
+                berry->initObject(strawMin, strawMax, i, GameObject::strawberry, gameplay);
                 BoundingBox *otherBB = berry->getBB();
                 for (int j = 0; j < objects.size(); j++)
                 {
                     berry = new Strawberry();
-                    berry->initObject(strawMin, strawMax, i, GameObject::strawberry);
+                    berry->initObject(strawMin, strawMax, i, GameObject::strawberry, gameplay);
                     BoundingBox *otherBB = berry->getBB();
                     if ((objects[j]->isCollided(otherBB)))
                     {
@@ -376,11 +378,10 @@ public:
                 crystal = new Crystal();
 //                GameObject::objType crystal_type = selectRandomCrystal();
                 GameObject::objType crystal_type = GameObject::crystal1;
-                crystal = new Crystal();
 
                 if (crystal_type == GameObject::crystal1)
                 {
-                    crystal->initObject(cryst1min, cryst1max, i % 5, crystal_type);
+                    crystal->initObject(cryst1min, cryst1max, i % 5, crystal_type, gameplay);
                 }
 //                else if (crystal_type == GameObject::crystal2)
 //                {
@@ -429,7 +430,6 @@ public:
 
 	void initGeom()
 	{
-
 		// for ground
 		//initQuad();
         player.initPlayer();
@@ -621,27 +621,27 @@ public:
                     int color = s->collect();
                     if(color == 0)
 					{
-                    	red = true;
+                    	gameplay->collectRed();
 					}
                     else if(color == 1)
 					{
-                    	orange = true;
+                        gameplay->collectOrange();
 					}
                     else if(color == 2)
 					{
-                    	yellow = true;
+                        gameplay->collectYellow();
 					}
 					else if(color == 3)
 					{
-						green = true;
+                        gameplay->collectGreen();
 					}
 					else if(color == 4)
 					{
-						blue = true;
+                        gameplay->collectBlue();
 					}
 					else if(color == 5)
 					{
-						violet = true;
+                        gameplay->collectViolet();
 					}
 
 					objects.erase(objects.begin()+i);

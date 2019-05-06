@@ -19,18 +19,7 @@ void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shap
 	{
 		if(!(this->collected))
 		{
-			if(j == 0)
-			{
-				SetMaterial(this->color, prog.get());
-			}
-			else if (j == 2)
-			{
-				SetMaterial(8, prog.get());
-			}
-			else
-			{
-				SetMaterial(6, prog.get());
-			}
+		    SetMaterial(this->color, prog.get());
 		}
 		else
 		{
@@ -41,10 +30,11 @@ void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shap
 	}
 	Model->popMatrix();
 }
-void Strawberry::initObject(glm::vec3 min, glm::vec3 max, int num, objType type)
+void Strawberry::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay* ccg)
 {
 	this->bb = new BoundingBox(min, max);
 	this->type = type;
+	this->ccg = ccg;
 
 	currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
 	currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);

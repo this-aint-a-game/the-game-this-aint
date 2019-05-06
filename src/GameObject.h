@@ -11,6 +11,7 @@
 #include "Program.h"
 #include "Shape.h"
 #include "MatrixStack.h"
+#include "ColorCollectGameplay.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -20,7 +21,7 @@ class GameObject
 public:
     enum objType{strawberry, crystal1, crystal2, crystal3};
 
-    virtual void initObject(glm::vec3, glm::vec3, int, objType) = 0;
+    virtual void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay*) = 0;
     virtual void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>) = 0;
     virtual void update(float) = 0;
     virtual bool isCollided(glm::vec3) = 0;
@@ -32,6 +33,7 @@ public:
     int color;
     objType type;
     std::shared_ptr<Program> prog;
+    ColorCollectGameplay* ccg;
 
     void SetMaterial(int i, Program *prog)
     {
@@ -79,11 +81,6 @@ public:
                 glUniform3f(prog->getUniform("MatSpec"), 0.545f, 0.294f, 0.588f);
                 glUniform1f(prog->getUniform("shine"), 47.0f);
                 break;
-
-
-
-
-
 
         }
     }

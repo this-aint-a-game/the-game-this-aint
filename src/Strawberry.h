@@ -12,7 +12,7 @@ class Strawberry : public CollectibleObject
 
 public:
 
-	void initObject(glm::vec3, glm::vec3, int, objType);
+	void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay*);
 	void update(float);
 	bool isCollided(glm::vec3);
 	bool isCollided(BoundingBox*);
