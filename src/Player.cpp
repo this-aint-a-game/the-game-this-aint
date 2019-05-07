@@ -44,8 +44,8 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg = std::make_shared<Program>();
     playerProg->setVerbose(true);
     playerProg->setShaderNames(
-            "../Resources/player_vert.glsl",
-            "../Resources/player_frag.glsl");
+            "../Resources/phong_vert.glsl",
+            "../Resources/phong_frag.glsl");
     if (! playerProg->init())
     {
         std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
@@ -56,7 +56,12 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("M");
     playerProg->addAttribute("vertPos");
     playerProg->addAttribute("vertNor");
-    playerProg->addAttribute("vertTex");
+    playerProg->addUniform("MatAmb");
+    playerProg->addUniform("MatDif");
+    playerProg->addUniform("MatSpec");
+    playerProg->addUniform("shine");
+    playerProg->addUniform("view");
+
 
     // Initialize the obj mesh VBOs etc
     playerShape = std::make_shared<Shape>();
@@ -67,13 +72,18 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     this->bb = new BoundingBox(playerShape->min, playerShape->max);
 }
 
-void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection)
+void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view)
 {
     playerProg->bind();
 
     glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
     glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
     glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
+    glUniform3f(playerProg->getUniform("view"), 5.f, 5.f, 5.f);
+    glUniform3f(playerProg->getUniform("MatAmb"), 0.13, 0.13, 0.14);
+    glUniform3f(playerProg->getUniform("MatDif"), 0.3, 0.3, 0.4);
+    glUniform3f(playerProg->getUniform("MatSpec"), 0.3, 0.3, 0.4);
+    glUniform1f(playerProg->getUniform("shine"), 47.0);
     //glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
     playerShape->draw(playerProg);

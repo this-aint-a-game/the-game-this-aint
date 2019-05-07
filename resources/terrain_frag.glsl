@@ -3,7 +3,7 @@
 uniform vec3 MatAmb;
 uniform vec3 MatDif;
 uniform vec3 MatSpec;
-//uniform float shine;
+uniform float shine;
 uniform float numberLights;
 uniform sampler2D lighting;
 uniform vec3 cameraPos;
@@ -26,11 +26,9 @@ vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
     vec3 k_d = MatDif;
 
     vec3 diffuse = MatDif*(clamp(dot(fragNor, lightVec), 0, 1));//*texColor.xyz;
-    //vec3 specular = MatSpec*pow(clamp(dot(halfVec, fragNor), 0, 1), shine);
+    vec3 specular = MatSpec*pow(clamp(dot(halfVec, fragNor), 0, 1), shine);
 
-    vec3 phongColor = (k_d * diffuse);// + (k_s * specular);
-//    vec3 phongColor = diffuse + specular;
-
+    vec3 phongColor = diffuse + specular;
 
     return phongColor;
 }

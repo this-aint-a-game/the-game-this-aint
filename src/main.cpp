@@ -830,12 +830,21 @@ public:
 		Model->pushMatrix();
 
 		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
-		terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
+
+        if (!debug)
+        {
+            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), camera.getPosition(), lighting);
+        }
+        else
+        {
+            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
+        }
+
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 
 		Model->popMatrix();
 
-		player.drawPlayer(userViewPtr, projectionPtr);
+		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition());
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
