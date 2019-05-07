@@ -9,6 +9,7 @@
 #include "Shape.h"
 #include "GameObject.h"
 #include "ColorCollectGameplay.h"
+#include "Lighting.h"
 
 #define MOVESPEED 2
 
@@ -42,7 +43,7 @@ public:
     void updateView(double frametime, int mousex, int mousey, int width, int height);
 
     void initPlayer(ColorCollectGameplay * ccg);
-    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view);
+    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
 
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};

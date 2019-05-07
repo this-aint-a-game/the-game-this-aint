@@ -862,7 +862,7 @@ public:
 
 		Model->popMatrix();
 
-		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition());
+		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();

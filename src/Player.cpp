@@ -60,6 +60,8 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("MatSpec");
     playerProg->addUniform("shine");
     playerProg->addUniform("view");
+    playerProg->addUniform("numberLights");
+    playerProg->addUniform("lighting");
 
 
     // Initialize the obj mesh VBOs etc
@@ -68,22 +70,25 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerShape->resize();
     playerShape->init();
 
+    scale = glm::vec3(0.2,0.2,0.2);
+
     this->bb = new BoundingBox(playerShape->min, playerShape->max);
 }
 
-void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view)
+void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting)
 {
     playerProg->bind();
 
     glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
     glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
     glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
-    glUniform3f(playerProg->getUniform("view"), 5.f, 5.f, 5.f);
+    glUniform3f(playerProg->getUniform("view"), view.x, view.y, view.z);
     glUniform3f(playerProg->getUniform("MatAmb"), 0.13, 0.13, 0.14);
     glUniform3f(playerProg->getUniform("MatDif"), 0.3, 0.3, 0.4);
     glUniform3f(playerProg->getUniform("MatSpec"), 0.3, 0.3, 0.4);
     glUniform1f(playerProg->getUniform("shine"), 47.0);
-    //glUniform3f(playerProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+    glUniform1f(playerProg->getUniform("numberLights"), lighting->numberLights);
+    lighting->bind(playerProg->getUniform("lighting"));
 
     playerShape->draw(playerProg);
 
@@ -93,7 +98,7 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 vi
 void Player::updateView(double frametime, int mousex, int mousey, int width, int height)
 {
     model = updateModelMatrix(frametime, mousex, mousey, width, height);
-    model *= glm::scale(glm::mat4(1), glm::vec3(0.2,0.2,0.2));
+    model *= glm::scale(glm::mat4(1), scale);
 }
 
 bool Player::checkForCollisions(std::vector<GameObject*> & objs)
