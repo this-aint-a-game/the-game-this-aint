@@ -1,12 +1,46 @@
 #include "Strawberry.h"
 #include "Terrain.h"
 
-Strawberry::Strawberry()
+Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay* ccg)
 {
     this->currentPos.x = 0.f;
     this->currentPos.z = 0.f;
     this->scale = glm::vec3(1.0f,1.0f,1.0f);
     collected = false;
+
+    this->bb = new BoundingBox(min, max);
+    this->type = type;
+    this->ccg = ccg;
+
+	switch(num)
+	{
+		case 0:
+			//red
+			color = 0;
+			break;
+		case 1:
+			//orange
+			color = 1;
+			break;
+		case 2:
+			//yellow
+			color = 2;
+			break;
+		case 3:
+			//green
+			color = 3;
+			break;
+		case 4:
+			//blue
+			color = 4;
+			break;
+		case 5:
+			//violet
+			color = 5;
+			break;
+	}
+
+    setPosition(getRand(-GROUND_SIZE, GROUND_SIZE), getRand(-GROUND_SIZE, GROUND_SIZE));
 }
 
 void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view)
@@ -37,45 +71,8 @@ void Strawberry::setPosition(float x, float z)
 	currentPos.x = x;
 	currentPos.z = z;
 	currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z);
-
 }
 
-// TODO take num out of this call
-void Strawberry::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay* ccg)
-{
-	this->bb = new BoundingBox(min, max);
-	this->type = type;
-	this->ccg = ccg;
-
-	switch(num)
-	{
-		case 0:
-			//red
-			color = 0;
-			break;
-		case 1:
-			//orange
-			color = 1;
-			break;
-		case 2:
-			//yellow
-			color = 2;
-			break;
-		case 3:
-			//green
-			color = 3;
-			break;
-		case 4:
-			//blue
-			color = 4;
-			break;
-		case 5:
-			//violet
-			color = 5;
-			break;
-	}
-
-}
 
 void Strawberry::collect()
 {

@@ -54,12 +54,6 @@ public:
 	bool releaseMouse = false;
 
 	std::string resourceDir = "../resources";
-	bool red = false;
-	bool orange = false;
-	bool yellow = false;
-	bool green = false;
-	bool blue = false;
-	bool violet = false;
 	vector<GameObject*> objects;
 
 	// programs
@@ -346,47 +340,35 @@ public:
     {
         uploadMultipleShapes("/fruits/strawberries.obj", 0);
 
-		Strawberry * first = new Strawberry();
-		first->initObject(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
+        Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
 		first->setPosition(-8, 12);
 		objects.push_back(first);
 
-        /*
-        for(int i = 0; i < 6; i++)
+
+        for(int i = 0; i < 5; i++)
         {
             bool found_spot = false;
             Strawberry *berry;
             while (!found_spot)
             {
-                std::cout << "362" << std::endl;
-                berry = new Strawberry();
-                berry->initObject(strawMin, strawMax, i, GameObject::strawberry, gameplay);
+                berry = new Strawberry(strawMin, strawMax, i, GameObject::strawberry, gameplay);
                 BoundingBox *otherBB = berry->getBB();
-                std::cout << "366" << std::endl;
                 for (int j = 0; j < objects.size(); j++)
                 {
-                    std::cout << "369" << std::endl;
-                    berry = new Strawberry();
-                    berry->initObject(strawMin, strawMax, i, GameObject::strawberry, gameplay);
+                    berry = new Strawberry(strawMin, strawMax, i, GameObject::strawberry, gameplay);
                     BoundingBox *otherBB = berry->getBB();
-                    std::cout << "373" << std::endl;
 
                     if ((objects[j]->isCollided(otherBB)))
                     {
-                        std::cout << "376" << std::endl;
                         delete berry;
                         delete otherBB;
                     }
-                    std::cout << "380" << std::endl;
                 }
-                std::cout << "382" << std::endl;
                 found_spot = true;
                 delete otherBB;
             }
             objects.push_back(berry);
         }
-         */
-        //std::cout << "384" << std::endl;
     }
 
     void initSceneObjects()
@@ -403,14 +385,14 @@ public:
 
 //            while (!found_spot)
 //            {
-                crystal = new Crystal();
+
 //                GameObject::objType crystal_type = selectRandomCrystal();
                 GameObject::objType crystal_type = GameObject::crystal1;
 
-                if (crystal_type == GameObject::crystal1)
-                {
-                    crystal->initObject(cryst1min, cryst1max, i % 5, crystal_type, gameplay);
-                }
+                //if (crystal_type == GameObject::crystal1)
+                //{
+					crystal = new Crystal(cryst1min, cryst1max, i % 5, crystal_type, gameplay);
+                //}
 //                else if (crystal_type == GameObject::crystal2)
 //                {
 //                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);

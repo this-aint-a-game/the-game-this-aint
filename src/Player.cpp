@@ -64,12 +64,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerShape->resize();
     playerShape->init();
 
-    initObject(playerShape->min, playerShape->max, 0, GameObject::player, ccg);
-}
-
-void Player::initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay * ccg)
-{
-    this->bb = new BoundingBox(min, max);
+    this->bb = new BoundingBox(playerShape->min, playerShape->max);
 }
 
 void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection)

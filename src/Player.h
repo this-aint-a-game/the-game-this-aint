@@ -43,8 +43,6 @@ public:
     void drawPlayer(MatrixStack* View, MatrixStack* Projection);
 
     // TODO this should be less specific
-    void initObject(glm::vec3, glm::vec3, int, objType, ColorCollectGameplay * ccg);
-    // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
 
     bool checkForCollisions(std::vector<GameObject*> & objs);

@@ -35,15 +35,16 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
 
     // flat grey
     if (ccg->checkColor(5)) {
-        glUniform3f(prog->getUniform("MatAmb"), 0.11f, 0.00f, 0.25f);
-        glUniform3f(prog->getUniform("MatDif"), 0.11f, 0.00f, 0.25f);
-        //glUniform3f(prog->getUniform("MatSpec"), 0.21f, 0.1f, 0.35f);
+        glm::vec3 a = ccg->violetColor.ambient;
+        glm::vec3 d = ccg->violetColor.diffuse;
+
+        glUniform3f(prog->getUniform("MatAmb"), a.x, a.y, a.z);
+        glUniform3f(prog->getUniform("MatDif"), d.x, d.y, d.z);
     }
     else
     {
         glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
         glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
-        //glUniform3f(prog->getUniform("MatSpec"), 0.0, 0.0, 0.0);
     }
 
     draw();

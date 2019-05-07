@@ -151,12 +151,15 @@ void Water::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M
     glUniform3f(prog->getUniform("cameraPos"), cameraPos.x, cameraPos.y, cameraPos.z);
     glUniform3f(prog->getUniform("lightPos"), -2.0, 2.0, 2.0); // TODO
 
-    // flat grey // TODO
     if (ccg->checkColor(4))
     {
-        glUniform3f(prog->getUniform("MatAmb"), 0.08, 0.67, 0.8);
-        glUniform3f(prog->getUniform("MatDif"), 0.08, 0.67, 0.8);
-        glUniform3f(prog->getUniform("MatSpec"), 0.18, 0.77, 0.9);
+        glm::vec3 a = ccg->blueColor.ambient;
+        glm::vec3 d = ccg->blueColor.diffuse;
+        glm::vec3 s = ccg->blueColor.specular;
+
+        glUniform3f(prog->getUniform("MatAmb"), a.x, a.y, a.z);
+        glUniform3f(prog->getUniform("MatDif"), d.x, d.y, d.z);
+        glUniform3f(prog->getUniform("MatSpec"), s.x, s.y, s.z);
         glUniform1f(prog->getUniform("shine"), 100.0);
     }
     else
