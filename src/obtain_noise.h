@@ -84,11 +84,11 @@ float scale(float i, float iLow, float iHigh, float oLow, float oHigh)
 
 float noise(glm::vec3 position)
 {
-    float octaves = 8;
+    float octaves = 9;
     float persistence = 0.8;
-    float frequency = 0.003;
-    float low = 0.f;//-2000.f;
-    float high = 5.f;//3000.0f;
+    float frequency = 0.02;
+    float low = -0.2;//0.f;//-2000.f;
+    float high = 8.f;//3000.0f;
 
     float total = 0.0;
     float maxAmplitude = 0.0;

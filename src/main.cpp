@@ -340,12 +340,18 @@ public:
     {
         uploadMultipleShapes("/fruits/strawberries.obj", 0);
 
+        // For now, hard code purple prize close to start
         Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
 		first->setPosition(-8, 12);
 		objects.push_back(first);
 
+		// For now, hard code blue prize close to start
+        Strawberry * second = new Strawberry(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
+        second->setPosition(0, 8);
+        objects.push_back(second);
 
-        for(int i = 0; i < 5; i++)
+
+        for(int i = 0; i < 4; i++)
         {
             bool found_spot = false;
             Strawberry *berry;
@@ -391,7 +397,7 @@ public:
 
                 //if (crystal_type == GameObject::crystal1)
                 //{
-					crystal = new Crystal(cryst1min, cryst1max, i % 5, crystal_type, gameplay);
+					crystal = new Crystal(cryst1min, cryst1max, i % 6, crystal_type, gameplay);
                 //}
 //                else if (crystal_type == GameObject::crystal2)
 //                {
