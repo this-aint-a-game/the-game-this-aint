@@ -6,15 +6,22 @@
 
 class Camera
 {
-public:
-    float angle;
-    float target;
+public:  
+    int zoomIn;
+    int zoomOut;
+    float targetYaw; 
+    float yawAngle;
+    float targetDistance;
+    float distance;
+    float pitchAngle;
     glm::vec3 position;
 
     Camera()
     {
-        target = angle = 0.0;
+        targetYaw = yawAngle = 0.0;
+        targetDistance = distance = 5.0;
     }
+
     glm::mat4 update
     (     
         glm::vec3 playerPos,
