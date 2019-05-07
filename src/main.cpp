@@ -180,6 +180,18 @@ public:
             }
             if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
                 player.d = 0;
+            }            
+			if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+                camera.zoomIn = 1;
+            }
+            if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
+                camera.zoomIn = 0;
+            }
+            if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+                camera.zoomOut = 1;
+            }
+            if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+                camera.zoomOut = 0;
             }
         }
 		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
