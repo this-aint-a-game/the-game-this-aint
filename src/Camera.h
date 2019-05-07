@@ -4,6 +4,14 @@
 #include "glm/vec4.hpp"
 #include "glm/mat4x4.hpp"
 
+#define ZOOM_SENSITIVITY 3
+#define ANGLE_SENSITIVITY 0.008
+#define CAMERA_SPRING 3
+#define MAX_DISTANCE 12
+#define MIN_DISTANCE 0.5
+#define MAX_PITCH -100
+#define MIN_PITCH 100
+
 class Camera
 {
 public:  

@@ -1,7 +1,6 @@
 #include "Player.h"
 #include "Terrain.h"
 #include "Strawberry.h"
-#define MOVESPEED 0.5
 
 glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
                             int width, int height)

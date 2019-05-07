@@ -10,6 +10,8 @@
 #include "GameObject.h"
 #include "ColorCollectGameplay.h"
 
+#define MOVESPEED 2
+
 class Player : public GameObject
 {
     std::shared_ptr<Program> playerProg;

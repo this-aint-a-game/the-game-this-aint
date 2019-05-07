@@ -1,12 +1,6 @@
 #include "Camera.h"
+#include "Terrain.h"
 #include <stdio.h>
-#define ZOOM_SENSITIVITY 3
-#define ANGLE_SENSITIVITY 0.008
-#define CAMERA_SPRING 3
-#define MAX_DISTANCE 12
-#define MIN_DISTANCE 0.5
-#define MAX_PITCH -100
-#define MIN_PITCH 100
 
 glm::mat4 Camera::update(glm::vec3 playerPos, double frametime, 
                         int mousex, int mousey,
@@ -32,6 +26,9 @@ glm::mat4 Camera::update(glm::vec3 playerPos, double frametime,
     
     // set the camera position based on player position
     position = playerPos + offsets;
+
+    if(position.y < (Terrain::getHeight(position.x, position.z) + 0.5))
+        position.y = Terrain::getHeight(position.x, position.z) + 0.5;
 
     // orient the camera towards the player once 
     // the camera postion is determined
