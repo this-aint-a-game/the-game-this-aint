@@ -15,6 +15,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Player.h"
+#include "GameObject.h"
 
 using namespace glm;
 
@@ -29,8 +31,8 @@ class Particle
 public:
 
 	void load();
-	void rebirth(float t);
-	void update(float t, float h, const glm::vec3 &g, const bool *keyToggles);
+	void rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg);
+	void update(float t, float h, const glm::vec3 &g, const bool *keyToggles, glm::vec3, ColorCollectGameplay*);
 	const vec3 &getPosition() const { return x; };
 	const vec3 &getVelocity() const { return v; };
 	const vec4 &getColor() const { return color; };

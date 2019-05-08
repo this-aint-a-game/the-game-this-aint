@@ -20,7 +20,7 @@ obtain.
 #include "Terrain.h"
 #include "Water.h"
 #include "Crystal.h"
-#include "Player.h"
+//#include "Player.h"
 #include "Camera.h"
 #include "Lighting.h"
 #include "Sky.h"
@@ -83,7 +83,7 @@ public:
 	//stuff necessary for particles
 	vector<std::shared_ptr<Particle>> particles;
 	GLuint ParticleVertexArrayID;
-	int numP = 600;
+	int numP = 20;
 	GLfloat points[1800];
 	GLfloat pointColors[2400];
 	GLuint particlePointsBuffer;
@@ -356,11 +356,13 @@ public:
         Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
 		first->setPosition(-8, 12);
 		objects.push_back(first);
+        gameplay->setPos(first->color, first->currentPos);
 
 		// For now, hard code blue prize close to start
         Strawberry * second = new Strawberry(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
         second->setPosition(0, 8);
         objects.push_back(second);
+        gameplay->setPos(second->color, second->currentPos);
 
 
         for(int i = 0; i < 4; i++)
@@ -386,6 +388,7 @@ public:
                 delete otherBB;
             }
             objects.push_back(berry);
+
         }
     }
 
@@ -594,7 +597,7 @@ public:
 		// update the particles
 		for (auto particle : particles)
 		{
-			particle->update(t, h, g, keyToggles);
+			particle->update(t, h, g, keyToggles, player.position, gameplay);
 		}
 		t += h;
 
@@ -644,9 +647,9 @@ public:
 		Model->pushMatrix();
 			Model->loadIdentity();
 
-		auto Projection = make_shared<MatrixStack>();
-		Projection->pushMatrix();
-		Projection->perspective(45.0f, aspect, 0.01f, 150.0f);
+        auto Projection = make_shared<MatrixStack>();
+        Projection->pushMatrix();
+        Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
 
 		particleTexture->bind(particleProg->getUniform("alphaTexture"));
 		CHECKED_GL_CALL(glUniformMatrix4fv(particleProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix())));
@@ -833,21 +836,19 @@ public:
 //        drawParticles(userViewPtr, aspect);
 //        CHECKED_GL_CALL(glDisable(GL_BLEND));
 
+
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
+
+
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         drawScene(userViewPtr, projectionPtr);
 
-
-        CHECKED_GL_CALL(glEnable(GL_BLEND));
-        CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        CHECKED_GL_CALL(glPointSize(25.0f));
-        drawParticles(userViewPtr, aspect);
 
 		auto Model = make_shared<MatrixStack>();
 		Model->pushMatrix();
 		Model->loadIdentity();
 		Model->pushMatrix();
 
-		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
 
         if (!debug)
         {
@@ -857,12 +858,20 @@ public:
         {
             terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
         }
-
+        CHECKED_GL_CALL(glEnable(GL_BLEND));
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
-
 		Model->popMatrix();
 
+
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
 		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting);
+
+
+        CHECKED_GL_CALL(glEnable(GL_BLEND));
+        CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
+        CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        CHECKED_GL_CALL(glPointSize(25.0f));
+        drawParticles(userViewPtr, aspect);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
