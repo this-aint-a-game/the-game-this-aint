@@ -5,7 +5,7 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
 {
     this->currentPos.x = 0.f;
     this->currentPos.z = 0.f;
-    this->scale = glm::vec3(1.0f,1.0f,1.0f);
+    this->scale = glm::vec3(5.0f,5.0f,5.0f);
     collected = false;
 
     this->bb = new BoundingBox(min, max);
@@ -47,17 +47,23 @@ void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shap
 {
 	Model->pushMatrix();
 	Model->translate(glm::vec3(this->currentPos.x, this->currentPos.y + 0.5f, this->currentPos.z));
-//	Model->rotate(glfwGetTime()/2, vec3(0,1,0));
 	Model->scale(this->scale);
 	for (size_t j = 0; j < strawberryShapes.size(); j++)
 	{
 		if(!(this->collected))
 		{
-		    SetMaterial(this->color, prog.get());
-		}
-		else
-		{
-			SetMaterial(6, prog.get());
+			if(j == 0)
+			{
+				SetMaterial(this->color, prog.get());
+			}
+			else
+			{
+				glUniform3f(prog.get()->getUniform("MatAmb"), 0.25f, 0.20725f, 0.20725f);
+				glUniform3f(prog.get()->getUniform("MatDif"),1.0f, 0.829f, 0.829f);
+				glUniform3f(prog.get()->getUniform("MatSpec"), 0.296648f, 0.296648f, 0.296648f);
+				glUniform1f(prog.get()->getUniform("shine"), 12.0f);
+			}
+
 		}
         glUniform3f(prog->getUniform("view"), view.x, view.y, view.z);
 		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));

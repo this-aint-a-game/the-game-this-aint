@@ -350,7 +350,7 @@ public:
 
 	void initSceneCollectibles()
     {
-        uploadMultipleShapes("/fruits/strawberries.obj", 0);
+        uploadMultipleShapes("/mushroom.obj", 0);
 
         // For now, hard code purple prize close to start
         Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
@@ -804,14 +804,13 @@ public:
                 holdCameraPos = cameraPos + (sides * actualSpeed);
             }
 
-            /*
-            bool go = checkForEdge(holdCameraPos);
-            go = checkForObject(holdCameraPos);
 
-            if (go) {
-                cameraPos = holdCameraPos;
-            }
-            */
+//            bool go = checkForEdge(holdCameraPos);
+//            go = checkForObject(holdCameraPos);
+//
+//            if (go) {
+//                cameraPos = holdCameraPos;
+//            }
 
 			cameraPos = holdCameraPos;
             ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z),

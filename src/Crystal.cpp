@@ -71,6 +71,8 @@ void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>>
         glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
         crystalShapes[j]->draw(prog);
     }
+
+
     Model->popMatrix();
 }
 
