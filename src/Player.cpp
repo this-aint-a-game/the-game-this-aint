@@ -66,7 +66,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
 
     // Initialize the obj mesh VBOs etc
     playerShape = std::make_shared<Shape>();
-    playerShape->loadMesh("../Resources/character.obj");
+    playerShape->loadMesh("../Resources/sphere.obj");
     playerShape->resize();
     playerShape->init();
 

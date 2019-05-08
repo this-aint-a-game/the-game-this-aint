@@ -2,7 +2,7 @@
 #ifndef OBTAIN_TERRAIN_H
 #define OBTAIN_TERRAIN_H
 
-#define INITIAL_WIDTH 100
+#define INITIAL_WIDTH 150
 #define WIDTH 700
 #define STEP 0.5f
 

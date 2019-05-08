@@ -354,13 +354,13 @@ public:
 
         // For now, hard code purple prize close to start
         Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
-		first->setPosition(-8, 12);
+		first->setPosition(-8, 20);
 		objects.push_back(first);
         gameplay->setPos(first->color, first->currentPos);
 
 		// For now, hard code blue prize close to start
         Strawberry * second = new Strawberry(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
-        second->setPosition(0, 8);
+        second->setPosition(8, 8);
         objects.push_back(second);
         gameplay->setPos(second->color, second->currentPos);
 
@@ -388,7 +388,7 @@ public:
                 delete otherBB;
             }
             objects.push_back(berry);
-
+            gameplay->setPos(berry->color, berry->currentPos);
         }
     }
 
