@@ -24,6 +24,54 @@ void Particle::load()
 //	rebirth(0.0f);
 }
 
+float getDistance(glm::vec3 playPos, glm::vec3 otherPos)
+{
+    return sqrt(((playPos.x-otherPos.x)*(playPos.x-otherPos.x)) + ((playPos.z-otherPos.z)*(playPos.z-otherPos.z)));
+}
+
+int getClosestColor(glm::vec3 playPos, ColorCollectGameplay* ccg)
+{
+    float closestDis = 50000000000000.f;
+    int closestColor = 0;
+
+    if((closestDis>getDistance(playPos, ccg->redColorPos)) && !ccg->red)
+    {
+        closestDis = getDistance(playPos, ccg->redColorPos);
+    }
+
+    if((closestDis>getDistance(playPos, ccg->orangeColorPos))  && !ccg->orange)
+    {
+        closestDis = getDistance(playPos, ccg->orangeColorPos);
+        closestColor = 1;
+    }
+
+    if((closestDis>getDistance(playPos, ccg->yellowColorPos))  && !ccg->yellow)
+    {
+        closestDis = getDistance(playPos, ccg->yellowColorPos);
+        closestColor = 2;
+    }
+
+    if((closestDis>getDistance(playPos, ccg->greenColorPos))  && !ccg->green)
+    {
+        closestDis = getDistance(playPos, ccg->greenColorPos);
+        closestColor = 3;
+    }
+
+    if((closestDis>getDistance(playPos, ccg->blueColorPos))  && !ccg->blue)
+    {
+        closestDis = getDistance(playPos, ccg->blueColorPos);
+        closestColor = 4;
+    }
+
+    if((closestDis>getDistance(playPos, ccg->violetColorPos))  && !ccg->violet)
+    {
+        closestDis = getDistance(playPos, ccg->violetColorPos);
+        closestColor = 5;
+    }
+
+    return closestColor;
+}
+
 // all particles born at the origin
 void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
 {
@@ -34,7 +82,7 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     x.y = playPos.y;
 	x.z = playPos.z;
 
-    int colorSelected = rand() % 6;
+    int colorSelected = getClosestColor(playPos, ccg);
 
     if((colorSelected == 0) && (!ccg->red))
     {
