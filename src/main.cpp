@@ -822,7 +822,7 @@ public:
 
         auto Projection = make_shared<MatrixStack>();
         Projection->pushMatrix();
-        Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
+        Projection->perspective(45.0f, aspect, 0.01f, 150.f);
         MatrixStack *projectionPtr = Projection.get();
 
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
@@ -830,16 +830,7 @@ public:
         sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
 
 
-//        CHECKED_GL_CALL(glEnable(GL_BLEND));
-//        glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-//        CHECKED_GL_CALL(glPointSize(25.0f));
-//        drawParticles(userViewPtr, aspect);
-//        CHECKED_GL_CALL(glDisable(GL_BLEND));
-
-
         CHECKED_GL_CALL(glDisable(GL_BLEND));
-
-
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         drawScene(userViewPtr, projectionPtr);
 
@@ -858,7 +849,9 @@ public:
         {
             terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
         }
+
         CHECKED_GL_CALL(glEnable(GL_BLEND));
+        CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
