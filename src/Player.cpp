@@ -116,14 +116,49 @@ void Player::updateView(double frametime, int mousex, int mousey, int width, int
 
 void Player::updateFreeDirs(BoundingBox* otherBB)
 {
-  //  if (this->bb->bbmin.x <= bb->bbmax.x) 
-  //      printf("1\n");
-  //  else if (this->bb->bbmax.x >= otherBB->bbmin.x) 
-  //      printf("2\n");         
-  //  else if (this->bb->bbmin.z <= bb->bbmax.z)
-  //      printf("3\n");
-  //  else if (this->bb->bbmax.z >= otherBB->bbmin.z)
-  //      printf("4\n");
+    /*
+    if (bb->bbmin.x <= otherBB->bbmax.x) 
+    {
+        dFree = false;
+    } else {
+        dFree = true;
+    }
+
+    if (bb->bbmax.x >= otherBB->bbmin.x) 
+    {
+        uFree = false;
+    } else {
+        uFree = true;
+    }
+
+    if (bb->bbmin.z <= otherBB->bbmax.z)
+    {
+
+    } else {
+
+    }
+        
+    if (bb->bbmax.z >= otherBB->bbmin.z)
+    {
+
+    } else {
+
+    } 
+    */
+
+   if(bb->bbmax.z >= otherBB->bbmin.z && bb->bbmax.z <= otherBB->bbmax.z)
+   {
+       rFree = false;
+   } else {
+       rFree = true;
+   }
+   
+   if(bb->bbmin.z >= otherBB->bbmin.z && bb->bbmax.z >= otherBB->bbmin.z)
+   {
+       rFree = false;
+   } else {
+       rFree = true;
+   }
 }
 
 bool Player::checkForCollisions(std::vector<GameObject*> & objs)
@@ -144,11 +179,14 @@ bool Player::checkForCollisions(std::vector<GameObject*> & objs)
                 // TODO free?
                 objs.erase(objs.begin()+i);
             }
-            if(glm::distance(oldPos, objs[i]->currentPos) < glm::distance(position, objs[i]->currentPos)) {
+            /*
+            if(glm::distance(oldPos, objs[i]->currentPos) < glm::distance(position, objs[i]->currentPos))
+            {
                 std::cout << "1" << endl;
                 position = targetPos = oldPos;
                 model = glm::translate(glm::mat4(1), oldPos) * glm::scale(glm::mat4(1), scale);
             }
+            */
             return true;
         }
     }
