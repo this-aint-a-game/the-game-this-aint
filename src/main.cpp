@@ -157,41 +157,41 @@ public:
             }
         }
 		else {
-            if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-                player.w = 1;
-            }
-            if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
-                player.w = 0;
-            }
-            if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-                player.s = 1;
-            }
-            if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-                player.s = 0;
-            }
-            if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-                player.a = 1;
-            }
-            if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
-                player.a = 0;
-            }
-            if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-                player.d = 1;
-            }
-            if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
-                player.d = 0;
-            }            
+    	    if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+    	        player.w = true;
+    	    }
+    	    if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
+    	        player.w = false;
+    	    }
+    	    if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+    	        player.s = true;
+    	    }
+    	    if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+    	        player.s = false;
+    	    }
+    	    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+    	        player.a = true;
+    	    }
+    	    if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
+    	        player.a = false;
+    	    }
+    	    if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+    	        player.d = true;
+    	    }
+    	    if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
+    	        player.d = false;
+    	    }            
 			if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-                camera.zoomIn = 1;
+                camera.zoomIn = true;
             }
             if (key == GLFW_KEY_Q && action == GLFW_RELEASE) {
-                camera.zoomIn = 0;
+                camera.zoomIn = false;
             }
             if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-                camera.zoomOut = 1;
+                camera.zoomOut = true;
             }
             if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
-                camera.zoomOut = 0;
+                camera.zoomOut = false;
             }
         }
 		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
@@ -746,11 +746,13 @@ public:
 
         updateGeom(deltaTime);
 
-        if (!player.checkForCollisions(objects))
-        {
+//        if (!player.checkForCollisions(objects))
+//        {
 			player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
-							  height);
-		}
+							  height);		
+			player.checkForCollisions(objects);
+
+//		}
         //mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
 		//playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
 

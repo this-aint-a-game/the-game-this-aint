@@ -5,28 +5,38 @@
 glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
                             int width, int height)
 {
+    oldPos = position;
     float speed = 0;
     float lateralSpeed = 0;
-    float yawAngle = 0;
-    float pitchAngle = 0;
-    if (w == 1)
+
+    if (w == 1) 
+    {
         speed = MOVESPEED * frametime;
-    else if (s == 1)
+        targetYaw = 0;
+    }
+    else if(s == 1) 
+    {
         speed = -MOVESPEED * frametime;
-    if(a == 1)
+        targetYaw = PI;   
+    }
+    else if(a == 1)
+    {
         lateralSpeed = -MOVESPEED * frametime;
+        targetYaw = PI / 2.0;
+    }
     else if(d == 1)
+    {
         lateralSpeed = MOVESPEED * frametime;
+        targetYaw = 3.0 * PI / 2.0;
+    }
+ 
+    yaw += frametime * PLAYER_ROTATION_SPRING * (targetYaw - yaw);
 
-    glm::mat4 Ry = glm::rotate(glm::mat4(1), yaw.y, glm::vec3(0, 1, 0));
-    glm::mat4 Rx = glm::rotate(glm::mat4(1), pitch.x, glm::vec3(1, 0, 0));
     glm::vec4 dir = glm::vec4(0, 0, speed, 1);
-
-    dir = dir * Rx * Ry;
     
     glm::vec3 lateralDir = glm::vec3(glm::vec4(0,0, lateralSpeed, 1) * 
-                glm::rotate(glm::mat4(1), 3.14159f / 2.0f, glm::vec3(0,1,0))
-                           *Ry);
+                glm::rotate(glm::mat4(1), 3.14159f / 2.0f, glm::vec3(0,1,0)));
+   
     targetPos += lateralDir;
     targetPos += glm::vec3(dir.x, 0, dir.z);
     position += -0.1f * position + 0.1f * targetPos;
@@ -34,8 +44,7 @@ glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
 
     currentPos = position;
     
-    glm::mat4 T = glm::translate(glm::mat4(1), position);
-    return Rx * Ry * T;
+    return glm::translate(glm::mat4(1), position) * glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
 }
 
 void Player::initPlayer(ColorCollectGameplay * ccg)
@@ -101,6 +110,18 @@ void Player::updateView(double frametime, int mousex, int mousey, int width, int
     model *= glm::scale(glm::mat4(1), scale);
 }
 
+void Player::updateFreeDirs(BoundingBox* otherBB)
+{
+  //  if (this->bb->bbmin.x <= bb->bbmax.x) 
+  //      printf("1\n");
+  //  else if (this->bb->bbmax.x >= otherBB->bbmin.x) 
+  //      printf("2\n");         
+  //  else if (this->bb->bbmin.z <= bb->bbmax.z)
+  //      printf("3\n");
+  //  else if (this->bb->bbmax.z >= otherBB->bbmin.z)
+  //      printf("4\n");
+}
+
 bool Player::checkForCollisions(std::vector<GameObject*> & objs)
 {
     //std::cout << "97" << std::endl;
@@ -118,6 +139,11 @@ bool Player::checkForCollisions(std::vector<GameObject*> & objs)
 
                 // TODO free?
                 objs.erase(objs.begin()+i);
+            }
+            if(glm::distance(oldPos, objs[i]->currentPos) < glm::distance(position, objs[i]->currentPos)) {
+                std::cout << "1" << endl;
+                position = targetPos = oldPos;
+                model = glm::translate(glm::mat4(1), oldPos) * glm::scale(glm::mat4(1), scale);
             }
             return true;
         }

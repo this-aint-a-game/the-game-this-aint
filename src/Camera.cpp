@@ -13,15 +13,25 @@ glm::mat4 Camera::update(glm::vec3 playerPos, double frametime,
         targetDistance += ZOOM_SENSITIVITY * frametime;
 
     // adjust target yaw based on mouse inputs. No constraints. 
-    targetYaw += ANGLE_SENSITIVITY * frametime * (width - 4.0 * mousex);
-
-    // interpolate towards target
+    targetYaw += YAW_ANGLE_SENSITIVITY * frametime * (width - 4.0 * mousex);
+    
+    // interpolate towards target distance and yaw
     distance += frametime * CAMERA_SPRING * (targetDistance - distance);
     yawAngle += frametime * CAMERA_SPRING * (targetYaw - yawAngle);
 
+    targetPitchOffset += PITCH_ANGLE_SENSITIVITY * frametime * (height - 4.0 * mousey);
+    if(targetPitchOffset < -1 * distance)
+        targetPitchOffset = -1 * distance;
+    else if(targetPitchOffset > 0.5 * MAX_DISTANCE)
+        targetPitchOffset = 0.5 * MAX_DISTANCE;
+
+    pitchOffSet += frametime * CAMERA_SPRING * (targetPitchOffset - pitchOffSet);
+
+
+
     // calculate offsets from the player based on distance and angle
     glm::vec3 offsets = glm::vec3(cos(yawAngle) * distance,
-                        distance,
+                        pitchOffSet + distance,
                         sin(yawAngle) * distance);
     
     // set the camera position based on player position

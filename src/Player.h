@@ -12,6 +12,8 @@
 #include "Lighting.h"
 
 #define MOVESPEED 2
+#define PLAYER_ROTATION_SPRING 10
+#define PI 3.14159
 
 class Player : public GameObject
 {
@@ -29,18 +31,23 @@ class Player : public GameObject
             );
 
 public:
-    glm::vec3 position, yaw, pitch, targetPos, targetYaw, targetPitch;
-    int w, a, s, d;
+    glm::vec3 oldPos, position, targetPos;
+    float yaw, targetYaw;
+    bool w, a, s, d;
+    // for determining if the player can move up/left/down/right
+    bool uFree, lFree, dFree, rFree;
+    
     Player()
     {
-        w = a = s = d = 0;
-        yaw = pitch = glm::vec3(0, 0, 0);
+        w = a = s = d = false;
+        uFree = lFree = dFree = rFree = true;
+        yaw = targetYaw = 0.0f;
         position = glm::vec3(-8.43903, 0, 9.66477);
-        targetPos = position;
-        targetYaw = targetPitch = glm::vec3(0, 0, 0);
+        oldPos = targetPos = position;
     }
 
     void updateView(double frametime, int mousex, int mousey, int width, int height);
+    void updateFreeDirs(BoundingBox* otherBB);
 
     void initPlayer(ColorCollectGameplay * ccg);
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);

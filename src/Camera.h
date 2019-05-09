@@ -5,23 +5,25 @@
 #include "glm/mat4x4.hpp"
 
 #define ZOOM_SENSITIVITY 3
-#define ANGLE_SENSITIVITY 0.008
+#define YAW_ANGLE_SENSITIVITY 0.008
+#define PITCH_ANGLE_SENSITIVITY 0.016
 #define CAMERA_SPRING 3
 #define MAX_DISTANCE 12
-#define MIN_DISTANCE 0.5
+#define MIN_DISTANCE 1
 #define MAX_PITCH -100
 #define MIN_PITCH 100
 
 class Camera
 {
 public:  
-    int zoomIn;
-    int zoomOut;
+    bool zoomIn;
+    bool zoomOut;
     float targetYaw; 
     float yawAngle;
     float targetDistance;
     float distance;
-    float pitchAngle;
+    float pitchOffSet;
+    float targetPitchOffset;
     glm::vec3 position;
 
     Camera()

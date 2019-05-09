@@ -14,7 +14,7 @@ public:
 
     bool isCollided(BoundingBox* otherBB, glm::vec3 currentPos, glm::vec3 scale)
     {
-        glm::vec3 curmin = currentPos + (bbmin*scale) ;
+        glm::vec3 curmin = currentPos + (bbmin*scale);
         glm::vec3 curmax = currentPos + (bbmax*scale);
 
         glm::vec3 othermin = otherBB->bbmin;
