@@ -85,7 +85,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
 
     scale = glm::vec3(0.2,0.2,0.2);
 
-    this->bb = new BoundingBox(playerShape->min, playerShape->max);
+    this->bb = new BoundingBox(playerShape->min, playerShape->max, scale);
 }
 
 void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting)
@@ -187,6 +187,7 @@ bool Player::checkForCollisions(std::vector<GameObject*> & objs)
                 model = glm::translate(glm::mat4(1), oldPos) * glm::scale(glm::mat4(1), scale);
             }
             */
+//            std::cout<<"collision"<<std::endl;
             return true;
         }
     }

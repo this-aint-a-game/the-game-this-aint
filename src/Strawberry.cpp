@@ -8,7 +8,7 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
     this->scale = glm::vec3(5.0f,5.0f,5.0f);
     collected = false;
 
-    this->bb = new BoundingBox(min, max);
+    this->bb = new BoundingBox(min, max, this->scale);
     this->type = type;
     this->ccg = ccg;
 
