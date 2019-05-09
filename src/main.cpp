@@ -34,7 +34,7 @@ obtain.
 using namespace std;
 using namespace glm;
 
-bool debug = true;
+bool debug = false;
 
 class Application : public EventCallbacks
 {
