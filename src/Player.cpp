@@ -13,6 +13,8 @@ glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
     {
         speed = MOVESPEED * frametime;
         targetYaw = 0;
+        if(yaw > PI)
+            yaw -= 2.0 * PI;
     }
     else if(s == 1) 
     {
@@ -23,6 +25,8 @@ glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
     {
         lateralSpeed = -MOVESPEED * frametime;
         targetYaw = PI / 2.0;
+        if(yaw > 3.0 * PI / 2.0)
+            yaw -= 2.0 * PI;
     }
     else if(d == 1)
     {
