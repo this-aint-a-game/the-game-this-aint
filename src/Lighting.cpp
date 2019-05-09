@@ -5,7 +5,7 @@
 #include "Lighting.h"
 
 
-Lighting::Lighting(){    numberLights = 5;  }
+Lighting::Lighting(){    numberLights = 3;  }
 
 void Lighting::init() {
     GLubyte lightPositions[(int)numberLights][(int)numberLights][3];
@@ -23,7 +23,7 @@ void Lighting::init() {
     lightPositions[0][1][1] = (GLubyte) 20.0;
     lightPositions[0][2][2] = (GLubyte) 2.0;
     lightPositions[1][0][0] = (GLubyte) -1.0;
-    lightPositions[1][1][1] = (GLubyte) 20.0;
+    lightPositions[1][1][1] = (GLubyte) 40.0;
     lightPositions[1][2][2] = (GLubyte) 2.0;
     lightPositions[2][0][0] = (GLubyte) 20.0;
     lightPositions[2][1][1] = (GLubyte) 10.0;

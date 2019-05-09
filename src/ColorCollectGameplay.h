@@ -27,6 +27,13 @@ public:
     Color blueColor;
     Color violetColor;
 
+    glm::vec3 redColorPos;
+    glm::vec3 orangeColorPos;
+    glm::vec3 yellowColorPos;
+    glm::vec3 greenColorPos;
+    glm::vec3 blueColorPos;
+    glm::vec3 violetColorPos;
+
     ColorCollectGameplay()
     {
         red = false;
@@ -68,6 +75,41 @@ public:
     void collectGreen(){green = true;};
     void collectBlue(){blue = true;};
     void collectViolet(){violet = true;};
+
+    void setPos(int color, glm::vec3 colorPos)
+    {
+        if(color == 0)
+        {
+            setRedPos(colorPos);
+        }
+        else if(color ==1)
+        {
+            setOrangePos(colorPos);
+        }
+        else if(color ==2)
+        {
+            setYellowPos(colorPos);
+        }
+        else if(color ==3)
+        {
+            setGreenPos(colorPos);
+        }
+        else if(color ==4)
+        {
+            setBluePos(colorPos);
+        }
+        else if(color ==5)
+        {
+            setVioletPos(colorPos);
+        }
+    };
+
+    void setRedPos(glm::vec3 rp){redColorPos = rp;};
+    void setOrangePos(glm::vec3 op){orangeColorPos = op;};
+    void setYellowPos(glm::vec3 yp){yellowColorPos = yp;};
+    void setGreenPos(glm::vec3 gp){greenColorPos = gp;};
+    void setBluePos(glm::vec3 bp){blueColorPos = bp;};
+    void setVioletPos(glm::vec3 vp){violetColorPos = vp;};
 
     bool checkColor(int color)
     {
