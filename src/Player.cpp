@@ -44,7 +44,7 @@ glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
     targetPos += lateralDir;
     targetPos += glm::vec3(dir.x, 0, dir.z);
     position += -0.1f * position + 0.1f * targetPos;
-    position.y = Terrain::getHeight(position.x, position.z) + 0.4;
+    position.y = Terrain::getHeight(position.x, position.z) + 0.3;
 
     currentPos = position;
     
