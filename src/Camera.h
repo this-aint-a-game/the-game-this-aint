@@ -1,8 +1,12 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "glm/glm.hpp"
 #include "glm/vec4.hpp"
 #include "glm/mat4x4.hpp"
+#include "Bezier.h"
 
 #define ZOOM_SENSITIVITY 3
 #define YAW_ANGLE_SENSITIVITY 0.008
@@ -44,3 +48,5 @@ public:
 
     glm::vec3 getPosition();
 };
+
+#endif

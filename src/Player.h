@@ -1,3 +1,6 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "glm/glm.hpp"
@@ -57,3 +60,5 @@ public:
 
     bool checkForCollisions(std::vector<GameObject*> & objs);
 };
+
+#endif
