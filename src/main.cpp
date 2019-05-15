@@ -20,6 +20,7 @@ obtain.
 #include "Terrain.h"
 #include "Water.h"
 #include "Crystal.h"
+#include "Shadow.h"
 //#include "Player.h"
 #include "Camera.h"
 #include "Lighting.h"
@@ -27,7 +28,7 @@ obtain.
 #include "ColorCollectGameplay.h"
 
 
-#define PI 3.1415
+//#define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
 #define RENDER_SPEED 0.5f
 
@@ -44,6 +45,8 @@ public:
     ColorCollectGameplay * gameplay = new ColorCollectGameplay();
     Player player = Player();
 	Camera camera = Camera();
+    Lighting* lighting = new Lighting();
+	Shadow shadow = Shadow(lighting);
 	Terrain terrain = Terrain(gameplay);
 	Water water = Water(gameplay);
 	Sky sky = Sky();
@@ -59,8 +62,6 @@ public:
 	// programs
 	shared_ptr<Program> shapeProg;
 	shared_ptr<Program> particleProg;
-
-	Lighting* lighting = new Lighting();
 
 	shared_ptr<Texture> particleTexture;
 
@@ -334,6 +335,7 @@ public:
 		particleSetUp();
 		terrain.initTerrain();
 		water.initWater();
+		shadow.init(width, height);
 	}
 
 	void initParticles()
@@ -857,9 +859,9 @@ public:
 		Model->popMatrix();
 
 
+		shadow.render(player);
         CHECKED_GL_CALL(glDisable(GL_BLEND));
-		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting);
-
+		player.drawPlayer(userViewPtr, projectionPtr, shadow.getLS(), shadow.getDepthMap(), camera.getPosition(), lighting);
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));

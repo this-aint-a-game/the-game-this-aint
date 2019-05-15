@@ -37,7 +37,7 @@ class Terrain {
     GLuint vertexArrayID;
     GLuint vertexBuffer;
     GLuint vertexIndexBuffer;
-    //GLuint numIndices;
+    GLuint GrndTexBuffObj;
 
     void initTex();
     void unbind();

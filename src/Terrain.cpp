@@ -127,6 +127,21 @@ void Terrain::bindVAO()
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+
+        static GLfloat GrndTex[] = {
+                0, 0, // back
+                0, 1,
+                1, 1,
+                1, 0 };
+        glGenBuffers(1, &GrndTexBuffObj);
+        glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GrndTex), GrndTex, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+
     }
     else
     {
@@ -184,6 +199,8 @@ void Terrain::generateGrid(int width)
     assert(num_indices == numIndices);
     vertices = tempV;
     vertexArrayID = 0;
+
+
 }
 
 std::thread Terrain::threadedGenerateGrid()
@@ -211,6 +228,8 @@ void Terrain::draw()
 void Terrain::unbind()
 {
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -244,5 +263,6 @@ void Terrain::initTerrain()
 
 
     prog->addAttribute("vertPos");
-    //prog->addAttribute("vertNor");
+    prog->addAttribute("vertNor");
+    prog->addAttribute("vertTex");
 }

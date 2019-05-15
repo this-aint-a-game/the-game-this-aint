@@ -19,6 +19,8 @@ void Lighting::init() {
 //        }
 //    }
 
+    positions.push_back(glm::vec3(50.f, 20.f, 2.f));
+
     lightPositions[0][0][0] = (GLubyte) 50.0;
     lightPositions[0][1][1] = (GLubyte) 20.0;
     lightPositions[0][2][2] = (GLubyte) 2.0;
