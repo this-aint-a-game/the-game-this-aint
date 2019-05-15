@@ -27,8 +27,6 @@ glm::mat4 Camera::update(glm::vec3 playerPos, double frametime,
 
     pitchOffSet += frametime * CAMERA_SPRING * (targetPitchOffset - pitchOffSet);
 
-
-
     // calculate offsets from the player based on distance and angle
     glm::vec3 offsets = glm::vec3(cos(yawAngle) * distance,
                         pitchOffSet + distance,
