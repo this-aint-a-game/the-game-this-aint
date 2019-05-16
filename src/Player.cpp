@@ -14,22 +14,22 @@ glm::mat4 Player::updateModelMatrix(double frametime,
     float lateralSpeed = 0;
     glm::vec3 camDir = glm::normalize(glm::vec3(position.x - camPos.x, 0, position.z - camPos.z));
     
-    if (w == 1) 
+    if (w == true) 
     {
         speed = MOVESPEED * frametime;
         targetDir = camDir;
     }
-    else if(s == 1) 
+    else if(s == true) 
     {
         speed = MOVESPEED * frametime;
         targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), PI, glm::vec3(0,1,0));
     }
-    else if(a == 1)
+    else if(a == true)
     {
         speed = MOVESPEED * frametime;       
         targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), -PI / 2, glm::vec3(0,1,0));
     }
-    else if(d == 1)
+    else if(d == true)
     {
         speed = MOVESPEED * frametime;
         targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), PI / 2, glm::vec3(0,1,0));
