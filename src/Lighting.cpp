@@ -19,7 +19,7 @@ void Lighting::init() {
 //        }
 //    }
 
-    positions.push_back(glm::vec3(50.f, 20.f, 2.f));
+    positions.push_back(glm::vec3(50.f, 5.f, 2.f));
     //positions.push_back(glm::vec3(20.f, 10.f, 50.f));
     //positions.push_back(glm::vec3(20.f, 10.f, 50.f));
     //positions.push_back(glm::vec3(-1.f, 40.f, 2.f));

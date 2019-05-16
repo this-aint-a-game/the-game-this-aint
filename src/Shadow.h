@@ -17,11 +17,13 @@ class Shadow {
     int height;
     Lighting *lighting;
     glm::mat4 LS;
+    float t;
 
 public:
     Shadow(Lighting *l)
     {
         this->lighting = l;
+        this-> t = 0.f;
     }
 
     glm::mat4 & getLS()
@@ -69,8 +71,6 @@ public:
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-
     }
 
     void render(Player & player)
@@ -78,19 +78,23 @@ public:
         //glViewport(0, 0, S_WIDTH, S_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
-        //glCullFace(GL_FRONT); // TODO?
+        glCullFace(GL_FRONT); // TODO?
 
         //set up shadow shader
         //render scene
         depthProg->bind();
-        //TODO you will need to fix these
         glm::mat4 LP = SetOrthoMatrix();
-        glm::mat4 LV = SetLightView(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        //LA = glm::vec3(0, 0, 0)
+        //glm::vec3 lightPos = player.currentPos + glm::vec3(0, 3, 0);
+        glm::vec3 lightPos = player.currentPos + glm::vec3(2*sin(t), 3, cos(t)*2);
+        t += 0.001; // TODO frametime
+        //glm::vec3 look = glm::lookAt(lightPos, player.currentPos, glm::vec3(1, 0, 0));
+        glm::mat4 LV = SetLightView(lightPos, player.currentPos, glm::vec3(1, 0, 0));
         LS = LP * LV;
 
         player.drawShape(depthProg);
         depthProg->unbind();
-        //glCullFace(GL_BACK);  // TODO?
+        glCullFace(GL_BACK);  // TODO?
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
@@ -98,18 +102,21 @@ public:
     glm::mat4 SetOrthoMatrix()
     {
         // orthographic view volume - numbers set up extents
-        glm::mat4 ortho = glm::ortho(-15.f, 15.f, -15.f, 15.0f, 0.1f, 30.f);
+        //glm::mat4 ortho = glm::ortho(-15.f, 15.f, -15.f, 15.0f, 0.1f, 30.f);
+        //glm::mat4 ortho = glm::ortho(-7.f, 7.f, -7.f, 7.0f, 0.1f, 15.f);
+        glm::mat4 ortho = glm::ortho(-5.f, 5.f, -5.f, 5.0f, 0.1f, 12.f);
+
         //fill in the glUniform call to send to the right shader!
         glUniformMatrix4fv(depthProg->getUniform("LP"), 1, GL_FALSE, value_ptr(ortho)); // LV is uniform in shader
         return ortho;
     }
 
-    glm::mat4 SetLightView(glm::vec3 LA, glm::vec3 up)
+    glm::mat4 SetLightView(glm::vec3 lightPos, glm::vec3 LA, glm::vec3 up)
     {
         // TODO multiple lights
-        glm::vec3 pos = lighting->positions.front();
+        //lightPos = lighting->positions.front();
 
-        glm::mat4 Cam = glm::lookAt(pos, LA, up);
+        glm::mat4 Cam = glm::lookAt(lightPos, LA, up);
         glUniformMatrix4fv(depthProg->getUniform("LV"), 1, GL_FALSE, value_ptr(Cam)); // LV is uniform in shader
         //fill in the glUniform call to send to the right shader!
         return Cam;

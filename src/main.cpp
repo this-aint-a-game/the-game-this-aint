@@ -832,11 +832,9 @@ public:
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
 
-
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         drawScene(userViewPtr, projectionPtr);
-
 
 		auto Model = make_shared<MatrixStack>();
 		Model->pushMatrix();
@@ -857,7 +855,6 @@ public:
         CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
-
 
 		shadow.render(player);
         CHECKED_GL_CALL(glDisable(GL_BLEND));

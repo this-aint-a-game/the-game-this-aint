@@ -45,8 +45,8 @@ public:
         w = a = s = d = false;
         uFree = lFree = dFree = rFree = true;
         yaw = targetYaw = 0.0f;
-        //position = glm::vec3(-8.43903, 0, 9.66477);
-        position = glm::vec3(30.43903, 0, 1.66477);
+        position = glm::vec3(-8.43903, 0, 9.66477);
+        //position = glm::vec3(30.43903, 0, 1.66477);
         oldPos = targetPos = position;
     }
 
