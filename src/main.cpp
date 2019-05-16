@@ -752,8 +752,8 @@ public:
 //        if (!player.checkForCollisions(objects))
 //        {
 			player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
-							  height, camera.getPosition());		
-			player.checkForCollisions(objects);
+							  height, camera.getPosition(), objects);		
+			//player.checkForCollisions(objects);
 
 //		}
         //mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);

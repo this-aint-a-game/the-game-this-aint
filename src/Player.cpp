@@ -7,7 +7,8 @@ glm::mat4 Player::updateModelMatrix(double frametime,
                                     int mousey,
                                     int width, 
                                     int height,
-                                    glm::vec3 camPos)
+                                    glm::vec3 camPos,
+                                    std::vector<GameObject*> & objs)
 {
     oldPos = position;
     float speed = 0;
@@ -42,6 +43,9 @@ glm::mat4 Player::updateModelMatrix(double frametime,
 
     position += speed * dir;
     position.y = Terrain::getHeight(position.x, position.z) + 0.3;
+
+    if(checkForCollisions(objs))
+        position = oldPos;
 
     currentPos = position;
     
@@ -110,9 +114,10 @@ void Player::updateView(double frametime,
                         int mousey, 
                         int width, 
                         int height, 
-                        glm::vec3 camdir)
+                        glm::vec3 camdir, 
+                        std::vector<GameObject*> & objs)
 {
-    model = updateModelMatrix(frametime, mousex, mousey, width, height, camdir);
+    model = updateModelMatrix(frametime, mousex, mousey, width, height, camdir, objs);
     model *= glm::scale(glm::mat4(1), scale);
 }
 

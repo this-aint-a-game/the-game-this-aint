@@ -33,7 +33,8 @@ class Player : public GameObject
                     int mousey,
                     int width,
                     int height,
-                    glm::vec3 lastCamDir
+                    glm::vec3 lastCamDir,
+                    std::vector<GameObject*> & objs
             );
 
     glm::vec3 oldPos, position, targetPos, dir, targetDir;
@@ -49,7 +50,7 @@ class Player : public GameObject
         oldPos = targetPos = position;
     }
 
-    void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos);
+    void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos, std::vector<GameObject*> & objs);
     void initPlayer(ColorCollectGameplay * ccg);
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
 
