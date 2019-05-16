@@ -14,12 +14,14 @@
 #include "ColorCollectGameplay.h"
 #include "Lighting.h"
 
-#define MOVESPEED 2
-#define PLAYER_ROTATION_SPRING 10
-#define PI 3.14159
+#define MOVESPEED 2.0f
+#define PLAYER_ROTATION_SPRING 10.0f
+#define PI 3.14159f
 
 class Player : public GameObject
 {
+    public:
+
     std::shared_ptr<Program> playerProg;
     std::shared_ptr<Shape>   playerShape;
     glm::mat4 model;
@@ -30,29 +32,26 @@ class Player : public GameObject
                     int mousex,
                     int mousey,
                     int width,
-                    int height
+                    int height,
+                    glm::vec3 lastCamDir,
+                    std::vector<GameObject*> & objs
             );
 
-public:
-    glm::vec3 oldPos, position, targetPos;
+    glm::vec3 oldPos, position, dir, targetDir;
     float yaw, targetYaw;
     bool w, a, s, d;
-    // for determining if the player can move up/left/down/right
-    bool uFree, lFree, dFree, rFree;
     
     Player()
     {
         w = a = s = d = false;
-        uFree = lFree = dFree = rFree = true;
         yaw = targetYaw = 0.0f;
+        dir = targetDir = glm::vec3(0,0,0);
         //position = glm::vec3(-8.43903, 0, 9.66477);
         position = glm::vec3(30.43903, 0, 1.66477);
         oldPos = targetPos = position;
     }
 
-    void updateView(double frametime, int mousex, int mousey, int width, int height);
-    void updateFreeDirs(BoundingBox* otherBB);
-
+    void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos, std::vector<GameObject*> & objs);
     void initPlayer(ColorCollectGameplay * ccg);
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
     // TODO this should be less specific

@@ -2,52 +2,65 @@
 #include "Terrain.h"
 #include "Strawberry.h"
 
-glm::mat4 Player::updateModelMatrix(double frametime, int mousex, int mousey,
-                            int width, int height)
+glm::mat4 Player::updateModelMatrix(double frametime, 
+                                    int mousex, 
+                                    int mousey,
+                                    int width, 
+                                    int height,
+                                    glm::vec3 camPos,
+                                    std::vector<GameObject*> & objs)
 {
+    // for collision detection
     oldPos = position;
+    // set speed = 0 as default, will update value based on keypresses
     float speed = 0;
-    float lateralSpeed = 0;
-
-    if (w == 1) 
+    // because the camera is always looking at the player when the player has control of the 
+    // camera, we can assume that the camera's direction is the vector between the camera 
+    // and the player
+    glm::vec3 camDir = glm::normalize(glm::vec3(position.x - camPos.x, 0, position.z - camPos.z));
+    
+    // set speed and target direction based on keypresses
+    if (w == true) 
     {
         speed = MOVESPEED * frametime;
-        targetYaw = 0;
-        if(yaw > PI)
-            yaw -= 2.0 * PI;
+        targetDir = camDir;
     }
-    else if(s == 1) 
+    else if(s == true) 
     {
-        speed = -MOVESPEED * frametime;
-        targetYaw = PI;   
+        speed = MOVESPEED * frametime;
+        targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), PI, glm::vec3(0,1,0));
     }
-    else if(a == 1)
+    else if(a == true)
     {
-        lateralSpeed = -MOVESPEED * frametime;
-        targetYaw = PI / 2.0;
-        if(yaw > 3.0 * PI / 2.0)
-            yaw -= 2.0 * PI;
+        speed = MOVESPEED * frametime;       
+        targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), -PI / 2, glm::vec3(0,1,0));
     }
-    else if(d == 1)
+    else if(d == true)
     {
-        lateralSpeed = MOVESPEED * frametime;
-        targetYaw = 3.0 * PI / 2.0;
+        speed = MOVESPEED * frametime;
+        targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), PI / 2, glm::vec3(0,1,0));
     }
  
+    // lerp the direction towards the target direction
+    dir += (float)(frametime * PLAYER_ROTATION_SPRING) * (targetDir - dir);
+    // extract the target angle from the target direction
+    targetYaw = atan2(targetDir.x, targetDir.z);
+    // lerp the yaw angle towards the target angle
     yaw += frametime * PLAYER_ROTATION_SPRING * (targetYaw - yaw);
+    // construct a rotation matrix based on the currect yaw
+    glm::mat4 Ry = glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
 
-    glm::vec4 dir = glm::vec4(0, 0, speed, 1);
-    
-    glm::vec3 lateralDir = glm::vec3(glm::vec4(0,0, lateralSpeed, 1) * 
-                glm::rotate(glm::mat4(1), 3.14159f / 2.0f, glm::vec3(0,1,0)));
-   
-    targetPos += lateralDir;
-    targetPos += glm::vec3(dir.x, 0, dir.z);
-    position += -0.1f * position + 0.1f * targetPos;
+    // move the player in the direction they are facing
+    position += speed * dir;
+    // set their y position based on the height of the terrain at that point
     position.y = Terrain::getHeight(position.x, position.z) + 0.3;
 
+    //std::cout << "position prior to check is: " << position.x << "," << position.y << "," << position.z << std::endl;
+
+    // this is because the player is a GameObject 
     currentPos = position;
     
+    // construct a model matrix using our current position and current yaw angle
     return glm::translate(glm::mat4(1), position) * glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
 }
 
@@ -109,65 +122,22 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 vi
     playerProg->unbind();
 }
 
+void Player::updateView(double frametime, 
+                        int mousex, 
+                        int mousey, 
+                        int width, 
+                        int height, 
+                        glm::vec3 camdir, 
+                        std::vector<GameObject*> & objs)
+{
+    model = updateModelMatrix(frametime, mousex, mousey, width, height, camdir, objs);
+    model *= glm::scale(glm::mat4(1), scale);
+}
 void Player::drawShape(std::shared_ptr<Program> prog)
 {
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
     playerShape->draw(prog);
 }
-
-void Player::updateView(double frametime, int mousex, int mousey, int width, int height)
-{
-    model = updateModelMatrix(frametime, mousex, mousey, width, height);
-    model *= glm::scale(glm::mat4(1), scale);
-}
-
-void Player::updateFreeDirs(BoundingBox* otherBB)
-{
-    /*
-    if (bb->bbmin.x <= otherBB->bbmax.x) 
-    {
-        dFree = false;
-    } else {
-        dFree = true;
-    }
-
-    if (bb->bbmax.x >= otherBB->bbmin.x) 
-    {
-        uFree = false;
-    } else {
-        uFree = true;
-    }
-
-    if (bb->bbmin.z <= otherBB->bbmax.z)
-    {
-
-    } else {
-
-    }
-        
-    if (bb->bbmax.z >= otherBB->bbmin.z)
-    {
-
-    } else {
-
-    } 
-    */
-
-   if(bb->bbmax.z >= otherBB->bbmin.z && bb->bbmax.z <= otherBB->bbmax.z)
-   {
-       rFree = false;
-   } else {
-       rFree = true;
-   }
-   
-   if(bb->bbmin.z >= otherBB->bbmin.z && bb->bbmax.z >= otherBB->bbmin.z)
-   {
-       rFree = false;
-   } else {
-       rFree = true;
-   }
-}
-
 bool Player::checkForCollisions(std::vector<GameObject*> & objs)
 {
     //std::cout << "97" << std::endl;
@@ -194,10 +164,8 @@ bool Player::checkForCollisions(std::vector<GameObject*> & objs)
                 model = glm::translate(glm::mat4(1), oldPos) * glm::scale(glm::mat4(1), scale);
             }
             */
-//            std::cout<<"collision"<<std::endl;
             return true;
         }
     }
-    //std::cout << "115" << std::endl;
     return false;
 }
