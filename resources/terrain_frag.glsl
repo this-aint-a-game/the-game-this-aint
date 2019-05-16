@@ -3,7 +3,7 @@
 uniform sampler2D shadowDepth;
 
 in vec4 fPosLS;
-in vec2 vTexCoord;
+//in vec2 vTexCoord;
 
 uniform vec3 MatAmb;
 uniform vec3 MatDif;
@@ -83,6 +83,6 @@ void main()
     float shade = TestShadow(fPosLS);
     //Outcolor = amb*(texColor0) + (1.0-Shade)*texColor0*BaseColor;
     //color = vec4(finalColor, 1.0);
-    //color = vec4(MatAmb + (1.0 - shade)*finalColor, 1.0);
-    color = vec4(MatAmb + finalColor, 1.0);
+    color = vec4(MatAmb + (1.0 - shade)*finalColor, 1.0);
+    //color = vec4(MatAmb + finalColor, 1.0);
 }

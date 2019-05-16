@@ -22,7 +22,7 @@ void Terrain::initTex()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting* lighting) {
+void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting* lighting) {
     prog->bind();
 
     glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P));
@@ -47,6 +47,12 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
         glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
 
     }
+
+    glActiveTexture(GL_TEXTURE1); // TODO? 2?
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+
+    glUniform1i(prog->getUniform("shadowDepth"), 1); // TODO 1?
+    glUniformMatrix4fv(prog->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
 
     draw();
 
@@ -128,6 +134,7 @@ void Terrain::bindVAO()
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
 
+        /*
         static GLfloat GrndTex[] = {
                 0, 0, // back
                 0, 1,
@@ -140,6 +147,7 @@ void Terrain::bindVAO()
         glEnableVertexAttribArray(2);
         glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+         */
 
 
     }
@@ -229,7 +237,10 @@ void Terrain::unbind()
 {
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
+
+    glActiveTexture(GL_TEXTURE0);
+
+    //glDisableVertexAttribArray(2);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -260,9 +271,11 @@ void Terrain::initTerrain()
     prog->addUniform("lighting");
     prog->addUniform("cameraPos");
     prog->addUniform("numberLights");
+    prog->addUniform("shadowDepth");
+    prog->addUniform("LS");
 
 
     prog->addAttribute("vertPos");
     prog->addAttribute("vertNor");
-    prog->addAttribute("vertTex");
+    //prog->addAttribute("vertTex");
 }

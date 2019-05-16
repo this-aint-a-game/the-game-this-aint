@@ -3,12 +3,6 @@
 //to send the color to a frame buffer
 layout(location = 0) out vec4 color;
 
-//uniform sampler2D shadowTexture;
-uniform sampler2D shadowDepth;
-
-in vec4 fPosLS;
-in vec2 vTexCoord;
-
 uniform vec3 MatAmb;
 uniform vec3 MatSpec;
 uniform vec3 MatDif;
@@ -41,35 +35,10 @@ vec3 calcLight(vec3 light)
 	return phongColor;
 }
 
-/* returns 1 if shadowed */
-/* called with the point projected into the light's coordinate space */
-float TestShadow(vec4 LSfPos) {
-
-    float bias = 0.005;
-    //1: shift the coordinates from -1, 1 to 0 ,1
-    // clip space range is -1 to 1 and depth buffer is 0 to 1
-    vec3 shifted = (LSfPos.xyz + vec3(1))*0.5;
-
-    //2: read off the stored depth (.) from the ShadowDepth, using the shifted.xy
-    float Ldepth = texture(shadowDepth, shifted.xy).r; // reading rgb from texture
-
-    //3: compare to the current depth (.z) of the projected depth
-    if (Ldepth < shifted.z - bias)
-    {
-        return 1.0;
-    }
-
-    //4: return 1 if the point is shadowed
-
-    return 0.0;
-}
-
 /* Very simple Diffuse shader with a directional light*/
 void main()
 {
     float shade;
-    //vec4 texColor = texture(shadowTexture, vTexCoord);
-    shade = TestShadow(fPosLS);
 
     vec3 finalColor = vec3(0);// = MatAmb;
 
@@ -84,8 +53,5 @@ void main()
 	}
 
     color = vec4(MatAmb + finalColor, 1.0);
-    //color = vec4(MatAmb + (1.0-shade)*finalColor, 1.0);
-
-    //Outcolor = amb*(texColor0) + (1.0-Shade)*texColor0*BaseColor; // add ambient color regardless
 
 }

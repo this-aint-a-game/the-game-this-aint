@@ -37,7 +37,7 @@ class Terrain {
     GLuint vertexArrayID;
     GLuint vertexBuffer;
     GLuint vertexIndexBuffer;
-    GLuint GrndTexBuffObj;
+    //GLuint GrndTexBuffObj;
 
     void initTex();
     void unbind();
@@ -51,7 +51,7 @@ class Terrain {
 
 public:
     Terrain(ColorCollectGameplay * ccg);
-    void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::vec3 cameraPos, Lighting*);
+    void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting*);
     void initTerrain();
     static float getHeight(float x, float z);
     ~Terrain() { clean(); }

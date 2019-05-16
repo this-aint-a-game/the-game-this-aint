@@ -45,7 +45,8 @@ public:
         w = a = s = d = false;
         uFree = lFree = dFree = rFree = true;
         yaw = targetYaw = 0.0f;
-        position = glm::vec3(-8.43903, 0, 9.66477);
+        //position = glm::vec3(-8.43903, 0, 9.66477);
+        position = glm::vec3(30.43903, 0, 1.66477);
         oldPos = targetPos = position;
     }
 
@@ -53,7 +54,7 @@ public:
     void updateFreeDirs(BoundingBox* otherBB);
 
     void initPlayer(ColorCollectGameplay * ccg);
-    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4 & LS, GLuint depthMap, glm::vec3 view, Lighting* lighting);
+    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
 

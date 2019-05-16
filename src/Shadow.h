@@ -69,6 +69,8 @@ public:
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+
+
     }
 
     void render(Player & player)

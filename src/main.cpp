@@ -846,11 +846,11 @@ public:
 
         if (!debug)
         {
-            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), camera.getPosition(), lighting);
+            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), camera.getPosition(), lighting);
         }
         else
         {
-            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos, lighting);
+            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), cameraPos, lighting);
         }
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
@@ -861,7 +861,7 @@ public:
 
 		shadow.render(player);
         CHECKED_GL_CALL(glDisable(GL_BLEND));
-		player.drawPlayer(userViewPtr, projectionPtr, shadow.getLS(), shadow.getDepthMap(), camera.getPosition(), lighting);
+		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting);
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));

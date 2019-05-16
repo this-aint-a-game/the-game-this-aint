@@ -76,8 +76,6 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("view");
     playerProg->addUniform("numberLights");
     playerProg->addUniform("lighting");
-    playerProg->addUniform("LS");
-    playerProg->addUniform("shadowDepth");
 
 
     // Initialize the obj mesh VBOs etc
@@ -91,7 +89,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     this->bb = new BoundingBox(playerShape->min, playerShape->max, scale);
 }
 
-void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4 & LS, GLuint depthMap, glm::vec3 view, Lighting* lighting)
+void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting)
 {
     playerProg->bind();
 
@@ -106,16 +104,7 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::mat4 & 
     glUniform1f(playerProg->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(playerProg->getUniform("lighting"));
 
-    //drawScene(ShadowProg, ShadowProg->getUniform("shadowTexture"), 2);
-    glActiveTexture(GL_TEXTURE1); // TODO? 2?
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-
-    glUniform1i(playerProg->getUniform("shadowDepth"), 2); // TODO 1?
-    glUniformMatrix4fv(playerProg->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
-
     playerShape->draw(playerProg);
-
-    glActiveTexture(GL_TEXTURE0);
 
     playerProg->unbind();
 }
