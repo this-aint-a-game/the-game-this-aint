@@ -37,7 +37,7 @@ class Player : public GameObject
                     std::vector<GameObject*> & objs
             );
 
-    glm::vec3 oldPos, position, targetPos, dir, targetDir;
+    glm::vec3 oldPos, position, dir, targetDir;
     float yaw, targetYaw;
     bool w, a, s, d;
     
@@ -47,7 +47,7 @@ class Player : public GameObject
         yaw = targetYaw = 0.0f;
         dir = targetDir = glm::vec3(0,0,0);
         position = glm::vec3(-8.43903, 0, 9.66477);
-        oldPos = targetPos = position;
+        oldPos = position;
     }
 
     void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos, std::vector<GameObject*> & objs);

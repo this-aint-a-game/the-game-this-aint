@@ -10,11 +10,16 @@ glm::mat4 Player::updateModelMatrix(double frametime,
                                     glm::vec3 camPos,
                                     std::vector<GameObject*> & objs)
 {
+    // for collision detection
     oldPos = position;
+    // set speed = 0 as default, will update value based on keypresses
     float speed = 0;
-    float lateralSpeed = 0;
+    // because the camera is always looking at the player when the player has control of the 
+    // camera, we can assume that the camera's direction is the vector between the camera 
+    // and the player
     glm::vec3 camDir = glm::normalize(glm::vec3(position.x - camPos.x, 0, position.z - camPos.z));
     
+    // set speed and target direction based on keypresses
     if (w == true) 
     {
         speed = MOVESPEED * frametime;
@@ -36,19 +41,26 @@ glm::mat4 Player::updateModelMatrix(double frametime,
         targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), PI / 2, glm::vec3(0,1,0));
     }
  
+    // lerp the direction towards the target direction
     dir += (float)(frametime * PLAYER_ROTATION_SPRING) * (targetDir - dir);
+    // extract the target angle from the target direction
     targetYaw = atan2(targetDir.x, targetDir.z);
+    // lerp the yaw angle towards the target angle
     yaw += frametime * PLAYER_ROTATION_SPRING * (targetYaw - yaw);
+    // construct a rotation matrix based on the currect yaw
     glm::mat4 Ry = glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
 
+    // move the player in the direction they are facing
     position += speed * dir;
+    // set their y position based on the height of the terrain at that point
     position.y = Terrain::getHeight(position.x, position.z) + 0.3;
 
-    if(checkForCollisions(objs))
-        position = oldPos;
+    //std::cout << "position prior to check is: " << position.x << "," << position.y << "," << position.z << std::endl;
 
+    // this is because the player is a GameObject 
     currentPos = position;
     
+    // construct a model matrix using our current position and current yaw angle
     return glm::translate(glm::mat4(1), position) * glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
 }
 
