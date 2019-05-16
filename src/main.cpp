@@ -752,7 +752,7 @@ public:
 //        if (!player.checkForCollisions(objects))
 //        {
 			player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
-							  height);		
+							  height, camera.getPosition());		
 			player.checkForCollisions(objects);
 
 //		}
