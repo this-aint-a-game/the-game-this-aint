@@ -46,18 +46,20 @@ class Player : public GameObject
         w = a = s = d = false;
         yaw = targetYaw = 0.0f;
         dir = targetDir = glm::vec3(0,0,0);
-        position = glm::vec3(-8.43903, 0, 9.66477);
-        oldPos = position;
+        //position = glm::vec3(-8.43903, 0, 9.66477);
+        position = glm::vec3(30.43903, 0, 1.66477);
+        oldPos = targetPos = position;
     }
 
     void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos, std::vector<GameObject*> & objs);
     void initPlayer(ColorCollectGameplay * ccg);
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
-
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
 
     bool checkForCollisions(std::vector<GameObject*> & objs);
+
+    void drawShape(std::shared_ptr<Program> prog);
 };
 
 #endif

@@ -81,6 +81,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("M");
     playerProg->addAttribute("vertPos");
     playerProg->addAttribute("vertNor");
+    playerProg->addAttribute("vertTex");
     playerProg->addUniform("MatAmb");
     playerProg->addUniform("MatDif");
     playerProg->addUniform("MatSpec");
@@ -132,7 +133,11 @@ void Player::updateView(double frametime,
     model = updateModelMatrix(frametime, mousex, mousey, width, height, camdir, objs);
     model *= glm::scale(glm::mat4(1), scale);
 }
-
+void Player::drawShape(std::shared_ptr<Program> prog)
+{
+    glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
+    playerShape->draw(prog);
+}
 bool Player::checkForCollisions(std::vector<GameObject*> & objs)
 {
     //std::cout << "97" << std::endl;

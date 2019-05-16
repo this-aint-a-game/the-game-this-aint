@@ -3,10 +3,6 @@
 //to send the color to a frame buffer
 layout(location = 0) out vec4 color;
 
-//out vec4 outputColor;
-
-//in vec3 finalColor;
-
 uniform vec3 MatAmb;
 uniform vec3 MatSpec;
 uniform vec3 MatDif;
@@ -42,7 +38,9 @@ vec3 calcLight(vec3 light)
 /* Very simple Diffuse shader with a directional light*/
 void main()
 {
-	vec3 finalColor = MatAmb;
+    float shade;
+
+    vec3 finalColor = vec3(0);// = MatAmb;
 
 	highp int nl = int(numberLights);
 	int i, j;
@@ -54,5 +52,6 @@ void main()
 		}
 	}
 
-	 color = vec4(finalColor, 1.0);
+    color = vec4(MatAmb + finalColor, 1.0);
+
 }
