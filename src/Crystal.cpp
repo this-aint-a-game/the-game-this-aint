@@ -9,7 +9,7 @@ Crystal::Crystal(glm::vec3 min, glm::vec3 max, int num, objType type, ColorColle
     this->currentPos.z = 0.f;
     this->scale = vec3(0.007f,0.007f,0.007f);
 
-    this->bb = new BoundingBox(min, max, this->scale);
+    this->bs = new BoundingSphere(min, max, this->scale);
     this->type = type;
     this->ccg = ccg;
 

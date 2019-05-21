@@ -99,7 +99,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
 
     scale = glm::vec3(0.2,0.2,0.2);
 
-    this->bb = new BoundingBox(playerShape->min, playerShape->max, scale);
+    this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale);
 }
 
 void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting)
@@ -140,10 +140,9 @@ void Player::drawShape(std::shared_ptr<Program> prog)
 }
 bool Player::checkForCollisions(std::vector<GameObject*> & objs)
 {
-    //std::cout << "97" << std::endl;
     for(int i = 0; i < objs.size(); i++)
     {
-        if (objs[i]->isCollided(getBB()))
+        if (objs[i]->isCollided(this->getBS()))
         {
             //std::cout << "102" << std::endl;
             if (dynamic_cast<Strawberry*>(objs[i]) != nullptr)
@@ -156,14 +155,6 @@ bool Player::checkForCollisions(std::vector<GameObject*> & objs)
                 // TODO free?
                 objs.erase(objs.begin()+i);
             }
-            /*
-            if(glm::distance(oldPos, objs[i]->currentPos) < glm::distance(position, objs[i]->currentPos))
-            {
-                std::cout << "1" << endl;
-                position = targetPos = oldPos;
-                model = glm::translate(glm::mat4(1), oldPos) * glm::scale(glm::mat4(1), scale);
-            }
-            */
             return true;
         }
     }

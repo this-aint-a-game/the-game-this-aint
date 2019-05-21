@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include "BoundingBox.h"
+#include "BoundingSphere.h"
 #include "Program.h"
 #include "Shape.h"
 #include "MatrixStack.h"
@@ -33,19 +33,15 @@ public:
     std::shared_ptr<Program> prog;
     ColorCollectGameplay* ccg;
 
-    bool isCollided(glm::vec3 v)
+
+    bool isCollided(BoundingSphere *sphere)
     {
-        return bb->isCollided(v, currentPos, this->scale);
+        return bs->isCollided(sphere, currentPos);
     }
 
-    bool isCollided(BoundingBox *box)
+    virtual BoundingSphere* getBS()
     {
-        return bb->isCollided(box, currentPos, this->scale);
-    }
-
-    virtual BoundingBox* getBB()
-    {
-        return bb->get(currentPos);
+        return bs->get(this->currentPos);
     }
 
     // TODO should this be in ColorCollectGameplay?
@@ -146,7 +142,7 @@ public:
     virtual ~GameObject() {};
 
 protected:
-    BoundingBox *bb;
+    BoundingSphere *bs;
 
 };
 

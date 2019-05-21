@@ -55,7 +55,6 @@ class Player : public GameObject
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
-
     bool checkForCollisions(std::vector<GameObject*> & objs);
 
     void drawShape(std::shared_ptr<Program> prog);

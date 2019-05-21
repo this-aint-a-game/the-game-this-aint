@@ -5,10 +5,10 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
 {
     this->currentPos.x = 0.f;
     this->currentPos.z = 0.f;
-    this->scale = glm::vec3(5.0f,5.0f,5.0f);
+    this->scale = glm::vec3(3.0f,3.0f,3.0f);
     collected = false;
 
-    this->bb = new BoundingBox(min, max, this->scale);
+    this->bs = new BoundingSphere(min, max, this->scale);
     this->type = type;
     this->ccg = ccg;
 

@@ -21,14 +21,12 @@ obtain.
 #include "Water.h"
 #include "Crystal.h"
 #include "Shadow.h"
-//#include "Player.h"
 #include "Camera.h"
 #include "Lighting.h"
 #include "Sky.h"
 #include "ColorCollectGameplay.h"
+#include "ParticleCollection.h"
 
-
-//#define PI 3.1415
 #define MOVEMENT_SPEED 0.2f
 #define RENDER_SPEED 0.5f
 
@@ -43,10 +41,12 @@ class Application : public EventCallbacks
 public:
 
     ColorCollectGameplay * gameplay = new ColorCollectGameplay();
+    ParticleCollection *pc = new ParticleCollection();
     Player player = Player();
 	Camera camera = Camera();
     Lighting* lighting = new Lighting();
 	Shadow shadow = Shadow(lighting);
+
 	Terrain terrain = Terrain(gameplay);
 	Water water = Water(gameplay);
 	Sky sky = Sky();
@@ -61,9 +61,6 @@ public:
 
 	// programs
 	shared_ptr<Program> shapeProg;
-	shared_ptr<Program> particleProg;
-
-	shared_ptr<Texture> particleTexture;
 
 	// Shape to be used (from obj file)
     vector<shared_ptr<Shape>> crystal1Shapes;
@@ -81,20 +78,10 @@ public:
 
     int numCrystals;
 
-	//stuff necessary for particles
-	vector<std::shared_ptr<Particle>> particles;
-	GLuint ParticleVertexArrayID;
-	int numP = 20;
-	GLfloat points[1800];
-	GLfloat pointColors[2400];
-	GLuint particlePointsBuffer;
-	GLuint particleColorBuffer;
 	float t0_disp = 0.0f;
 	float t_disp = 0.0f;
 	bool keyToggles[256] = { false };
-	float t = 0.0f;
-	float h = 0.01f;
-	glm::vec3 g = glm::vec3(0.0f, -0.01f, 0.0f);
+
 
 	bool sprint = false;
 	bool Moving = false;
@@ -268,11 +255,11 @@ public:
 	{
 		sky.initTex();
 
-		particleTexture = make_shared<Texture>();
-		particleTexture->setFilename(resourceDir + "/alpha.bmp");
-		particleTexture->init();
-		particleTexture->setUnit(4);
-		particleTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);	
+		pc->particleTexture = make_shared<Texture>();
+		pc->particleTexture->setFilename(resourceDir + "/alpha.bmp");
+		pc->particleTexture->init();
+		pc->particleTexture->setUnit(4);
+		pc->particleTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	}
 
@@ -303,25 +290,6 @@ public:
         shapeProg->addUniform("numberLights");
 	}
 
-	void particleSetUp()
-	{
-		particleProg = make_shared<Program>();
-		particleProg->setVerbose(true);
-		particleProg->setShaderNames(
-				resourceDir + "/particle_vert.glsl",
-				resourceDir + "/particle_frag.glsl");
-		if (! particleProg->init())
-		{
-			std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-			exit(1);
-		}
-		particleProg->addUniform("P");
-		particleProg->addUniform("V");
-		particleProg->addUniform("M");
-		particleProg->addUniform("alphaTexture");
-		particleProg->addAttribute("vertPos");
-	}
-
 	void init()
 	{
 		glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
@@ -329,25 +297,13 @@ public:
 
 		glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
-		
+
 		sky.skySetUp();
 		shapeSetUp();
-		particleSetUp();
+		pc->setUp();
 		terrain.initTerrain();
 		water.initWater();
 		shadow.init(width, height);
-	}
-
-	void initParticles()
-	{
-		int n = numP;
-
-		for (int i = 0; i < n; ++ i)
-		{
-			auto particle = make_shared<Particle>();
-			particles.push_back(particle);
-			particle->load();
-		}
 	}
 
 	void initSceneCollectibles()
@@ -374,20 +330,20 @@ public:
             while (!found_spot)
             {
                 berry = new Strawberry(strawMin, strawMax, i, GameObject::strawberry, gameplay);
-                BoundingBox *otherBB = berry->getBB();
+                BoundingSphere *otherBS = berry->getBS();
                 for (int j = 0; j < objects.size(); j++)
                 {
                     berry = new Strawberry(strawMin, strawMax, i, GameObject::strawberry, gameplay);
-                    BoundingBox *otherBB = berry->getBB();
+					BoundingSphere *otherBS = berry->getBS();
 
-                    if ((objects[j]->isCollided(otherBB)))
+                    if ((objects[j]->isCollided(otherBS)))
                     {
                         delete berry;
-                        delete otherBB;
+                        delete otherBS;
                     }
                 }
                 found_spot = true;
-                delete otherBB;
+                delete otherBS;
             }
             objects.push_back(berry);
             gameplay->setPos(berry->color, berry->currentPos);
@@ -465,21 +421,19 @@ public:
 	{
         player.initPlayer(gameplay);
 		initSceneCollectibles();
-        initSceneObjects();
+//        initSceneObjects();
 
-		// creation for particles
-		CHECKED_GL_CALL(glGenVertexArrays(1, &ParticleVertexArrayID));
-		CHECKED_GL_CALL(glBindVertexArray(ParticleVertexArrayID));
+		CHECKED_GL_CALL(glGenVertexArrays(1, &pc->ParticleVertexArrayID));
+		CHECKED_GL_CALL(glBindVertexArray(pc->ParticleVertexArrayID));
 
-		CHECKED_GL_CALL(glGenBuffers(1, &particlePointsBuffer));
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particlePointsBuffer));
+		CHECKED_GL_CALL(glGenBuffers(1, &pc->particlePointsBuffer));
+		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, pc->particlePointsBuffer));
 
-		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(points), NULL, GL_STREAM_DRAW));
-		CHECKED_GL_CALL(glGenBuffers(1, &particleColorBuffer));
+		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pc->points), NULL, GL_STREAM_DRAW));
+		CHECKED_GL_CALL(glGenBuffers(1, &pc->particleColorBuffer));
 		
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particleColorBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pointColors), NULL, GL_STREAM_DRAW));
-		// creation for particles
+		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, pc->particleColorBuffer));
+		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pc->pointColors), NULL, GL_STREAM_DRAW));
 	}
 
     void uploadMultipleShapes(string objDir, int switchNum)
@@ -568,48 +522,29 @@ public:
 		glm::vec3 pos;
 		glm::vec4 col;
 
-		for (int i = 0; i < numP; i++)
+		for (int i = 0; i < pc->numP; i++)
 		{
-			pos = particles[i]->getPosition();
-			col = particles[i]->getColor();
-			points[i * 3 + 0] = pos.x;
-			points[i * 3 + 1] = pos.y;
-			points[i * 3 + 2] = pos.z;
-			pointColors[i * 4 + 0] = col.r + col.a / 10.f;
-			pointColors[i * 4 + 1] = col.g + col.g / 10.f;
-			pointColors[i * 4 + 2] = col.b + col.b / 10.f;
-			pointColors[i * 4 + 3] = col.a;
+			pos = pc->particles[i]->x;
+			col = pc->particles[i]->color;
+            pc->points[i * 3 + 0] = pos.x;
+            pc->points[i * 3 + 1] = pos.y;
+            pc->points[i * 3 + 2] = pos.z;
+            pc->pointColors[i * 4 + 0] = col.r + col.a / 10.f;
+            pc->pointColors[i * 4 + 1] = col.g + col.g / 10.f;
+            pc->pointColors[i * 4 + 2] = col.b + col.b / 10.f;
+            pc->pointColors[i * 4 + 3] = col.a;
 		}
 
 
-		// update the GPU data
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particlePointsBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(points), NULL, GL_STREAM_DRAW));
-		CHECKED_GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * numP * 3, points));
+		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, pc->particlePointsBuffer));
+		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pc->points), NULL, GL_STREAM_DRAW));
+		CHECKED_GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * pc->numP * 3, pc->points));
 
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particleColorBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pointColors), NULL, GL_STREAM_DRAW));
-		CHECKED_GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * numP * 4, pointColors));
+		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, pc->particleColorBuffer));
+		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(pc->pointColors), NULL, GL_STREAM_DRAW));
+		CHECKED_GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * pc->numP * 4, pc->pointColors));
 
 		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
-	}
-
-	void updateParticles()
-	{
-		// update the particles
-		for (auto particle : particles)
-		{
-			particle->update(t, h, g, keyToggles, player.position, gameplay);
-		}
-		t += h;
-
-		// Sort the particles by Z
-		auto temp = make_shared<MatrixStack>();
-		temp->rotate(y, vec3(0, 1, 0));
-
-		ParticleSorter sorter;
-		sorter.C = temp->topMatrix();
-		std::sort(particles.begin(), particles.end(), sorter);
 	}
 
 	bool checkForEdge(vec3 hold)
@@ -640,107 +575,53 @@ public:
 		}
 	}
 
-	void drawParticles(MatrixStack* View, float aspect)
-	{
-		particleProg->bind();
-		updateParticles();
-
-		auto Model = make_shared<MatrixStack>();
-		Model->pushMatrix();
-			Model->loadIdentity();
-
-        auto Projection = make_shared<MatrixStack>();
-        Projection->pushMatrix();
-        Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
-
-		particleTexture->bind(particleProg->getUniform("alphaTexture"));
-		CHECKED_GL_CALL(glUniformMatrix4fv(particleProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix())));
-		CHECKED_GL_CALL(glUniformMatrix4fv(particleProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix())));
-		CHECKED_GL_CALL(glUniformMatrix4fv(particleProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix())));
-
-		CHECKED_GL_CALL(glEnableVertexAttribArray(0));
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particlePointsBuffer));
-		CHECKED_GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0));
-
-		CHECKED_GL_CALL(glEnableVertexAttribArray(1));
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, particleColorBuffer));
-		CHECKED_GL_CALL(glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) 0));
-
-		CHECKED_GL_CALL(glVertexAttribDivisor(0, 1));
-		CHECKED_GL_CALL(glVertexAttribDivisor(1, 1));
-		CHECKED_GL_CALL(glDrawArraysInstanced(GL_POINTS, 0, 1, numP));
-
-		CHECKED_GL_CALL(glVertexAttribDivisor(0, 0));
-		CHECKED_GL_CALL(glVertexAttribDivisor(1, 0));
-		CHECKED_GL_CALL(glDisableVertexAttribArray(0));
-		CHECKED_GL_CALL(glDisableVertexAttribArray(1));
-		particleTexture->unbind();
-
-		Model->popMatrix();
-		particleProg->unbind();
-	}
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
-
 		auto Model = make_shared<MatrixStack>();
-		shapeProg->bind();
 
-		glUniformMatrix4fv(shapeProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-		glUniformMatrix4fv(shapeProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+        shapeProg->bind();
+
+        glUniformMatrix4fv(shapeProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+        glUniformMatrix4fv(shapeProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
         glUniform1f(shapeProg->getUniform("numberLights"), lighting->numberLights);
-		lighting->bind(shapeProg->getUniform("lighting"));
+        lighting->bind(shapeProg->getUniform("lighting"));
 
-		Model->pushMatrix();
-		Model->loadIdentity();
+        Model->pushMatrix();
+        Model->loadIdentity();
 
-		for(int i = 0; i < objects.size(); i++)
-		{
+        for(int i = 0; i < objects.size(); i++)
+        {
             MatrixStack *modelptr = Model.get();
 
             if(objects[i]->type == GameObject::strawberry)
-			{
-				objects[i]->drawObject(modelptr, strawberryShapes, shapeProg, camera.getPosition());
-			}
-			else if(objects[i]->type == GameObject::crystal1)
-			{
+            {
+                objects[i]->drawObject(modelptr, strawberryShapes, shapeProg, camera.getPosition());
+            }
+            else if(objects[i]->type == GameObject::crystal1)
+            {
                 CHECKED_GL_CALL(glEnable(GL_BLEND));
                 glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-				objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg, camera.getPosition());
+                objects[i]->drawObject(modelptr, crystal1Shapes, shapeProg, camera.getPosition());
                 CHECKED_GL_CALL(glDisable(GL_BLEND));
-			}
-//			else if(objects[i]->type == GameObject::crystal2)
-//			{
-//                CHECKED_GL_CALL(glEnable(GL_BLEND));
-//                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-//				objects[i]->drawObject(modelptr, crystal2Shapes, shapeProg);
-//                CHECKED_GL_CALL(glDisable(GL_BLEND));
-//			}
-//			else if(objects[i]->type == GameObject::crystal3)
-//            {
-//                CHECKED_GL_CALL(glEnable(GL_BLEND));
-//                CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-//				objects[i]->drawObject(modelptr, crystal3Shapes, shapeProg);
-//                CHECKED_GL_CALL(glDisable(GL_BLEND));
-//			}
+            }
 
-		}
+        }
+
+        shapeProg->unbind();
 
 		Model->popMatrix();
 		lighting->unbind();
-		shapeProg->unbind();
 
 	}
 
     void render(float deltaTime)
     {
-
         glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
         glViewport(0, 0, width, height);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
 		// need mouse position in order to use camera
 		double mousex = width / 4.0;
 		double mousey = height / 4.0;    
@@ -751,15 +632,9 @@ public:
 
         updateGeom(deltaTime);
 
-//        if (!player.checkForCollisions(objects))
-//        {
-			player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
-							  height, camera.getPosition(), objects);		
-			player.checkForCollisions(objects);
-
-//		}
-        //mat4 playerM = player.update(deltaTime* 0.000001f, mousex, mousey, width, height);
-		//playerM *= scale(mat4(1), vec3(0.2,0.2,0.2));
+		player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
+						  height, camera.getPosition(), objects);
+		player.checkForCollisions(objects);
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
         lightPos.z = sin(glfwGetTime()/100) * 500.f;
@@ -769,17 +644,21 @@ public:
         ViewUser->loadIdentity();
         ViewUser->pushMatrix();
 
-        if (!debug) {
+
+
+        if (!debug)
+        {
             ViewUser->multMatrix(
                     camera.update(player.position, deltaTime * 0.000001f,
                                   mousex, mousey, width, height));
 
             // reset mouse position to center of screen after finding difference.
-
             if (!releaseMouse)
                 glfwSetCursorPos(windowManager->getHandle(), width / 4.0,
                                  height / 4.0);
-        } else {
+        }
+        else
+        {
             x = cos(radians(phi)) * cos(radians(theta));
             y = sin(radians(phi));
             z = cos(radians(phi)) * sin(radians(theta));
@@ -809,13 +688,6 @@ public:
             }
 
 
-//            bool go = checkForEdge(holdCameraPos);
-//            go = checkForObject(holdCameraPos);
-//
-//            if (go) {
-//                cameraPos = holdCameraPos;
-//            }
-
 			cameraPos = holdCameraPos;
             ViewUser->lookAt(vec3(cameraPos.x, 1.0, cameraPos.z),
                              forward + vec3(cameraPos.x, 1.0, cameraPos.z), up);
@@ -827,6 +699,7 @@ public:
         Projection->pushMatrix();
         Projection->perspective(45.0f, aspect, 0.01f, 150.f);
         MatrixStack *projectionPtr = Projection.get();
+
 
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glDisable(GL_BLEND));
@@ -864,11 +737,12 @@ public:
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         CHECKED_GL_CALL(glPointSize(25.0f));
-        drawParticles(userViewPtr, aspect);
+        pc->drawParticles(userViewPtr, aspect, keyToggles, player.position, gameplay, y);
 
 		Projection->popMatrix();
 		ViewUser->popMatrix();
 		ViewUser->popMatrix();
+
     }
 
 };
@@ -884,7 +758,7 @@ int main(int argc, char **argv)
 
 	application->init();
 	application->initTex();
-	application->initParticles();
+	application->pc->initParticles();
 
     glfwSetInputMode(windowManager->getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
