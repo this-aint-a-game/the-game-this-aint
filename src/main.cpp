@@ -259,6 +259,7 @@ public:
 	{
         oc->player.initPlayer(oc->gameplay);
 		oc->initSceneCollectibles();
+		oc->initObjectHierarchy();
 //        initSceneObjects();
 
 		CHECKED_GL_CALL(glGenVertexArrays(1, &pc->ParticleVertexArrayID));

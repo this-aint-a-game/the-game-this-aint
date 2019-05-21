@@ -9,6 +9,7 @@
 #include "Strawberry.h"
 #include "Shape.h"
 #include "ColorCollectGameplay.h"
+#include "BoundingVolumeHierarchy.h"
 #include "Player.h"
 
 class ObjectCollection {
@@ -19,8 +20,9 @@ public:
 
     Player player = Player();
     ColorCollectGameplay * gameplay = new ColorCollectGameplay();
-    vector<GameObject*> objects;
+    BoundingVolumeHierarchy *bvh = new BoundingVolumeHierarchy();
 
+    vector<GameObject*> objects;
     int numCrystals;
 
     // Shape to be used (from obj file)
@@ -43,6 +45,7 @@ public:
     void initSceneCollectibles();
     void initSceneObjects();
     void uploadMultipleShapes(string objDir, int switchNum);
+    void initObjectHierarchy();
 };
 
 

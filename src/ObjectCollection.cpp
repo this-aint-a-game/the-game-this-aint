@@ -3,7 +3,10 @@
 //
 
 #include "ObjectCollection.h"
-
+void ObjectCollection::initObjectHierarchy()
+{
+    bvh->init(objects);
+}
 
 void ObjectCollection::objectSetUp()
 {
