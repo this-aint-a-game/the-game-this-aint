@@ -355,7 +355,7 @@ public:
 		uploadMultipleShapes("/crystal1.obj", 1);
 //		uploadMultipleShapes("/crystal2.obj", 2);
 //		uploadMultipleShapes("/crystal3.obj", 3);
-		numCrystals = clamp(rand() % 100, 5, 15);
+		numCrystals = glm::clamp(rand() % 100, 5, 15);
 
         for(int i = 0; i < numCrystals; i++)
         {
