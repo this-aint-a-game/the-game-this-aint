@@ -34,7 +34,7 @@ glm::vec3 Bezier::quadBez(glm::vec3 (*interpolation)(glm::vec3, glm::vec3, float
 {
     // determine which interpolation function to use.
     // NULL sets the default to linear interpolation
-    interpolation = interpolation ?: lErp;
+    interpolation = interpolation ? interpolation : lErp;
     
     // set up endpoints of line to interpolate
     // along to form the curve
@@ -55,7 +55,7 @@ glm::vec3 Bezier::cubeBez(glm::vec3 (*interpolation)(glm::vec3, glm::vec3, float
 {
     // determine which interpolation function to use.
     // NULL sets the default to linear interpolation
-    interpolation = interpolation ?: lErp;
+    interpolation = interpolation ? interpolation : lErp;
     
     // set up endpoints of lines to interpolate
     // low order control lines between

@@ -61,7 +61,7 @@ glm::mat4 Player::updateModelMatrix(double frametime,
     currentPos = position;
     
     // construct a model matrix using our current position and current yaw angle
-    return glm::translate(glm::mat4(1), position) * glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
+    return glm::translate(glm::mat4(1), position) * Ry;
 }
 
 void Player::initPlayer(ColorCollectGameplay * ccg)
