@@ -69,8 +69,8 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg = std::make_shared<Program>();
     playerProg->setVerbose(true);
     playerProg->setShaderNames(
-            "../Resources/phong_vert.glsl",
-            "../Resources/phong_frag.glsl");
+            "../resources/phong_vert.glsl",
+            "../resources/phong_frag.glsl");
     if (! playerProg->init())
     {
         std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
@@ -93,7 +93,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
 
     // Initialize the obj mesh VBOs etc
     playerShape = std::make_shared<Shape>();
-    playerShape->loadMesh("../Resources/character.obj");
+    playerShape->loadMesh("../resources/character.obj");
     playerShape->resize();
     playerShape->init();
 
