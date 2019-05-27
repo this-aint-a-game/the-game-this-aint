@@ -9,9 +9,10 @@ in OUT_struct {
    vec3 butterflyPosition;
 } in_struct;
 
-void main() {
-    vec4 ambient = vec4(0.1,0.1,0.1,0.1);
-    Outcolor = vec4(in_struct.fragNor, 1) + ambient;
+void main() {    
     vec3 lightDirection = in_struct.butterflyPosition - in_struct.fPos;
-    Outcolor += pow(2*clamp(dot(vec3(in_struct.fragNor), lightDirection), 0, 1),2) * vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    vec3 diffuse = pow(2*clamp(dot(vec3(in_struct.fragNor), lightDirection), 0, 1),2) * vec3(1.0f, 1.0f, 1.0f);
+
+    Outcolor = vec4(in_struct.fragNor, 1);
+    Outcolor.rgb += diffuse;
 }
