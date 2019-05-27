@@ -6,12 +6,23 @@
 #define BOUNDINGVOLUMEHIERARCHY_H
 
 #include "GameObject.h"
-
+#include "BoundingBox.h"
+#include "BoundingSphere.h"
+#include "Strawberry.h"
 class BoundingVolumeHierarchy {
 
 public:
 
-    void init(std::vector<GameObject*> objs);
+    BoundingBox *root;
+
+    // functions
+    void init(std::vector<GameObject*>);
+    void printBVH(BoundingBox*);
+    void createBVH(BoundingBox*, std::vector<GameObject*>);
+    bool checkForCollision(std::vector<GameObject*> &, BoundingBox* cur, BoundingSphere* bs);
+    GameObject* checkAgainstShapes(BoundingBox* cur, BoundingSphere* bs);
+    std::vector<GameObject*> splitArray(std::vector<GameObject*> og_array, int index_begin, int index_end);
+
 };
 
 

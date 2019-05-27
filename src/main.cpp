@@ -394,7 +394,7 @@ public:
 
         oc->player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
 						  height, camera.getPosition(), oc->objects);
-        oc->player.checkForCollisions(oc->objects);
+        oc->player.checkForCollisions(oc->objects, oc->bvh);
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
         lightPos.z = sin(glfwGetTime()/100) * 500.f;

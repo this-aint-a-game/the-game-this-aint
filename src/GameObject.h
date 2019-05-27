@@ -21,10 +21,7 @@ class GameObject
 public:
     enum objType{strawberry, crystal1, crystal2, crystal3};
 
-    // TODO take num and type out of this call
-    //virtual void initObject(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay * ccg) = 0;
     virtual void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) = 0;
-
     glm::vec3 currentPos;
     glm::vec3 scale;
 
@@ -32,6 +29,7 @@ public:
     objType type;
     std::shared_ptr<Program> prog;
     ColorCollectGameplay* ccg;
+    int comparator_value = 0;
 
 
     bool isCollided(BoundingSphere *sphere)
@@ -137,13 +135,35 @@ public:
         return (1.0f - r) * min + r * max;
     }
 
+    bool operator =(const GameObject& obj2) const
+    {
+        if((this->type == strawberry) && (obj2.type == strawberry) && ((this->color == obj2.color)))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    bool operator <(const GameObject& obj2) const
+    {
+        if(this->comparator_value == 0)
+        {
+            return this->currentPos.x < obj2.currentPos.x;
+        }
+        else
+        {
+            return this->currentPos.z < obj2.currentPos.z;
+        }
+    }
 
     GameObject() { };
     virtual ~GameObject() {};
-
-protected:
     BoundingSphere *bs;
 
 };
+
 
 #endif

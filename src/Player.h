@@ -12,6 +12,7 @@
 #include "Shape.h"
 #include "GameObject.h"
 #include "ColorCollectGameplay.h"
+#include "BoundingVolumeHierarchy.h"
 #include "Lighting.h"
 
 #define MOVESPEED 2.0f
@@ -55,7 +56,7 @@ class Player : public GameObject
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
-    bool checkForCollisions(std::vector<GameObject*> & objs);
+    bool checkForCollisions(std::vector<GameObject*> & objs, BoundingVolumeHierarchy* bvh);
 
     void drawShape(std::shared_ptr<Program> prog);
 };
