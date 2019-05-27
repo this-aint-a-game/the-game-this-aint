@@ -61,7 +61,7 @@ glm::mat4 Player::updateModelMatrix(double frametime,
     currentPos = position;
     
     // construct a model matrix using our current position and current yaw angle
-    return glm::translate(glm::mat4(1), position) * glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
+    return glm::translate(glm::mat4(1), position) * Ry;
 }
 
 void Player::initPlayer(ColorCollectGameplay * ccg)
@@ -69,8 +69,8 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg = std::make_shared<Program>();
     playerProg->setVerbose(true);
     playerProg->setShaderNames(
-            "../Resources/phong_vert.glsl",
-            "../Resources/phong_frag.glsl");
+            "../resources/player_vert.glsl",
+            "../resources/player_frag.glsl");
     if (! playerProg->init())
     {
         std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
@@ -81,7 +81,9 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("M");
     playerProg->addAttribute("vertPos");
     playerProg->addAttribute("vertNor");
-    playerProg->addAttribute("vertTex");
+    playerProg->addAttribute("vertTex");    
+    playerProg->addUniform("butterflyPos");
+/*
     playerProg->addUniform("MatAmb");
     playerProg->addUniform("MatDif");
     playerProg->addUniform("MatSpec");
@@ -89,11 +91,12 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("view");
     playerProg->addUniform("numberLights");
     playerProg->addUniform("lighting");
+    */
 
 
     // Initialize the obj mesh VBOs etc
     playerShape = std::make_shared<Shape>();
-    playerShape->loadMesh("../Resources/character.obj");
+    playerShape->loadMesh("../resources/character.obj");
     playerShape->resize();
     playerShape->init();
 
@@ -102,13 +105,16 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale);
 }
 
-void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting)
+void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting, glm::vec3 butterflyPos)
 {
     playerProg->bind();
 
     glUniformMatrix4fv(playerProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
     glUniformMatrix4fv(playerProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-    glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
+    glUniformMatrix4fv(playerProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);    
+    glUniform3f(playerProg->getUniform("butterflyPos"), butterflyPos.x, butterflyPos.y, butterflyPos.z);
+ 
+ /*
     glUniform3f(playerProg->getUniform("view"), view.x, view.y, view.z);
     glUniform3f(playerProg->getUniform("MatAmb"), 0.13, 0.13, 0.14);
     glUniform3f(playerProg->getUniform("MatDif"), 0.3, 0.3, 0.4);
@@ -116,7 +122,7 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 vi
     glUniform1f(playerProg->getUniform("shine"), 47.0);
     glUniform1f(playerProg->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(playerProg->getUniform("lighting"));
-
+*/
     playerShape->draw(playerProg);
 
     playerProg->unbind();

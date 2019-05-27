@@ -6,12 +6,13 @@ layout(location = 2) in vec2 vertTex;
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
+uniform vec3 butterflyPos;
 
 out OUT_struct {
 	vec3 fPos;
 	vec3 fragNor;
 	vec2 vTexCoord;
-	vec3 vColor;
+  vec3 butterflyPosition;
 } out_struct;
 
 void main() {
@@ -25,4 +26,8 @@ void main() {
   out_struct.fragNor = (M*vec4(vertNor, 0.0)).xyz;
   /* pass through the texture coordinates to be interpolated */
   out_struct.vTexCoord = vertTex;
+  /* pass through the position of the butterflyPos */
+  out_struct.butterflyPosition = butterflyPos;
 }
+
+

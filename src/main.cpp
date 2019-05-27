@@ -17,6 +17,7 @@ obtain.
 #include "GLTextureWriter.h"
 #include "Particle.h"
 #include "Strawberry.h"
+#include "Butterfly.h"
 #include "Terrain.h"
 #include "Water.h"
 #include "Crystal.h"
@@ -43,6 +44,7 @@ public:
     ColorCollectGameplay * gameplay = new ColorCollectGameplay();
     ParticleCollection *pc = new ParticleCollection();
     Player player = Player();
+	Butterfly butterfly = Butterfly();
 	Camera camera = Camera();
     Lighting* lighting = new Lighting();
 	Shadow shadow = Shadow(lighting);
@@ -355,7 +357,7 @@ public:
 		uploadMultipleShapes("/crystal1.obj", 1);
 //		uploadMultipleShapes("/crystal2.obj", 2);
 //		uploadMultipleShapes("/crystal3.obj", 3);
-		numCrystals = clamp(rand() % 100, 5, 15);
+		numCrystals = glm::clamp(rand() % 100, 5, 15);
 
         for(int i = 0; i < numCrystals; i++)
         {
@@ -420,6 +422,7 @@ public:
 	void initGeom()
 	{
         player.initPlayer(gameplay);
+		butterfly.initbutterfly();
 		initSceneCollectibles();
 //        initSceneObjects();
 
@@ -634,6 +637,7 @@ public:
 
 		player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
 						  height, camera.getPosition(), objects);
+		butterfly.updateModelMatrix(deltaTime, player.currentPos);
 		player.checkForCollisions(objects);
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
@@ -729,9 +733,10 @@ public:
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
-		shadow.render(player);
+		shadow.render(player, butterfly);
         CHECKED_GL_CALL(glDisable(GL_BLEND));
-		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting);
+		player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
+		butterfly.drawbutterfly(userViewPtr, projectionPtr, camera.getPosition(), lighting);
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));

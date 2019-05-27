@@ -52,7 +52,7 @@ class Player : public GameObject
 
     void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos, std::vector<GameObject*> & objs);
     void initPlayer(ColorCollectGameplay * ccg);
-    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting);
+    void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting, glm::vec3 butterflyPos);
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};
     bool checkForCollisions(std::vector<GameObject*> & objs);

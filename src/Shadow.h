@@ -5,6 +5,7 @@
 #include "Program.h"
 #include "Lighting.h"
 #include "Player.h"
+#include "Butterfly.h"
 #include <glm/gtc/type_ptr.hpp>
 
 
@@ -73,7 +74,7 @@ public:
 
     }
 
-    void render(Player & player)
+    void render(Player & player, Butterfly & butterfly)
     {
         //glViewport(0, 0, S_WIDTH, S_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -86,7 +87,8 @@ public:
         glm::mat4 LP = SetOrthoMatrix();
         //LA = glm::vec3(0, 0, 0)
         //glm::vec3 lightPos = player.currentPos + glm::vec3(0, 3, 0);
-        glm::vec3 lightPos = player.currentPos + glm::vec3(2*sin(t), 3, cos(t)*2);
+        //glm::vec3 lightPos = player.currentPos + glm::vec3(2*sin(t), 3, cos(t)*2);
+        glm::vec3 lightPos = butterfly.currentPos;
         t += 0.001; // TODO frametime
         //glm::vec3 look = glm::lookAt(lightPos, player.currentPos, glm::vec3(1, 0, 0));
         glm::mat4 LV = SetLightView(lightPos, player.currentPos, glm::vec3(1, 0, 0));
