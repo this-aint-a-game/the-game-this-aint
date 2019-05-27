@@ -74,11 +74,11 @@ endif()
 set(AI_INCLUDE_DIR "$ENV{AI_INCLUDE_DIR}")
 if(AI_INCLUDE_DIR)
   include_directories(${AI_INCLUDE_DIR})
-  message(STATUS "GLM environment variable found")
+  message(STATUS "assimp environment variable found")
 else()
 # If the AI_INCLUDE_DIR environment variable is not set, we assume
-# the user has installed GLM properly on their system
-  message(STATUS "GLM environment variable `AI_INCLUDE_DIR` not found, GLM must be installed with the system")
+# the user has installed assimp properly on their system
+  message(STATUS "assimp environment variable `AI_INCLUDE_DIR` not found, assimp must be installed with the system")
 endif()
 
 
