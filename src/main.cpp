@@ -406,12 +406,17 @@ public:
 
         updateGeom(deltaTime);
 
-        bool collision = oc->player.checkForCollisions(oc->objects, oc->bvh);
-        if(!collision)
-        {
-            oc->player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
-                                  height, camera.getPosition(), oc->objects);
-        }
+   //     bool collision = oc->player.checkForCollisions(oc->objects, oc->bvh);
+  
+        oc->player.updateView(deltaTime * 0.000001f, 
+							mousex, 
+							mousey, 
+							width,
+                            height, 
+							camera.getPosition(), 
+							oc->objects,
+							oc->bvh);
+       
 
 
 		butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
