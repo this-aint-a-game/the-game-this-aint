@@ -83,7 +83,7 @@ public:
 
         auto Projection = make_shared<MatrixStack>();
         Projection->pushMatrix();
-        Projection->perspective(45.0f, aspect, 0.01f, GROUND_SIZE);
+        Projection->perspective(radians(50.0f), aspect, 0.1f, 100.0f);
 
         particleTexture->bind(particleProg->getUniform("alphaTexture"));
         CHECKED_GL_CALL(glUniformMatrix4fv(particleProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix())));
