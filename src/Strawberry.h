@@ -12,7 +12,7 @@ class Strawberry : public CollectibleObject
 
 public:
 
-	void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>,  std::shared_ptr<Program>, glm::vec3 view, glm::vec3);
+	void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>,  std::shared_ptr<Program>, glm::vec3 view, glm::vec3, ColorCollectGameplay* ccg);
     void collect();
 	void setPosition(float x, float z);
 

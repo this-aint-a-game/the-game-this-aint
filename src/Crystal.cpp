@@ -46,7 +46,7 @@ Crystal::Crystal(glm::vec3 min, glm::vec3 max, int num, objType type, ColorColle
     }
 }
 
-void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos)
+void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos, ColorCollectGameplay* ccg)
 {
     Model->pushMatrix();
     Model->translate(vec3(this->currentPos.x, this->currentPos.y, this->currentPos.z));

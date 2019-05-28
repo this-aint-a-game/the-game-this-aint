@@ -262,6 +262,7 @@ public:
 	{
         oc->player.initPlayer(oc->gameplay);
 		oc->initSceneCollectibles();
+        oc->initSceneObjects();
 		oc->initObjectHierarchy();
 		butterfly.initbutterfly();
 
@@ -338,6 +339,12 @@ public:
 		}
 	}
 
+	float randFloat(float l, float h)
+	{
+		float r = rand() / (float) RAND_MAX;
+		return (1.0f - r) * l + r * h;
+	}
+
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
@@ -357,16 +364,18 @@ public:
         {
             if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
             {
-                MatrixStack *modelptr = Model.get();
 
                 if (oc->objects[i]->type == GameObject::strawberry) {
+					MatrixStack *modelptr = Model.get();
                     oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
-                                               butterfly.currentPos);
-                } else if (oc->objects[i]->type == GameObject::crystal1) {
+                                               butterfly.currentPos, oc->gameplay);
+                } else if (oc->objects[i]->type == GameObject::plant) {
                     CHECKED_GL_CALL(glEnable(GL_BLEND));
                     glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
-                    oc->objects[i]->drawObject(modelptr, oc->crystal1Shapes, oc->objProg, camera.getPosition(),
-                                               butterfly.currentPos);
+//					Model->rotate(randFloat(0, 360), vec3(0,1,0));
+					MatrixStack *modelptr = Model.get();
+                    oc->objects[i]->drawObject(modelptr, oc->plantShapes, oc->objProg, camera.getPosition(),
+                                               butterfly.currentPos, oc->gameplay);
                     CHECKED_GL_CALL(glDisable(GL_BLEND));
                 }
             }
@@ -397,9 +406,14 @@ public:
 
         updateGeom(deltaTime);
 
-        oc->player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
-						  height, camera.getPosition(), oc->objects);
-        oc->player.checkForCollisions(oc->objects, oc->bvh);
+        bool collision = oc->player.checkForCollisions(oc->objects, oc->bvh);
+        if(!collision)
+        {
+            oc->player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
+                                  height, camera.getPosition(), oc->objects);
+        }
+
+
 		butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
@@ -409,8 +423,6 @@ public:
         ViewUser->pushMatrix();
         ViewUser->loadIdentity();
         ViewUser->pushMatrix();
-
-
 
         if (!debug)
         {

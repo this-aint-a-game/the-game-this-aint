@@ -10,6 +10,7 @@
 #include "Shape.h"
 #include "ColorCollectGameplay.h"
 #include "BoundingVolumeHierarchy.h"
+#include "Plant.h"
 #include "Player.h"
 
 class ObjectCollection {
@@ -23,18 +24,15 @@ public:
     BoundingVolumeHierarchy *bvh = new BoundingVolumeHierarchy();
 
     vector<GameObject*> objects;
-    int numCrystals;
+    int numPlants;
 
     // Shape to be used (from obj file)
-    vector<shared_ptr<Shape>> crystal1Shapes;
-    glm::vec3 cryst1min = glm::vec3(0);
-    glm::vec3 cryst1max = glm::vec3(0);
-    vector<shared_ptr<Shape>> crystal2Shapes;
-    glm::vec3 cryst2min = glm::vec3(0);
-    glm::vec3 cryst2max = glm::vec3(0);
-    vector<shared_ptr<Shape>> crystal3Shapes;
-    glm::vec3 cryst3min = glm::vec3(0);
-    glm::vec3 cryst3max = glm::vec3(0);
+//    vector<shared_ptr<Shape>> crystal1Shapes;
+//    glm::vec3 cryst1min = glm::vec3(0);
+//    glm::vec3 cryst1max = glm::vec3(0);
+    vector<shared_ptr<Shape>> plantShapes;
+    glm::vec3 plantmin = glm::vec3(0);
+    glm::vec3 plantmax = glm::vec3(0);
     vector<shared_ptr<Shape>> strawberryShapes;
     glm::vec3 strawMin = glm::vec3(0);
     glm::vec3 strawMax = glm::vec3(0);

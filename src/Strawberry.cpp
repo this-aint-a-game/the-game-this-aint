@@ -43,7 +43,7 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
     setPosition(getRand(-GROUND_SIZE, GROUND_SIZE), getRand(-GROUND_SIZE, GROUND_SIZE));
 }
 
-void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos)
+void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos, ColorCollectGameplay* ccg)
 {
 	Model->pushMatrix();
 	Model->translate(glm::vec3(this->currentPos.x, this->currentPos.y + 0.5f, this->currentPos.z));

@@ -41,12 +41,13 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
         glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
         glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
         glUniform3f(prog->getUniform("MatSpec"), d.x, d.y, d.z);
-        glUniform1f(prog->getUniform("shine"), 47.f);
+        glUniform1f(prog->getUniform("shine"), 50.f);
     }
     else
     {
         glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
-        glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
+        glUniform3f(prog->getUniform("MatDif"), 1.f, 1.f, 1.f);
+        glUniform3f(prog->getUniform("MatSpec"), 0, 0, 0);
 
     }
 

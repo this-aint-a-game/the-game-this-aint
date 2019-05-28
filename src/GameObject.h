@@ -19,9 +19,9 @@ class GameObject
 {
 
 public:
-    enum objType{strawberry, crystal1, crystal2, crystal3};
+    enum objType{strawberry, plant};
 
-    virtual void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view, glm::vec3 ) = 0;
+    virtual void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view, glm::vec3 , ColorCollectGameplay* ccg) = 0;
     glm::vec3 currentPos;
     glm::vec3 scale;
 

@@ -59,7 +59,8 @@ glm::mat4 Player::updateModelMatrix(double frametime,
 
     // this is because the player is a GameObject 
     currentPos = position;
-    
+
+
     // construct a model matrix using our current position and current yaw angle
     return glm::translate(glm::mat4(1), position) * Ry;
 }
@@ -146,15 +147,11 @@ void Player::drawShape(std::shared_ptr<Program> prog)
 }
 bool Player::checkForCollisions(std::vector<GameObject*> &objs, BoundingVolumeHierarchy* bvh)
 {
-    bool collided = bvh->checkForCollision(objs, bvh->root, this->getBS());
+    bool collided = false;
+    bvh->checkForCollision(objs, bvh->root, this->getBS(), collided);
 
     if(collided)
     {
-        std::cout << "collided with an object" << std::endl;
-//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
-//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
-//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
-//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
         return true;
     }
 
