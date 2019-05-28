@@ -22,6 +22,7 @@ out vec4 color;
 in float water;
 in vec4 pos;
 
+/*
 vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
 {
     vec3 lightVec = light.xyz;
@@ -37,6 +38,18 @@ vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
     vec3 phongColor = diffuse + specular;
 
     return phongColor;
+}
+*/
+vec3 calcLight(vec3 lightPosition, vec3 fragNor)
+{
+    float distance = distance(lightPosition, pos.xyz);
+    vec3 lightDirection = lightPosition - pos.xyz;
+    float diffuse = pow(1/distance*clamp(dot(fragNor, lightDirection), 0, 1),2);
+
+    vec3 lightColor = vec3(fragNor);
+    lightColor += diffuse * vec3(1,1,1);
+    return lightColor;
+
 }
 
 /* returns 1 if shadowed */
@@ -77,13 +90,14 @@ void main()
 //        for (j = 0; j < nl; j++) {
 //            ivec2 ij = ivec2(i, j);
 //            vec4 light = texelFetch(lighting, ij, 0);
-            finalColor += calcLight(lightPos, viewVec, norm);
+            //finalColor += calcLight(lightPos, viewVec, norm);
+            finalColor += calcLight(lightPos, norm);
 //        }
 //    }
 
     float shade = TestShadow(fPosLS);
     //Outcolor = amb*(texColor0) + (1.0-Shade)*texColor0*BaseColor;
     //color = vec4(finalColor, 1.0);
-    color = vec4(MatAmb + (1.0 - shade)*finalColor, 1.0);
+    color = vec4((1.0 - shade)*finalColor, 1.0);
     //color = vec4(MatAmb + finalColor, 1.0);
 }
