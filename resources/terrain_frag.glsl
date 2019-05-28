@@ -46,7 +46,7 @@ vec3 calcLight(vec3 lightPosition, vec3 fragNor)
     vec3 lightDirection = lightPosition - pos.xyz;
     float diffuse = pow(1/distance*clamp(dot(fragNor, lightDirection), 0, 1),2);
 
-    vec3 lightColor = vec3(fragNor);
+    vec3 lightColor = vec3(0);
     lightColor += diffuse * vec3(1,1,1);
     return lightColor;
 
