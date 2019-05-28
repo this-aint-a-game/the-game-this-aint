@@ -14,7 +14,7 @@ void BoundingVolumeHierarchy::init(std::vector<GameObject*> objs)
 
     createBVH(root, objs);
 
-    printBVH(root);
+//    printBVH(root);
 }
 
 void BoundingVolumeHierarchy::printBVH(BoundingBox* cur)

@@ -51,7 +51,7 @@ class Terrain {
 
 public:
     Terrain(ColorCollectGameplay * ccg);
-    void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting*);
+    void render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting*, glm::vec3);
     void initTerrain();
     static float getHeight(float x, float z);
     ~Terrain() { clean(); }

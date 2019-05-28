@@ -5,13 +5,13 @@
 void Sky::initTex()
 {
     skyTexture = std::make_shared<Texture>();
-    skyTexture->setFilename("../Resources/night.jpg");
+    skyTexture->setFilename("../resources/night.jpg");
     skyTexture->init();
     skyTexture->setUnit(0);
     skyTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
     sunTexture = std::make_shared<Texture>();
-    sunTexture->setFilename("../Resources/night.jpg");
+    sunTexture->setFilename("../resources/night.jpg");
     sunTexture->init();
     sunTexture->setUnit(1);
     sunTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -20,15 +20,15 @@ void Sky::initTex()
 void Sky::skySetUp()
 {
     sphereShape = std::make_shared<Shape>();
-    sphereShape->loadMesh("../Resources/sphere.obj");
+    sphereShape->loadMesh("../resources/sphere.obj");
     sphereShape->resize();
     sphereShape->init();
 
     skyProg = std::make_shared<Program>();
     skyProg->setVerbose(true);
     skyProg->setShaderNames(
-            "../Resources/sky_tex_vert.glsl",
-            "../Resources/sky_tex_frag.glsl");
+            "../resources/sky_tex_vert.glsl",
+            "../resources/sky_tex_frag.glsl");
     if (! skyProg->init())
     {
         std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;

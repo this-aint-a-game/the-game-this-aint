@@ -33,6 +33,8 @@ void ObjectCollection::objectSetUp()
     objProg->addAttribute("vertNor");
     objProg->addUniform("lighting");
     objProg->addUniform("numberLights");
+    objProg->addUniform("lightPos");
+
 }
 
 void ObjectCollection::initSceneCollectibles()

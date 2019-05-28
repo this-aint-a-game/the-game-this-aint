@@ -10,7 +10,7 @@
 #include "ColorCollectGameplay.h"
 
 
-float randFloat(float l, float h)
+float Particle::randFloat(float l, float h)
 {
 	float r = rand() / (float) RAND_MAX;
 	return (1.0f - r) * l + r * h;
@@ -18,6 +18,7 @@ float randFloat(float l, float h)
 
 void Particle::load()
 {
+    x = glm::vec3(randFloat(-75.f, 75.f), randFloat(-75.f, 75.f), randFloat(-75.f, 75.f));
 }
 
 float getDistance(glm::vec3 playPos, glm::vec3 otherPos)
@@ -71,16 +72,16 @@ int getClosestColor(glm::vec3 playPos, ColorCollectGameplay* ccg)
 void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
 {
 	x.x = playPos.x;
-    x.y = playPos.y;
+    x.y = playPos.y + 0.2f;
 	x.z = playPos.z;
 
     int colorSelected = getClosestColor(playPos, ccg);
 
     if((colorSelected == 0) && (!ccg->red))
     {
-        v.x = (ccg->redColorPos.x - playPos.x)+ randFloat(-0.5f, 0.5f);
-        v.y = (ccg->redColorPos.y - playPos.y) + randFloat(0.1f, 0.5f);
-        v.z = (ccg->redColorPos.z - playPos.z)+ randFloat(-0.5f, 0.5f);
+        v.x = (ccg->redColorPos.x - playPos.x)+ randFloat(-0.7f, 0.7f);
+        v.y = (ccg->redColorPos.y - playPos.y) + randFloat(0.4f, 0.6f);
+        v.z = (ccg->redColorPos.z - playPos.z)+ randFloat(-0.7f, 0.7f);
 
         color.r = ccg->redColor.diffuse.r + randFloat(-0.1f, 0.1f);
         color.g = ccg->redColor.diffuse.g + randFloat(-0.1f, 0.1f);
@@ -88,9 +89,9 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     }
     else if((colorSelected == 1) && (!ccg->orange))
     {
-        v.x = (ccg->orangeColorPos.x - playPos.x)+ randFloat(-0.5f, 0.5f);
-        v.y = (ccg->orangeColorPos.y - playPos.y) + randFloat(0.5f, 1.0f);
-        v.z = (ccg->orangeColorPos.z - playPos.z)+ randFloat(-0.5f, 0.5f);
+        v.x = (ccg->orangeColorPos.x - playPos.x)+ randFloat(-0.7f, 0.7f);
+        v.y = (ccg->orangeColorPos.y - playPos.y) + randFloat(0.4f, 0.6f);
+        v.z = (ccg->orangeColorPos.z - playPos.z)+ randFloat(-0.7f, 0.7f);
 
 
         color.r = ccg->orangeColor.diffuse.r + randFloat(-0.1f, 0.1f);
@@ -99,9 +100,9 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     }
     else if((colorSelected == 2) && (!ccg->yellow))
     {
-        v.x = (ccg->yellowColorPos.x - playPos.x)+ randFloat(-0.5f, 0.5f);
-        v.y = (ccg->yellowColorPos.y - playPos.y) + randFloat(0.1f, 0.5f);
-        v.z = (ccg->yellowColorPos.z - playPos.z)+ randFloat(-0.5f, 0.5f);
+        v.x = (ccg->yellowColorPos.x - playPos.x)+ randFloat(-0.7f, 0.7f);
+        v.y = (ccg->yellowColorPos.y - playPos.y) + randFloat(0.4f, 0.6f);
+        v.z = (ccg->yellowColorPos.z - playPos.z)+ randFloat(-0.7f, 0.7f);
 
         color.r = ccg->yellowColor.diffuse.r + randFloat(-0.1f, 0.1f);
         color.g = ccg->yellowColor.diffuse.g + randFloat(-0.1f, 0.1f);
@@ -110,9 +111,9 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     }
     else if((colorSelected == 3) && (!ccg->green))
     {
-        v.x = (ccg->greenColorPos.x - playPos.x)+ randFloat(-0.5f, 0.5f);
-        v.y = (ccg->greenColorPos.y - playPos.y) + randFloat(0.1f, 0.5f);
-        v.z = (ccg->greenColorPos.z - playPos.z)+ randFloat(-0.5f, 0.5f);
+        v.x = (ccg->greenColorPos.x - playPos.x)+ randFloat(-0.7f, 0.7f);
+        v.y = (ccg->greenColorPos.y - playPos.y) + randFloat(0.4f, 0.6f);
+        v.z = (ccg->greenColorPos.z - playPos.z)+ randFloat(-0.7f, 0.7f);
 
         color.r = ccg->greenColor.diffuse.r + randFloat(-0.1f, 0.1f);
         color.g = ccg->greenColor.diffuse.g + randFloat(-0.1f, 0.1f);
@@ -121,9 +122,9 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     else if((colorSelected == 4) && (!ccg->blue))
     {
 
-        v.x = (ccg->blueColorPos.x- playPos.x) + randFloat(-0.5f, 0.5f);
-        v.y = (ccg->blueColorPos.y - playPos.y) + randFloat(0.1f, 0.5f);
-        v.z = (ccg->blueColorPos.z - playPos.z) + randFloat(-0.5f, 0.5f);
+        v.x = (ccg->blueColorPos.x- playPos.x) + randFloat(-0.7f, 0.7f);
+        v.y = (ccg->blueColorPos.y - playPos.y) + randFloat(0.4f, 0.6f);
+        v.z = (ccg->blueColorPos.z - playPos.z) + randFloat(-0.7f, 0.7f);
 
 
         color.r = ccg->blueColor.diffuse.r + randFloat(-0.1f, 0.1f);
@@ -133,9 +134,9 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     else if((colorSelected == 5) && (!ccg->violet))
     {
 
-        v.x = (ccg->violetColorPos.x - playPos.x) + randFloat(-0.5f, 0.5f);
-        v.y = (ccg->violetColorPos.y - playPos.y) + randFloat(0.1f, 0.5f);
-        v.z = (ccg->violetColorPos.z - playPos.z) + randFloat(-0.5f, 0.5f);
+        v.x = (ccg->violetColorPos.x - playPos.x) + randFloat(-0.7f, 0.7f);
+        v.y = (ccg->violetColorPos.y - playPos.y) + randFloat(0.4f, 0.6f);
+        v.z = (ccg->violetColorPos.z - playPos.z) + randFloat(-0.7f, 0.7f);
 
 
         color.r = ccg->violetColor.diffuse.r + randFloat(-0.1f, 0.1f);
@@ -154,7 +155,7 @@ void Particle::rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg)
     }
 
     v = glm::normalize(v);
-	lifespan = randFloat(2.f, 5.f);
+	lifespan = randFloat(5.f, 10.f);
 	tEnd = t + lifespan;
 
 	scale = randFloat(0.5f, 10.0f);

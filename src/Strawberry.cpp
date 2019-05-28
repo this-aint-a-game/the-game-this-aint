@@ -43,7 +43,7 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
     setPosition(getRand(-GROUND_SIZE, GROUND_SIZE), getRand(-GROUND_SIZE, GROUND_SIZE));
 }
 
-void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view)
+void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos)
 {
 	Model->pushMatrix();
 	Model->translate(glm::vec3(this->currentPos.x, this->currentPos.y + 0.5f, this->currentPos.z));
@@ -67,6 +67,7 @@ void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shap
 		}
         glUniform3f(prog->getUniform("view"), view.x, view.y, view.z);
 		glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+		glUniform3f(prog->getUniform("lightPos"), butterflyPos.x, butterflyPos.y, butterflyPos.z);
 		strawberryShapes[j]->draw(prog);
 	}
 	Model->popMatrix();

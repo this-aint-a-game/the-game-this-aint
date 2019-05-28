@@ -15,6 +15,7 @@ obtain.
 #include "WindowManager.h"
 #include "GLTextureWriter.h"
 #include "Particle.h"
+#include "Butterfly.h"
 #include "Terrain.h"
 #include "Water.h"
 #include "Shadow.h"
@@ -39,7 +40,7 @@ public:
 
     ParticleCollection *pc = new ParticleCollection();
     ObjectCollection *oc = new ObjectCollection();
-
+	Butterfly butterfly = Butterfly();
 	Camera camera = Camera();
     Lighting* lighting = new Lighting();
 	Shadow shadow = Shadow(lighting);
@@ -260,7 +261,7 @@ public:
         oc->player.initPlayer(oc->gameplay);
 		oc->initSceneCollectibles();
 		oc->initObjectHierarchy();
-//        initSceneObjects();
+		butterfly.initbutterfly();
 
 		CHECKED_GL_CALL(glGenVertexArrays(1, &pc->ParticleVertexArrayID));
 		CHECKED_GL_CALL(glBindVertexArray(pc->ParticleVertexArrayID));
@@ -356,13 +357,13 @@ public:
 
             if(oc->objects[i]->type == GameObject::strawberry)
             {
-                oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition());
+                oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(), butterfly.currentPos);
             }
             else if(oc->objects[i]->type == GameObject::crystal1)
             {
                 CHECKED_GL_CALL(glEnable(GL_BLEND));
                 glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-                oc->objects[i]->drawObject(modelptr, oc->crystal1Shapes, oc->objProg, camera.getPosition());
+                oc->objects[i]->drawObject(modelptr, oc->crystal1Shapes, oc->objProg, camera.getPosition(), butterfly.currentPos);
                 CHECKED_GL_CALL(glDisable(GL_BLEND));
             }
 
@@ -395,6 +396,7 @@ public:
         oc->player.updateView(deltaTime * 0.000001f, mousex, mousey, width,
 						  height, camera.getPosition(), oc->objects);
         oc->player.checkForCollisions(oc->objects, oc->bvh);
+		butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
         lightPos.z = sin(glfwGetTime()/100) * 500.f;
@@ -477,11 +479,11 @@ public:
 
         if (!debug)
         {
-            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), camera.getPosition(), lighting);
+            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), camera.getPosition(), lighting, butterfly.currentPos);
         }
         else
         {
-            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), cameraPos, lighting);
+            terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), cameraPos, lighting, butterfly.currentPos);
         }
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
@@ -489,9 +491,10 @@ public:
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
-		shadow.render(oc->player);
+		shadow.render(oc->player, butterfly);
         CHECKED_GL_CALL(glDisable(GL_BLEND));
-		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting);
+		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
+		butterfly.drawbutterfly(userViewPtr, projectionPtr, camera.getPosition(), lighting);
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
