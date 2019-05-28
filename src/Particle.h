@@ -28,13 +28,13 @@ public:
 
 	void load();
 	void rebirth(float t, glm::vec3 playPos, ColorCollectGameplay* ccg);
+    float randFloat(float l, float h);
 	void update(float t, float h, const glm::vec3 &g, const bool *keyToggles, glm::vec3, ColorCollectGameplay*);
-    glm::vec3 x = glm::vec3(0.f);
+    glm::vec3 x = glm::vec3(randFloat(-75.f, 75.f), randFloat(-75.f, 75.f), randFloat(-75.f, 75.f));
     glm::vec4 color = glm::vec4(1.f);
 
 
 private:
-
 
 	glm::vec3 v = glm::vec3(0.f);
 	float lifespan = 1.f;

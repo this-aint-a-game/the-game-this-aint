@@ -10,13 +10,15 @@
 #include <iostream>
 
 #include "glm/gtc/matrix_transform.hpp"
+#define PADDING 0.4
 
 class BoundingSphere {
 
 public:
 
-    glm::vec3 bs_midpt;
+    glm::vec3 midpt;
     float radius;
+
     glm::vec3 sphere_min;
     glm::vec3 sphere_max;
 
@@ -27,8 +29,8 @@ public:
 
     bool isCollided(BoundingSphere* otherSphere, glm::vec3 currentPos)
     {
-        glm::vec3 curSpherePos = this->bs_midpt + currentPos;
-        glm::vec3 otherCurPos = otherSphere->bs_midpt;
+        glm::vec3 curSpherePos = this->midpt + currentPos;
+        glm::vec3 otherCurPos = otherSphere->midpt;
 
         float dist = distance(curSpherePos, otherCurPos);
         float sumOfRadius = otherSphere->radius + this->radius;
@@ -53,8 +55,8 @@ public:
         glm::mat4 sm = glm::scale(glm::mat4(1), scale_vec);
         this->sphere_min = glm::vec3(glm::vec4(min, 1) * sm);
         this->sphere_max = glm::vec3(glm::vec4(max, 1) * sm);
-        this->bs_midpt = ((sphere_max + sphere_min) / 2.f);
-        this->radius = distance(sphere_max, bs_midpt);
+        this->midpt = ((sphere_max + sphere_min) / 2.f);
+        this->radius = distance(sphere_max, midpt) - PADDING;
     };
 
     BoundingSphere* get(glm::vec3 pos)

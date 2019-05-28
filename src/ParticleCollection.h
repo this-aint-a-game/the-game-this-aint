@@ -12,7 +12,7 @@ public:
 
     vector<std::shared_ptr<Particle>> particles;
     GLuint ParticleVertexArrayID;
-    int numP = 20;
+    int numP = 10;
     GLfloat points[1800];
     GLfloat pointColors[2400];
     GLuint particlePointsBuffer;
