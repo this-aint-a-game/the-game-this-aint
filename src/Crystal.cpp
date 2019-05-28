@@ -46,7 +46,7 @@ Crystal::Crystal(glm::vec3 min, glm::vec3 max, int num, objType type, ColorColle
     }
 }
 
-void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog, glm::vec3 view)
+void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> crystalShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos)
 {
     Model->pushMatrix();
     Model->translate(vec3(this->currentPos.x, this->currentPos.y, this->currentPos.z));
@@ -69,6 +69,7 @@ void Crystal::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>>
         }
 
         glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()));
+        glUniform3f(prog->getUniform("lightPos"), butterflyPos.x, butterflyPos.y, butterflyPos.z);
        // crystalShapes[j]->draw(prog);
     }
 

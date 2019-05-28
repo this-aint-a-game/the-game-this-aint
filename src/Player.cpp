@@ -144,25 +144,20 @@ void Player::drawShape(std::shared_ptr<Program> prog)
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
     playerShape->draw(prog);
 }
-bool Player::checkForCollisions(std::vector<GameObject*> & objs)
+bool Player::checkForCollisions(std::vector<GameObject*> &objs, BoundingVolumeHierarchy* bvh)
 {
-    for(int i = 0; i < objs.size(); i++)
-    {
-        if (objs[i]->isCollided(this->getBS()))
-        {
-            //std::cout << "102" << std::endl;
-            if (dynamic_cast<Strawberry*>(objs[i]) != nullptr)
-            {
-                //std::cout << "105" << std::endl;
-                auto s = dynamic_cast<Strawberry*>(objs[i]);
-                std::cout << "collecting" << std::endl;
-                s->collect();
+    bool collided = bvh->checkForCollision(objs, bvh->root, this->getBS());
 
-                // TODO free?
-                objs.erase(objs.begin()+i);
-            }
-            return true;
-        }
+    if(collided)
+    {
+        std::cout << "collided with an object" << std::endl;
+//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
+//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
+//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
+//        std::cout << "cur->objects_contained[i]: " << collided->color << "\n\n\n\n";
+        return true;
     }
+
     return false;
+
 }

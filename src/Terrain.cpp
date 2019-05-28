@@ -22,7 +22,7 @@ void Terrain::initTex()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting* lighting) {
+void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting* lighting, glm::vec3 lightPos) {
     prog->bind();
 
     glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, glm::value_ptr(P));
@@ -30,6 +30,8 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, glm::value_ptr(M));
     glUniform3f(prog->getUniform("cameraPos"), cameraPos.x, cameraPos.y,
                 cameraPos.z);
+    glUniform3f(prog->getUniform("lightPos"), lightPos.x, lightPos.y,
+                lightPos.z);
     glUniform1f(prog->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(prog->getUniform("lighting"));
 
@@ -273,7 +275,7 @@ void Terrain::initTerrain()
     prog->addUniform("numberLights");
     prog->addUniform("shadowDepth");
     prog->addUniform("LS");
-
+    prog->addUniform("lightPos");
 
     prog->addAttribute("vertPos");
     prog->addAttribute("vertNor");

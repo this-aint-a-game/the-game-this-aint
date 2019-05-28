@@ -12,6 +12,7 @@ uniform float shine;
 uniform float numberLights;
 uniform sampler2D lighting;
 uniform vec3 cameraPos;
+uniform vec3 lightPos;
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
@@ -23,7 +24,7 @@ in vec4 pos;
 
 vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
 {
-    vec3 lightVec = normalize(light.xyz);
+    vec3 lightVec = light.xyz;
     vec3 l = normalize(lightVec - (pos).xyz);
     vec3 halfVec = normalize(l + viewVec);
     vec3 k_a = MatAmb;
@@ -70,15 +71,15 @@ void main()
     vec3 viewVec = normalize(cameraPos - (V * M * vec4(normalize(norm), 1.0)).xyz);
     vec3 finalColor = vec3(0);//= MatAmb;
 
-    highp int nl = int(numberLights);
-    int i, j;
-    for (i = 0; i < nl; i++) {
-        for (j = 0; j < nl; j++) {
-            ivec2 ij = ivec2(i, j);
-            vec4 light = texelFetch(lighting, ij, 0);
-            finalColor += calcLight(light.xyz, viewVec, norm)/numberLights;
-        }
-    }
+//    highp int nl = int(numberLights);
+//    int i, j;
+//    for (i = 0; i < nl; i++) {
+//        for (j = 0; j < nl; j++) {
+//            ivec2 ij = ivec2(i, j);
+//            vec4 light = texelFetch(lighting, ij, 0);
+            finalColor += calcLight(lightPos, viewVec, norm);
+//        }
+//    }
 
     float shade = TestShadow(fPosLS);
     //Outcolor = amb*(texColor0) + (1.0-Shade)*texColor0*BaseColor;
