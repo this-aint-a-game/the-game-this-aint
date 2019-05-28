@@ -24,6 +24,7 @@ obtain.
 #include "Sky.h"
 #include "ObjectCollection.h"
 #include "ParticleCollection.h"
+#include "ViewFrustumCulling.h"
 
 #define MOVEMENT_SPEED 0.2f
 #define RENDER_SPEED 0.5f
@@ -47,6 +48,7 @@ public:
 	Terrain terrain = Terrain(oc->gameplay);
 	Water water = Water(oc->gameplay);
 	Sky sky = Sky();
+	ViewFrustumCulling* vfc = new ViewFrustumCulling();
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -353,18 +355,20 @@ public:
 
         for(int i = 0; i < oc->objects.size(); i++)
         {
-            MatrixStack *modelptr = Model.get();
+            if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
+            {
+                MatrixStack *modelptr = Model.get();
 
-            if(oc->objects[i]->type == GameObject::strawberry)
-            {
-                oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(), butterfly.currentPos);
-            }
-            else if(oc->objects[i]->type == GameObject::crystal1)
-            {
-                CHECKED_GL_CALL(glEnable(GL_BLEND));
-                glBlendFunc(GL_ONE_MINUS_DST_ALPHA,GL_DST_ALPHA);
-                oc->objects[i]->drawObject(modelptr, oc->crystal1Shapes, oc->objProg, camera.getPosition(), butterfly.currentPos);
-                CHECKED_GL_CALL(glDisable(GL_BLEND));
+                if (oc->objects[i]->type == GameObject::strawberry) {
+                    oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
+                                               butterfly.currentPos);
+                } else if (oc->objects[i]->type == GameObject::crystal1) {
+                    CHECKED_GL_CALL(glEnable(GL_BLEND));
+                    glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
+                    oc->objects[i]->drawObject(modelptr, oc->crystal1Shapes, oc->objProg, camera.getPosition(),
+                                               butterfly.currentPos);
+                    CHECKED_GL_CALL(glDisable(GL_BLEND));
+                }
             }
 
         }
@@ -457,15 +461,18 @@ public:
 
         MatrixStack *userViewPtr = ViewUser.get();
 
+
         auto Projection = make_shared<MatrixStack>();
         Projection->pushMatrix();
-        Projection->perspective(45.0f, aspect, 0.01f, 150.f);
+        Projection->perspective(radians(50.0f), aspect, 0.1f, 100.0f);
         MatrixStack *projectionPtr = Projection.get();
-
 
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
+
+        // view frustum culling
+        vfc->ExtractVFPlanes(Projection->topMatrix(), ViewUser->topMatrix());
 
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
