@@ -13,8 +13,7 @@ void BoundingVolumeHierarchy::init(std::vector<GameObject*> objs)
     root = new BoundingBox(min_hld, max_hld);
 
     createBVH(root, objs);
-
-//    printBVH(root);
+    printBVH(root);
 }
 
 void BoundingVolumeHierarchy::printBVH(BoundingBox* cur)
@@ -26,6 +25,10 @@ void BoundingVolumeHierarchy::printBVH(BoundingBox* cur)
             auto hld = dynamic_cast<Strawberry*>(cur->objects_contained[i]);
             std::cout << hld->color << std::endl;
         }
+        else
+        {
+            std::cout << cur->objects_contained[i]->color << std::endl;
+        }
     }
 
     if(cur->right_box != nullptr)
@@ -34,18 +37,18 @@ void BoundingVolumeHierarchy::printBVH(BoundingBox* cur)
         printBVH(cur->left_box);
 }
 
-bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameobjs, BoundingBox* cur, BoundingSphere* bs)
+bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameobjs, BoundingBox* cur, BoundingSphere* bs, bool &collided)
 {
     if(cur->right_box != nullptr && cur->left_box != nullptr)
     {
         if(cur->isCollided(bs))
         {
-            checkForCollision(gameobjs, cur->right_box, bs);
-            checkForCollision(gameobjs, cur->left_box, bs);
+            checkForCollision(gameobjs, cur->right_box, bs, collided);
+            checkForCollision(gameobjs, cur->left_box, bs, collided);
         }
     }
 
-    GameObject* hold = checkAgainstShapes(cur, bs);
+    GameObject* hold = checkAgainstShapes(cur, bs, collided);
     for (int i = 0; i < gameobjs.size(); i++)
     {
         if((gameobjs[i] == hold) && (dynamic_cast<Strawberry*>(gameobjs[i]) != nullptr))
@@ -67,13 +70,14 @@ bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameob
 
 }
 
-GameObject* BoundingVolumeHierarchy::checkAgainstShapes(BoundingBox* cur, BoundingSphere* bs)
+GameObject* BoundingVolumeHierarchy::checkAgainstShapes(BoundingBox* cur, BoundingSphere* bs, bool& collided)
 {
 
     for(int i = 0; i < cur->objects_contained.size(); i++)
     {
         if (cur->objects_contained[i]->isCollided(bs))
         {
+            collided = true;
             return cur->objects_contained[i];
         }
     }

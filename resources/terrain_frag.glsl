@@ -25,29 +25,31 @@ in vec4 pos;
 /*
 vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
 {
-    vec3 lightVec = light.xyz;
-    vec3 l = normalize(lightVec - (pos).xyz);
-    vec3 halfVec = normalize(l + viewVec);
+
+
     vec3 k_a = MatAmb;
     vec3 k_s = MatSpec;
     vec3 k_d = MatDif;
 
     vec3 diffuse = MatDif*(clamp(dot(fragNor, lightVec), 0, 1));//*texColor.xyz;
-    vec3 specular = MatSpec*pow(clamp(dot(halfVec, fragNor), 0, 1), shine);
+
 
     vec3 phongColor = diffuse + specular;
 
     return phongColor;
 }
 */
-vec3 calcLight(vec3 lightPosition, vec3 fragNor)
+vec3 calcLight(vec3 lightPosition, vec3 fragNor, vec3 viewVec)
 {
     float distance = distance(lightPosition, pos.xyz);
     vec3 lightDirection = lightPosition - pos.xyz;
     float diffuse = pow(1/distance*clamp(dot(fragNor, lightDirection), 0, 1),2);
 
+    vec3 halfVec = normalize(distance + viewVec);
+    vec3 specular = MatSpec*pow(1/distance*pow(clamp(dot(halfVec, fragNor), 0, 1), shine),2);
+
     vec3 lightColor = vec3(0);
-    lightColor += diffuse * vec3(1,1,1);
+    lightColor += diffuse * vec3(1,1,1) + specular;
     return lightColor;
 
 }
@@ -91,7 +93,7 @@ void main()
 //            ivec2 ij = ivec2(i, j);
 //            vec4 light = texelFetch(lighting, ij, 0);
             //finalColor += calcLight(lightPos, viewVec, norm);
-            finalColor += calcLight(lightPos, norm);
+            finalColor += calcLight(lightPos, norm, viewVec);
 //        }
 //    }
 

@@ -83,70 +83,55 @@ void ObjectCollection::initSceneCollectibles()
 
 void ObjectCollection::initSceneObjects()
 {
-    uploadMultipleShapes("/crystal1.obj", 1);
-//		uploadMultipleShapes("/crystal2.obj", 2);
-//		uploadMultipleShapes("/crystal3.obj", 3);
-    numCrystals = glm::clamp(rand() % 100, 5, 15);
+    uploadMultipleShapes("/plant.obj", 1);
+    numPlants = glm::clamp(rand() % 100, 50, 100);
 
-    for(int i = 0; i < numCrystals; i++)
+    for(int i = 0; i < numPlants; i++)
     {
-//            bool found_spot = false;
-        Crystal *crystal;
+        bool found_spot = false;
+        Plant *plant;
+        while (!found_spot)
+        {
+            int num = glm::clamp(rand() % 6, 0, 6);
+            plant = new Plant(plantmin, plantmax, num, GameObject::plant, gameplay);
+            BoundingSphere *otherBS = plant->getBS();
+            for (int j = 0; j < objects.size(); j++)
+            {
+                plant = new Plant(plantmin, plantmax, num, GameObject::plant, gameplay);
+                BoundingSphere *otherBS = plant->getBS();
 
-//            while (!found_spot)
-//            {
-
-//                GameObject::objType crystal_type = selectRandomCrystal();
-        GameObject::objType crystal_type = GameObject::crystal1;
-
-        //if (crystal_type == GameObject::crystal1)
-        //{
-        crystal = new Crystal(cryst1min, cryst1max, i % 6, crystal_type, gameplay);
-        //}
-//                else if (crystal_type == GameObject::crystal2)
-//                {
-//                    crystal->initObject(cryst2min, cryst2max, i % 5, crystal_type);
-//                }
-//                else if (crystal_type == GameObject::crystal3)
-//                {
-//                    crystal->initObject(cryst3min, cryst3max, i % 5, crystal_type);
-//                }
-
-//                BoundingBox *otherBB = crystal->getBB();
-//                for (int j = 0; j < objects.size(); j++)
-//                {
-//                    BoundingBox *otherBB = crystal->getBB();
-//                    if ((objects[j]->isCollided(otherBB))) {
-//                        delete crystal;
-//                        delete otherBB;
-//                    }
-//                }
-//                found_spot = true;
-//                delete otherBB;
-
-//            }
-        objects.push_back(crystal);
-    }
-}
-
-GameObject::objType selectRandomCrystal()
-{
-    int random = rand() % 3;
-
-    if(random == 0)
-    {
-        return GameObject::crystal1;
-    }
-    else if (random == 1)
-    {
-        return GameObject::crystal2;
-    }
-    else
-    {
-        return GameObject::crystal3;
+                if ((objects[j]->isCollided(otherBS)))
+                {
+                    delete plant;
+                    delete otherBS;
+                }
+            }
+            found_spot = true;
+            delete otherBS;
+        }
+        objects.push_back(plant);
     }
 
 }
+
+//GameObject::objType selectRandomCrystal()
+//{
+//    int random = rand() % 3;
+//
+//    if(random == 0)
+//    {
+//        return GameObject::crystal1;
+//    }
+//    else if (random == 1)
+//    {
+//        return GameObject::crystal2;
+//    }
+//    else
+//    {
+//        return GameObject::crystal3;
+//    }
+//
+//}
 
 void ObjectCollection::uploadMultipleShapes(string objDir, int switchNum)
 {
@@ -213,17 +198,9 @@ void ObjectCollection::uploadMultipleShapes(string objDir, int switchNum)
                     strawberryShapes.push_back(s);
                     break;
                 case 1:
-                    cryst1max = Gmax;
-                    cryst1min = Gmin;
-                    crystal1Shapes.push_back(s);
-                case 2:
-                    cryst2max = Gmax;
-                    cryst2min = Gmin;
-                    crystal2Shapes.push_back(s);
-                case 3:
-                    cryst3max = Gmax;
-                    cryst3min = Gmin;
-                    crystal3Shapes.push_back(s);
+                    plantmax = Gmax;
+                    plantmin = Gmin;
+                    plantShapes.push_back(s);
             }
         }
     }
