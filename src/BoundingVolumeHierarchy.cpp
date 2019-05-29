@@ -13,7 +13,7 @@ void BoundingVolumeHierarchy::init(std::vector<GameObject*> objs)
     root = new BoundingBox(min_hld, max_hld);
 
     createBVH(root, objs);
-    printBVH(root);
+    //printBVH(root);
 }
 
 void BoundingVolumeHierarchy::printBVH(BoundingBox* cur)

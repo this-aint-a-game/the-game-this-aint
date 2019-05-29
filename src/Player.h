@@ -29,13 +29,14 @@ class Player : public GameObject
 
     glm::mat4 updateModelMatrix
             (
-                    double frametime,
-                    int mousex,
-                    int mousey,
-                    int width,
-                    int height,
-                    glm::vec3 lastCamDir,
-                    std::vector<GameObject*> & objs
+                double frametime, 
+                int mousex, 
+                int mousey,
+                int width, 
+                int height,
+                glm::vec3 camPos,
+                std::vector<GameObject*> & objs,
+                BoundingVolumeHierarchy * bvh
             );
 
     glm::vec3 oldPos, position, dir, targetDir;
@@ -51,7 +52,17 @@ class Player : public GameObject
         oldPos = position;
     }
 
-    void updateView(double frametime, int mousex, int mousey, int width, int height, glm::vec3 camPos, std::vector<GameObject*> & objs);
+    void updateView(
+                    double frametime, 
+                    int mousex, 
+                    int mousey, 
+                    int width, 
+                    int height, 
+                    glm::vec3 camdir, 
+                    std::vector<GameObject*> & objs,
+                    BoundingVolumeHierarchy * bvh
+                    );
+
     void initPlayer(ColorCollectGameplay * ccg);
     void drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting, glm::vec3 butterflyPos);
     // TODO this should be less specific

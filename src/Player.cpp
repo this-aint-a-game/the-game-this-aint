@@ -8,10 +8,9 @@ glm::mat4 Player::updateModelMatrix(double frametime,
                                     int width, 
                                     int height,
                                     glm::vec3 camPos,
-                                    std::vector<GameObject*> & objs)
+                                    std::vector<GameObject*> & objs,
+                                    BoundingVolumeHierarchy * bvh)
 {
-    // for collision detection
-    oldPos = position;
     // set speed = 0 as default, will update value based on keypresses
     float speed = 0;
     // because the camera is always looking at the player when the player has control of the 
@@ -51,15 +50,15 @@ glm::mat4 Player::updateModelMatrix(double frametime,
     glm::mat4 Ry = glm::rotate(glm::mat4(1), yaw, glm::vec3(0,1,0));
 
     // move the player in the direction they are facing
-    position += speed * dir;
+    currentPos = position + (speed * dir);
     // set their y position based on the height of the terrain at that point
-    position.y = Terrain::getHeight(position.x, position.z) + 0.3;
+    currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z) + 0.3;
 
     //std::cout << "position prior to check is: " << position.x << "," << position.y << "," << position.z << std::endl;
-
-    // this is because the player is a GameObject 
-    currentPos = position;
-
+    if(checkForCollisions(objs, bvh))
+        currentPos = position;
+    else
+        position = currentPos;
 
     // construct a model matrix using our current position and current yaw angle
     return glm::translate(glm::mat4(1), position) * Ry;
@@ -135,9 +134,10 @@ void Player::updateView(double frametime,
                         int width, 
                         int height, 
                         glm::vec3 camdir, 
-                        std::vector<GameObject*> & objs)
+                        std::vector<GameObject*> & objs,
+                        BoundingVolumeHierarchy * bvh)
 {
-    model = updateModelMatrix(frametime, mousex, mousey, width, height, camdir, objs);
+    model = updateModelMatrix(frametime, mousex, mousey, width, height, camdir, objs, bvh);
     model *= glm::scale(glm::mat4(1), scale);
 }
 void Player::drawShape(std::shared_ptr<Program> prog)

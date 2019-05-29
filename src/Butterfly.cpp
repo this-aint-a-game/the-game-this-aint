@@ -2,7 +2,7 @@
 #include "Player.h"
 
 #define BUTTERFLY_ANGLE_SCALE 2.0
-#define BUTTERFLY_HEIGHT 2.0
+#define BUTTERFLY_HEIGHT 1.0
 #define BUTTERFLY_SPEED 0.0000008f
 
 void Butterfly::updateModelMatrix(double frametime, glm::vec3 playerPos)
