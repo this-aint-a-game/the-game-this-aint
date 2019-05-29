@@ -55,7 +55,8 @@ bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameob
         {
             auto hld = dynamic_cast<Strawberry*>(gameobjs[i]);
             hld->collect();
-            gameobjs.erase(gameobjs.begin()+i);
+//            printBVH(root);
+//            gameobjs.erase(gameobjs.begin()+i);
         }
     }
 
