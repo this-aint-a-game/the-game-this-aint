@@ -1,5 +1,5 @@
 #include "Butterfly.h"
-#include "Player.h"
+#include "Terrain.h"
 
 #define BUTTERFLY_ANGLE_SCALE 2.0
 #define BUTTERFLY_HEIGHT 1.0
@@ -11,6 +11,7 @@ void Butterfly::updateModelMatrix(double frametime, glm::vec3 origin)
     angle += frametime *  BUTTERFLY_SPEED * BUTTERFLY_ANGLE_SCALE;
     offsets = glm::vec3(cos(angle), sin(5*angle)*0.05 + BUTTERFLY_HEIGHT, sin(angle));
     currentPos = origin + offsets;
+    currentPos.y = std::max((float)(Terrain::getHeight(currentPos.x, currentPos.z) + BUTTERFLY_HEIGHT/4), currentPos.y);
     model = glm::translate(glm::mat4(1), currentPos) 
             * glm::rotate(glm::mat4(1), -1*angle, glm::vec3(0,1,0)) 
             * glm::scale(glm::mat4(1), glm::vec3(0.03f,0.03f,0.03f));

@@ -415,6 +415,7 @@ public:
 							oc->objects,
 							oc->bvh);
 
+		// TODO: make this better
 		static float t = 0;
 		if(t < 1)
 		{
@@ -425,7 +426,6 @@ public:
 			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
 			t += deltaTime*0.0000001;
 			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
-
 		} 
 		else
 		{		
