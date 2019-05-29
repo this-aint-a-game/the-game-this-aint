@@ -364,7 +364,6 @@ public:
         {
             if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
             {
-
                 if (oc->objects[i]->type == GameObject::strawberry) {
 					MatrixStack *modelptr = Model.get();
                     oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
