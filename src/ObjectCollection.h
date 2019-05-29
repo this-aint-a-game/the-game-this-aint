@@ -38,6 +38,7 @@ public:
     glm::vec3 strawMax = glm::vec3(0);
 
     ObjectCollection() {};
+    ~ObjectCollection() {};
     // function prototype declarations
     void objectSetUp();
     void initSceneCollectibles();

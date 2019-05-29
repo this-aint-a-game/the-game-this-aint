@@ -405,8 +405,6 @@ public:
 			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
 
         updateGeom(deltaTime);
-
-   //     bool collision = oc->player.checkForCollisions(oc->objects, oc->bvh);
   
         oc->player.updateView(deltaTime * 0.000001f, 
 							mousex, 
@@ -417,8 +415,6 @@ public:
 							oc->objects,
 							oc->bvh);
        
-
-
 		butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
