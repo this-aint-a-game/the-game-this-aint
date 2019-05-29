@@ -7,6 +7,9 @@ class Bezier
 {
     public:
 
+    static glm::vec3 quadErp(glm::vec3 a, glm::vec3 b, float t);
+    static glm::vec3 lErp(glm::vec3 a, glm::vec3 b, float t);
+
     // used when you want a quadratic curve (one control point)
     static glm::vec3 quadBez(glm::vec3 (*interpolation)(glm::vec3, glm::vec3, float),
                         glm::vec3 a, 

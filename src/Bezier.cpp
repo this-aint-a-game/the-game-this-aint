@@ -5,13 +5,13 @@
 // along a parametric curve between
 // points a,b at t
 
-glm::vec3 lErp(glm::vec3 a, glm::vec3 b, float t)
+glm::vec3 Bezier::lErp(glm::vec3 a, glm::vec3 b, float t)
 {
     // simple linear interpolation
     return (1.0f - t) * a + t * b;
 }
 
-glm::vec3 quadErp(glm::vec3 a, glm::vec3 b, float t)
+glm::vec3 Bezier::quadErp(glm::vec3 a, glm::vec3 b, float t)
 {
     // slower at the beginning, faster at the end
     return (1.0f - t * t) * a + t * t * b;
