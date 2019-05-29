@@ -38,7 +38,7 @@ public:
 
     glm::mat4 update
     (     
-        glm::vec3 playerPos,
+        glm::vec3 lookat,
         double frametime, 
         int mousex, 
         int mousey,
