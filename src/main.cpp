@@ -496,7 +496,7 @@ public:
 			glm::vec3 control2 = glm::vec3(-1,-3.5,9);
 			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
 			t += deltaTime*0.00000009;
-			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
+			//std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
 		}
 		else
 		{		
