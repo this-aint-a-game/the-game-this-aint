@@ -364,7 +364,6 @@ public:
         {
             if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
             {
-
                 if (oc->objects[i]->type == GameObject::strawberry) {
 					MatrixStack *modelptr = Model.get();
                     oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
@@ -405,8 +404,6 @@ public:
 			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
 
         updateGeom(deltaTime);
-
-   //     bool collision = oc->player.checkForCollisions(oc->objects, oc->bvh);
   
         oc->player.updateView(deltaTime * 0.000001f, 
 							mousex, 
@@ -416,10 +413,24 @@ public:
 							camera.getPosition(), 
 							oc->objects,
 							oc->bvh);
-       
 
-
-		butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
+		// TODO: make this better
+		static float t = 0;
+		if(t < 1)
+		{
+			glm::vec3 a = glm::vec3(0,0,0);
+			glm::vec3 b = oc->player.currentPos;
+			glm::vec3 control1 = glm::vec3(-3,1,7);
+			glm::vec3 control2 = glm::vec3(-7,1,9);
+			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
+			t += deltaTime*0.0000001;
+			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
+		} 
+		else
+		{		
+			butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
+		}
+		
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
         lightPos.z = sin(glfwGetTime()/100) * 500.f;
@@ -432,7 +443,7 @@ public:
         if (!debug)
         {
             ViewUser->multMatrix(
-                    camera.update(oc->player.position, deltaTime * 0.000001f,
+                    camera.update(butterfly.center, deltaTime * 0.000001f,
                                   mousex, mousey, width, height));
 
             // reset mouse position to center of screen after finding difference.

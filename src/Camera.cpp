@@ -2,7 +2,7 @@
 #include "Terrain.h"
 #include <stdio.h>
 
-glm::mat4 Camera::update(glm::vec3 playerPos, double frametime, 
+glm::mat4 Camera::update(glm::vec3 lookat, double frametime, 
                         int mousex, int mousey,
                         int width, int height)
 {
@@ -33,14 +33,14 @@ glm::mat4 Camera::update(glm::vec3 playerPos, double frametime,
                         sin(yawAngle) * distance);
     
     // set the camera position based on player position
-    position = playerPos + offsets;
+    position = lookat + offsets;
 
     if(position.y < (Terrain::getHeight(position.x, position.z) + 0.5))
         position.y = Terrain::getHeight(position.x, position.z) + 0.5;
 
     // orient the camera towards the player once 
     // the camera postion is determined
-    return glm::lookAt(position, playerPos, glm::vec3(0,1,0));
+    return glm::lookAt(position, lookat, glm::vec3(0,1,0));
 }
 
 glm::vec3 Camera::getPosition()
