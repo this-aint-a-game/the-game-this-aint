@@ -2,9 +2,9 @@
 #include "Terrain.h"
 
 #define BUTTERFLY_ANGLE_SCALE 2.0
-#define BUTTERFLY_HEIGHT 1.5
-#define BUTTERFLY_DISTANCE 0.75
-#define BUTTERFLY_SPEED 0.0000008f
+#define BUTTERFLY_HEIGHT 1.75
+#define BUTTERFLY_DISTANCE 0.5
+#define BUTTERFLY_SPEED 0.000001f
 #define BUTTERFLY_SIZE 0.04
 
 void Butterfly::updateModelMatrix(double frametime, glm::vec3 origin)
