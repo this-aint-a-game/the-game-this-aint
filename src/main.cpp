@@ -631,11 +631,7 @@ int main(int argc, char **argv)
 		std::cerr << "Could not start irrKlang sound engine" << std::endl;
 	}
 
-	char *soundFile = "../resources/tame.ogg";
-	//char actualPath[PATH_MAX+1];
-	//realpath(soundFile, actualPath);
-	//soundEngine->play2D(actualPath, true);
-    soundEngine->play2D(soundFile, true);
+    soundEngine->play2D("../resources/tame.ogg", true);
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(1024, 1024);
