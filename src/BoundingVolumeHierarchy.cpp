@@ -6,6 +6,7 @@
 
 void BoundingVolumeHierarchy::init(std::vector<GameObject*> objs)
 {
+
     std::vector<GameObject*> sortedByX = objs;
     std::sort(sortedByX.begin(), sortedByX.end());
     glm::vec3 min_hld = glm::vec3(sortedByX[0]->bs->midpt.x + sortedByX[0]->bs->radius, sortedByX[0]->bs->midpt.y + sortedByX[0]->bs->radius, sortedByX[0]->bs->midpt.z + sortedByX[0]->bs->radius);
@@ -13,7 +14,7 @@ void BoundingVolumeHierarchy::init(std::vector<GameObject*> objs)
     root = new BoundingBox(min_hld, max_hld);
 
     createBVH(root, objs);
-    //printBVH(root);
+//    printBVH(root);
 }
 
 void BoundingVolumeHierarchy::printBVH(BoundingBox* cur)
@@ -59,6 +60,7 @@ bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameob
                 soundEngine->play2D("../resources/sound9B.ogg", false);
             }
             hld->collect();
+//            printBVH(root);
         }
     }
 
@@ -115,11 +117,11 @@ void BoundingVolumeHierarchy::createBVH(BoundingBox* bb, std::vector<GameObject*
 
         if(sortedBy.size()%2 == 0)
         {
-            split_index = sortedBy.size()/2;
+            split_index = (sortedBy.size()+1)/2;
         }
         else
         {
-            split_index = (sortedBy.size()+1)/2;
+            split_index = (sortedBy.size())/2;
         }
 
         glm::vec3 min_hld = glm::vec3(sortedBy[0]->bs->midpt.x - sortedBy[0]->bs->radius, sortedBy[0]->bs->midpt.y - sortedBy[0]->bs->radius, sortedBy[0]->bs->midpt.z - sortedBy[0]->bs->radius);

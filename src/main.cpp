@@ -406,8 +406,8 @@ public:
 
         for(int i = 0; i < oc->objects.size(); i++)
         {
-            if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
-            {
+//            if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
+//            {
                 if (oc->objects[i]->type == GameObject::strawberry) {
 					MatrixStack *modelptr = Model.get();
                     oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
@@ -421,7 +421,7 @@ public:
                                                butterfly.currentPos, oc->gameplay);
                     CHECKED_GL_CALL(glDisable(GL_BLEND));
                 }
-            }
+//            }
 
         }
 
@@ -631,11 +631,7 @@ int main(int argc, char **argv)
 		std::cerr << "Could not start irrKlang sound engine" << std::endl;
 	}
 
-	char *soundFile = "../resources/tame.ogg";
-	//char actualPath[PATH_MAX+1];
-	//realpath(soundFile, actualPath);
-	//soundEngine->play2D(actualPath, true);
-    soundEngine->play2D(soundFile, true);
+    soundEngine->play2D("../resources/tame.ogg", true);
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(1920, 1080);

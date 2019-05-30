@@ -8,7 +8,7 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
     this->scale = glm::vec3(3.0f,3.0f,3.0f);
     collected = false;
 
-    this->bs = new BoundingSphere(min, max, this->scale);
+    this->bs = new BoundingSphere(min, max, this->scale, 0.f);
     this->type = type;
     this->ccg = ccg;
 
@@ -42,13 +42,13 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
 
     currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
     currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
-    while(Terrain::getHeight(currentPos.x, currentPos.z)>0.2f)
+    while(Terrain::getHeight(currentPos.x, currentPos.z)>0.1f)
     {
         currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
         currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
     }
 
-    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.3f;
+    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.2f;
 }
 
 void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos, ColorCollectGameplay* ccg)

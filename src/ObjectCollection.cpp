@@ -79,12 +79,18 @@ void ObjectCollection::initSceneCollectibles()
         objects.push_back(berry);
         gameplay->setPos(berry->color, berry->currentPos);
     }
+
 }
 
 void ObjectCollection::initSceneObjects()
 {
     uploadMultipleShapes("/plant.obj", 1);
-    numPlants = (glm::clamp(rand() % 100, 100, 150)/2)*2;
+    numPlants = glm::clamp(rand() % 100, 100, 150);
+
+    if(numPlants%2 != 0)
+    {
+        numPlants-=1;
+    }
 
     for(int i = 0; i < numPlants; i++)
     {

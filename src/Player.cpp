@@ -102,7 +102,7 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
 
     scale = glm::vec3(0.2,0.2,0.2);
 
-    this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale);
+    this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale, 0.f);
 }
 
 void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting, glm::vec3 butterflyPos)
