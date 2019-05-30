@@ -50,10 +50,14 @@ public:
 	Sky sky = Sky();
 	ViewFrustumCulling* vfc = new ViewFrustumCulling();
 
+    std::shared_ptr<Program> loadProg;
+    std::shared_ptr<Texture> loadTexture;
+
 	WindowManager * windowManager = nullptr;
 	int width, height;
 
 	bool releaseMouse = false;
+	bool loadrender = true;
 	std::string resourceDir = "../resources";
 
 	float t0_disp = 0.0f;
@@ -388,6 +392,11 @@ public:
 
 	}
 
+	void drawToScreen()
+	{
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
+	}
+
     void render(float deltaTime)
     {
         glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
@@ -399,6 +408,15 @@ public:
 		double mousex = width / 4.0;
 		double mousey = height / 4.0;    
 		float aspect = width/(float)height;
+
+		if(10.f<deltaTime)
+        {
+            loadrender = false;
+        }
+		else
+        {
+		    drawToScreen();
+		}
 
 		if(!releaseMouse)
 			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
@@ -544,6 +562,44 @@ public:
     }
 
 };
+
+void loadInitTex()
+{
+    loadTexture = std::make_shared<Texture>();
+    loadTexture->setFilename("../resources/load0.jpg");
+    loadTexture->init();
+    loadTexture->setUnit(0);
+    loadTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+}
+
+void loadSetUp()
+{
+    sphereShape = std::make_shared<Shape>();
+    sphereShape->loadMesh("../resources/sphere.obj");
+    sphereShape->resize();
+    sphereShape->init();
+
+    loadProg = std::make_shared<Program>();
+    loadProg->setVerbose(true);
+    loadProg->setShaderNames(
+            "../resources/sky_tex_vert.glsl",
+            "../resources/sky_tex_frag.glsl");
+    if (! skyProg->init())
+    {
+        std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+        exit(1);
+    }
+    loadProg->addUniform("P");
+    loadProg->addUniform("V");
+    loadProg->addUniform("M");
+    loadProg->addUniform("Texture0");
+    loadProg->addUniform("Texture1");
+    loadProg->addUniform("lightPos");
+    loadProg->addAttribute("vertPos");
+    loadProg->addAttribute("vertNor");
+    loadProg->addAttribute("vertTex");
+}
 
 int main(int argc, char **argv)
 {

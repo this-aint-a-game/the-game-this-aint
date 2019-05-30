@@ -41,20 +41,20 @@ void ObjectCollection::initSceneCollectibles()
 {
     uploadMultipleShapes("/mushroom.obj", 0);
 
-    // For now, hard code purple prize close to start
-    Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
-    first->setPosition(-8, 20);
-    objects.push_back(first);
-    gameplay->setPos(first->color, first->currentPos);
+//    // For now, hard code purple prize close to start
+//    Strawberry * first = new Strawberry(strawMin, strawMax, 5, GameObject::strawberry, gameplay);
+//    first->setPosition(-8, 20);
+//    objects.push_back(first);
+//    gameplay->setPos(first->color, first->currentPos);
+//
+//    // For now, hard code blue prize close to start
+//    Strawberry * second = new Strawberry(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
+//    second->setPosition(8, 8);
+//    objects.push_back(second);
+//    gameplay->setPos(second->color, second->currentPos);
 
-    // For now, hard code blue prize close to start
-    Strawberry * second = new Strawberry(strawMin, strawMax, 4, GameObject::strawberry, gameplay);
-    second->setPosition(8, 8);
-    objects.push_back(second);
-    gameplay->setPos(second->color, second->currentPos);
 
-
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 6; i++)
     {
         bool found_spot = false;
         Strawberry *berry;
@@ -84,7 +84,7 @@ void ObjectCollection::initSceneCollectibles()
 void ObjectCollection::initSceneObjects()
 {
     uploadMultipleShapes("/plant.obj", 1);
-    numPlants = glm::clamp(rand() % 100, 50, 100);
+    numPlants = (glm::clamp(rand() % 100, 100, 150)/2)*2;
 
     for(int i = 0; i < numPlants; i++)
     {
