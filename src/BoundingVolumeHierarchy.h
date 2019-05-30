@@ -9,6 +9,8 @@
 #include "BoundingBox.h"
 #include "BoundingSphere.h"
 #include "Strawberry.h"
+#include <irrKlang.h>
+
 class BoundingVolumeHierarchy {
 
 public:
@@ -22,6 +24,13 @@ public:
     bool checkForCollision(std::vector<GameObject*> &, BoundingBox* cur, BoundingSphere* bs, bool&);
     GameObject* checkAgainstShapes(BoundingBox* cur, BoundingSphere* bs, bool&);
     std::vector<GameObject*> splitArray(std::vector<GameObject*> og_array, int index_begin, int index_end);
+
+    irrklang::ISoundEngine* soundEngine;
+
+    void setSoundEngine(irrklang::ISoundEngine* soundEngine)
+    {
+        this->soundEngine = soundEngine;
+    }
 
 };
 

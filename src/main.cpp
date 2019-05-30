@@ -25,6 +25,7 @@ obtain.
 #include "ObjectCollection.h"
 #include "ParticleCollection.h"
 #include "ViewFrustumCulling.h"
+#include <irrKlang.h>
 
 #define MOVEMENT_SPEED 0.2f
 #define RENDER_SPEED 0.5f
@@ -39,6 +40,7 @@ class Application : public EventCallbacks
 
 public:
 
+    irrklang::ISoundEngine* soundEngine;
     ParticleCollection *pc = new ParticleCollection();
     ObjectCollection *oc = new ObjectCollection();
 	Butterfly butterfly = Butterfly();
@@ -284,6 +286,7 @@ public:
 		glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 
+        oc->setSoundEngine(soundEngine);
 		sky.skySetUp();
 //		gasSetUp(resourceDir);
 		oc->objectSetUp();
@@ -619,6 +622,20 @@ public:
 int main(int argc, char **argv)
 {
 	Application *application = new Application();
+
+	irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
+    application->soundEngine = soundEngine;
+
+	if (!soundEngine)
+	{
+		std::cerr << "Could not start irrKlang sound engine" << std::endl;
+	}
+
+	char *soundFile = "../resources/tame.ogg";
+	//char actualPath[PATH_MAX+1];
+	//realpath(soundFile, actualPath);
+	//soundEngine->play2D(actualPath, true);
+    soundEngine->play2D(soundFile, true);
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(1024, 1024);

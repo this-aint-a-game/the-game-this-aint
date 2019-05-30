@@ -3,6 +3,12 @@ cmake_minimum_required(VERSION 2.7)
 # Name of the project
 project(obtain)
 
+set(CMAKE_CXX_STANDARD 14)
+
+# irrKlang
+set(IRRKLANG_DIR ${CMAKE_SOURCE_DIR}/lib/irrKlang-64bit-1.6.0)
+include_directories(${IRRKLANG_DIR}/include/)
+
 # Use glob to get the list of all source files.
 file(GLOB_RECURSE SOURCES "src/*.cpp" "ext/*/*.cpp" "ext/glad/src/*.c")
 
@@ -17,7 +23,22 @@ include_directories("ext/glad/include")
 # Set the executable.
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
 
+# irrKlang
+set(IRRKLANG_DIR "${CMAKE_SOURCE_DIR}/lib/irrKlang-64bit-1.6.0")
+include_directories(${IRRKLANG_DIR}/include/)
+include_directories(${IRRKLANG_DIR}/plugins/)
 
+message(STATUS "irrKlang directory - ${IRRKLANG_DIR}")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${IRRKLANG_DIR}/bin/linux-gcc-64/libIrrKlang.so)
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${IRRKLANG_DIR}/bin/macosx-gcc/libirrklang.dylib)
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${IRRKLANG_DIR}/bin/macosx-gcc/ikpMP3.dylib)
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${IRRKLANG_DIR}/bin/winx64-visualStudio/irrKlang.dll)
+else()
+    message("Unknown system!")
+endif()
 
 # Add GLFW
 # Get the GLFW environment variable.

@@ -12,6 +12,7 @@
 #include "BoundingVolumeHierarchy.h"
 #include "Plant.h"
 #include "Player.h"
+#include <irrKlang.h>
 
 class ObjectCollection {
 
@@ -37,7 +38,13 @@ public:
     glm::vec3 strawMin = glm::vec3(0);
     glm::vec3 strawMax = glm::vec3(0);
 
-    ObjectCollection() {};
+
+
+    void setSoundEngine(irrklang::ISoundEngine* soundEngine)
+    {
+        bvh->setSoundEngine(soundEngine);
+    }
+
     ~ObjectCollection() {};
     // function prototype declarations
     void objectSetUp();
