@@ -406,8 +406,8 @@ public:
 
         for(int i = 0; i < oc->objects.size(); i++)
         {
-            if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
-            {
+//            if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
+//            {
                 if (oc->objects[i]->type == GameObject::strawberry) {
 					MatrixStack *modelptr = Model.get();
                     oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
@@ -421,7 +421,7 @@ public:
                                                butterfly.currentPos, oc->gameplay);
                     CHECKED_GL_CALL(glDisable(GL_BLEND));
                 }
-            }
+//            }
 
         }
 
@@ -496,7 +496,7 @@ public:
 			glm::vec3 control2 = glm::vec3(-7,1,9);
 			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
 			t += deltaTime*0.0000001;
-			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
+//			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
 		}
 		else
 		{		

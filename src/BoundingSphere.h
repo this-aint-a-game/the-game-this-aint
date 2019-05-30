@@ -10,7 +10,9 @@
 #include <iostream>
 
 #include "glm/gtc/matrix_transform.hpp"
+
 #define PADDING 0.3
+
 
 class BoundingSphere {
 
@@ -48,7 +50,7 @@ public:
 
     BoundingSphere() {};
 
-    BoundingSphere(glm::vec3 min, glm::vec3 max, glm::vec3 scale_vec)
+    BoundingSphere(glm::vec3 min, glm::vec3 max, glm::vec3 scale_vec, float rad_scale)
     {
         // not based on the current position of the sphere, only the local min and max of the object size
         // but scaled by a factor specified by the world
@@ -56,15 +58,16 @@ public:
         this->sphere_min = glm::vec3(glm::vec4(min, 1) * sm);
         this->sphere_max = glm::vec3(glm::vec4(max, 1) * sm);
         this->midpt = ((sphere_max + sphere_min) / 2.f);
-        this->radius = distance(sphere_max, midpt) - PADDING;
+        this->radius = distance(sphere_max, midpt) - (PADDING + rad_scale);
+
     };
 
-    BoundingSphere* get(glm::vec3 pos)
+    BoundingSphere* get(glm::vec3 pos, float rad_scale)
     {
         glm::vec3 min = pos + this->sphere_min;
         glm::vec3 max = pos + this->sphere_max;
 
-        return new BoundingSphere(min, max, glm::vec3(1.f));
+        return new BoundingSphere(min, max, glm::vec3(1.f), rad_scale);
     }
 };
 

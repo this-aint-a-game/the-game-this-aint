@@ -39,7 +39,15 @@ public:
 
     virtual BoundingSphere* getBS()
     {
-        return bs->get(this->currentPos);
+        if(this->type == plant)
+        {
+            return bs->get(this->currentPos, 0.3f);
+        }
+        else
+        {
+            return bs->get(this->currentPos, 0.0f);
+        }
+
     }
 
     // TODO should this be in ColorCollectGameplay?
