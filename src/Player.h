@@ -41,6 +41,7 @@ class Player : public GameObject
 
     glm::vec3 oldPos, position, dir, targetDir;
     float yaw, targetYaw;
+    float timer;
     bool w, a, s, d;
     
     Player()
@@ -50,6 +51,7 @@ class Player : public GameObject
         position = glm::vec3(-8.43903, 0, 9.66477);
         dir = targetDir = glm::vec3(0,0,0);
         oldPos = position;
+        timer = 0;
     }
 
     void updateView(

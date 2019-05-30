@@ -492,11 +492,11 @@ public:
 		{
 			glm::vec3 a = glm::vec3(0,0,0);
 			glm::vec3 b = oc->player.currentPos;
-			glm::vec3 control1 = glm::vec3(-3,1,7);
-			glm::vec3 control2 = glm::vec3(-7,1,9);
+			glm::vec3 control1 = glm::vec3(3.5,-2,7);
+			glm::vec3 control2 = glm::vec3(-1,-3.5,9);
 			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
-			t += deltaTime*0.0000001;
-//			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
+			t += deltaTime*0.00000009;
+			//std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
 		}
 		else
 		{		
@@ -634,7 +634,7 @@ int main(int argc, char **argv)
     soundEngine->play2D("../resources/tame.ogg", true);
  
 	WindowManager *windowManager = new WindowManager();
-	windowManager->init(1024, 1024);
+	windowManager->init(1920, 1080);
 	windowManager->setEventCallbacks(application);
 	application->windowManager = windowManager;
 
