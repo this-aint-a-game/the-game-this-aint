@@ -5,10 +5,6 @@ project(obtain)
 
 set(CMAKE_CXX_STANDARD 14)
 
-# irrKlang
-set(IRRKLANG_DIR ${CMAKE_SOURCE_DIR}/lib/irrKlang-64bit-1.6.0)
-include_directories(${IRRKLANG_DIR}/include/)
-
 # Use glob to get the list of all source files.
 file(GLOB_RECURSE SOURCES "src/*.cpp" "ext/*/*.cpp" "ext/glad/src/*.c")
 
