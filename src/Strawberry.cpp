@@ -48,7 +48,7 @@ Strawberry::Strawberry(glm::vec3 min, glm::vec3 max, int num, objType type, Colo
         currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
     }
 
-    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.35f;
+    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.3f;
 }
 
 void Strawberry::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> strawberryShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos, ColorCollectGameplay* ccg)
