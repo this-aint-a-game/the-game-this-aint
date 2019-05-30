@@ -166,6 +166,14 @@ public:
             if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
                 camera.zoomOut = false;
             }
+			if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS) {
+				oc->player.sprint = true;
+			} 			
+			if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
+				oc->player.sprint = false;
+			} 
+		
+		
         }
 		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
 			glfwSetInputMode(windowManager->getHandle(),
@@ -495,7 +503,7 @@ public:
 			glm::vec3 control1 = glm::vec3(3.5,-2,7);
 			glm::vec3 control2 = glm::vec3(-1,-3.5,9);
 			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
-			t += deltaTime*0.00000009;
+			t += deltaTime*0.0000001;
 			//std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
 		}
 		else

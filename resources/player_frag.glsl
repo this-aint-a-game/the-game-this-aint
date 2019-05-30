@@ -10,9 +10,18 @@ in OUT_struct {
 } in_struct;
 
 void main() {
-    float distance = distance(in_struct.butterflyPosition, in_struct.fPos.xyz);    
+    float distance = distance(in_struct.butterflyPosition, in_struct.fPos.xyz); 
+    distance = pow(distance, 1.4);    
+   
     vec3 lightDirection = normalize(in_struct.butterflyPosition - in_struct.fPos);
-    float diffuse = 3*pow(1/distance*clamp(dot(vec3(in_struct.fragNor), lightDirection), 0, 1),1.1);
+
+    // get basic diffuse by dotting normal with light direction
+    float diffuse = clamp(dot(vec3(in_struct.fragNor) + 0.05, lightDirection), 0, 1);
+    // add distance attenuation
+    diffuse *= clamp(6/distance, 0, 1);
+    // increase falloff
+    diffuse = clamp(diffuse*4, 0, 1);
+    diffuse = pow(diffuse, 1.5);
 
     Outcolor = vec4(in_struct.fragNor, 1);
     Outcolor.rgb += diffuse * vec3(1,1,1);

@@ -41,19 +41,24 @@ vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
 */
 vec3 calcLight(vec3 lightPosition, vec3 fragNor, vec3 viewVec)
 {
-    float distance = pow(distance(lightPosition, pos.xyz), 1.8);    
+    float distance = distance(lightPosition, pos.xyz);
+    distance = pow(distance, 1.4);    
     vec3 lightColor = vec3(0);
-
     
-      vec3 lightDirection = normalize(lightPosition - pos.xyz);
-      float diffuse = pow(1/distance*clamp(dot(fragNor, lightDirection), 0, 1),0.8);
+    vec3 lightDirection = normalize(lightPosition - pos.xyz);
 
-      vec3 halfVec = normalize(distance + viewVec);
-      vec3 specular = MatSpec*pow(1/distance*pow(clamp(dot(halfVec, fragNor), 0, 1), shine),2);
+    // get basic diffuse by dotting normal with light direction
+    float diffuse = clamp(dot(vec3(fragNor), lightDirection), 0, 1);
+    // add distance attenuation
+    diffuse *= clamp(6/distance, 0, 0.7);
+    // increase falloff
+    diffuse = pow(diffuse, 0.9);
 
-      lightColor += diffuse * vec3(1,1,1) + specular;
+    vec3 halfVec = normalize(distance + viewVec);
+    vec3 specular = MatSpec*pow((10/distance)*pow(clamp(dot(halfVec, fragNor), 0, 1), shine),2);
+
+    lightColor += diffuse * vec3(1,1,1) + specular;
     return lightColor;
-
 }
 
 /* returns 1 if shadowed */
