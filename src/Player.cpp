@@ -51,8 +51,8 @@ glm::mat4 Player::updateModelMatrix(double frametime,
 
     // move the player in the direction they are facing
     currentPos = position + (speed * dir);
-    // set their y position based on the height of the terrain at that point
-    currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z) + 0.3;
+    // set their y position based on the height of the terrain at that point, with temporary bouncing until we have animations
+    currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z) + 0.3 + ((1+sin(timer += frametime*4))/8);
 
     //std::cout << "position prior to check is: " << position.x << "," << position.y << "," << position.z << std::endl;
     if(checkForCollisions(objs, bvh))
