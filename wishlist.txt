@@ -1,5 +1,6 @@
 For Christmas all I want is:
   - Rendering to a framebuffer to do a loading screen and post processing
+  - HELLA bloom because thats what this game needs 
   - Animations imported via assimp
   - fixed VFC?
   - all scene objects included in shadow map render pass
