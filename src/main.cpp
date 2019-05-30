@@ -25,6 +25,7 @@ obtain.
 #include "ObjectCollection.h"
 #include "ParticleCollection.h"
 #include "ViewFrustumCulling.h"
+#include <irrKlang.h>
 
 #define MOVEMENT_SPEED 0.2f
 #define RENDER_SPEED 0.5f
@@ -39,6 +40,7 @@ class Application : public EventCallbacks
 
 public:
 
+    irrklang::ISoundEngine* soundEngine;
     ParticleCollection *pc = new ParticleCollection();
     ObjectCollection *oc = new ObjectCollection();
 	Butterfly butterfly = Butterfly();
@@ -50,10 +52,15 @@ public:
 	Sky sky = Sky();
 	ViewFrustumCulling* vfc = new ViewFrustumCulling();
 
+//    shared_ptr<Program> roosterProg;
+//    shared_ptr<Texture> roosterTexture;
+//    shared_ptr<Shape> rooster;
+
 	WindowManager * windowManager = nullptr;
 	int width, height;
 
 	bool releaseMouse = false;
+	bool loadrender = true;
 	std::string resourceDir = "../resources";
 
 	float t0_disp = 0.0f;
@@ -239,7 +246,37 @@ public:
 		pc->particleTexture->setUnit(4);
 		pc->particleTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
+//        roosterTexture = make_shared<Texture>();
+//        roosterTexture->setFilename(resourceDir + "/prop_gas_station_baseColor.jpeg");
+//        roosterTexture->init();
+//        roosterTexture->setUnit(4);
+//        roosterTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
 	}
+
+//    void gasSetUp(const std::string& resourceDirectory)
+//    {
+//        //initialize the textures we might use
+//        roosterProg = make_shared<Program>();
+//        roosterProg->setVerbose(true);
+//        roosterProg->setShaderNames(
+//                resourceDirectory + "/rooster_tex_vert.glsl",
+//                resourceDirectory + "/rooster_tex_frag.glsl");
+//        if (! roosterProg->init())
+//        {
+//            std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+//            exit(1);
+//        }
+//        roosterProg->addUniform("P");
+//        roosterProg->addUniform("V");
+//        roosterProg->addUniform("M");
+//        roosterProg->addUniform("Texture0");
+//        roosterProg->addUniform("texNum");
+//        roosterProg->addAttribute("vertPos");
+//        roosterProg->addAttribute("vertNor");
+//        roosterProg->addAttribute("vertTex");
+//        roosterProg->addUniform("lightPos");
+//    }
 
 	void init()
 	{
@@ -249,7 +286,9 @@ public:
 		glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 
+        oc->setSoundEngine(soundEngine);
 		sky.skySetUp();
+//		gasSetUp(resourceDir);
 		oc->objectSetUp();
 		pc->setUp();
 		terrain.initTerrain();
@@ -265,6 +304,11 @@ public:
         oc->initSceneObjects();
 		oc->initObjectHierarchy();
 		butterfly.initbutterfly();
+
+//        rooster = make_shared<Shape>();
+//        rooster->loadMesh(resourceDir + "/gas_pump.obj");
+//        rooster->resize();
+//        rooster->init();
 
 		CHECKED_GL_CALL(glGenVertexArrays(1, &pc->ParticleVertexArrayID));
 		CHECKED_GL_CALL(glBindVertexArray(pc->ParticleVertexArrayID));
@@ -364,7 +408,6 @@ public:
         {
             if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
             {
-
                 if (oc->objects[i]->type == GameObject::strawberry) {
 					MatrixStack *modelptr = Model.get();
                     oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
@@ -388,6 +431,34 @@ public:
 		lighting->unbind();
 
 	}
+
+//    void drawRooster(MatrixStack* View, MatrixStack* Projection)
+//    {
+//
+//        auto Model = make_shared<MatrixStack>();
+//        roosterProg->bind();
+//        glUniformMatrix4fv(roosterProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+//        glUniformMatrix4fv(roosterProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+//        glUniform3f(roosterProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
+//
+//        Model->pushMatrix();
+//        Model->loadIdentity();
+//
+//        Model->translate(vec3(0, 2, 0));
+//        Model->rotate(15, vec3(1,0,0));
+//
+//
+//        Model->pushMatrix();
+//        glUniformMatrix4fv(roosterProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
+//        roosterTexture->bind(roosterProg->getUniform("Texture0"));
+//        glUniform1f(roosterProg->getUniform("texNum"), 1);
+//        rooster->draw(roosterProg);
+//        Model->popMatrix();
+//        roosterTexture->unbind();
+//
+//        Model->popMatrix();
+//        roosterProg->unbind();
+//    }
 
     void render(float deltaTime)
     {
@@ -426,7 +497,7 @@ public:
 			butterfly.moveAlongPath(a, b, control1, control2, deltaTime, t);
 			t += deltaTime*0.0000001;
 			std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
-		} 
+		}
 		else
 		{		
 			butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
@@ -522,6 +593,8 @@ public:
             terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), cameraPos, lighting, butterfly.currentPos);
         }
 
+//        drawRooster(userViewPtr, projectionPtr);
+
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
@@ -549,6 +622,20 @@ public:
 int main(int argc, char **argv)
 {
 	Application *application = new Application();
+
+	irrklang::ISoundEngine* soundEngine = irrklang::createIrrKlangDevice();
+    application->soundEngine = soundEngine;
+
+	if (!soundEngine)
+	{
+		std::cerr << "Could not start irrKlang sound engine" << std::endl;
+	}
+
+	char *soundFile = "../resources/tame.ogg";
+	//char actualPath[PATH_MAX+1];
+	//realpath(soundFile, actualPath);
+	//soundEngine->play2D(actualPath, true);
+    soundEngine->play2D(soundFile, true);
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(1024, 1024);

@@ -18,15 +18,22 @@ Plant::Plant(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGa
 {
     this->currentPos.x = 0.f;
     this->currentPos.z = 0.f;
-    this->scale = vec3(randFloat(0.1f, 0.6f));
+    this->scale = vec3(randFloat(0.4f, 0.7f));
 
     this->bs = new BoundingSphere(min, max, this->scale);
     this->type = type;
     this->ccg = ccg;
 
+
     currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
     currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
-    currentPos.y = Terrain::getHeight(currentPos.x, currentPos.z);
+    while(Terrain::getHeight(currentPos.x, currentPos.z)>0.1f)
+    {
+        currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
+        currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
+    }
+
+    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.1f;
 
     switch(num)
     {

@@ -54,8 +54,11 @@ bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameob
         if((gameobjs[i] == hold) && (dynamic_cast<Strawberry*>(gameobjs[i]) != nullptr))
         {
             auto hld = dynamic_cast<Strawberry*>(gameobjs[i]);
+            if (!(hld->collected))
+            {
+                soundEngine->play2D("../resources/sound9B.ogg", false);
+            }
             hld->collect();
-            gameobjs.erase(gameobjs.begin()+i);
         }
     }
 

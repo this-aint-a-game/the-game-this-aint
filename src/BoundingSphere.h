@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "glm/gtc/matrix_transform.hpp"
-#define PADDING 0.4
+#define PADDING 0.3
 
 class BoundingSphere {
 
