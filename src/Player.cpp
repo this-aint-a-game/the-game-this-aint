@@ -21,7 +21,10 @@ glm::mat4 Player::updateModelMatrix(double frametime,
     // set speed and target direction based on keypresses
     if (w == true) 
     {
-        speed = MOVESPEED * frametime;
+        if(sprint)
+            speed = SPRINTSPEED * frametime;
+        else
+            speed = MOVESPEED * frametime; 
         targetDir = camDir;
     }
     else if(s == true) 

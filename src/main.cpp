@@ -166,6 +166,14 @@ public:
             if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
                 camera.zoomOut = false;
             }
+			if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS) {
+				oc->player.sprint = true;
+			} 			
+			if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
+				oc->player.sprint = false;
+			} 
+		
+		
         }
 		if (key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS) {
 			glfwSetInputMode(windowManager->getHandle(),

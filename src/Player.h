@@ -16,6 +16,7 @@
 #include "Lighting.h"
 
 #define MOVESPEED 2.0f
+#define SPRINTSPEED 10.0f
 #define PLAYER_ROTATION_SPRING 10.0f
 #define PI 3.14159f
 
@@ -42,11 +43,11 @@ class Player : public GameObject
     glm::vec3 oldPos, position, dir, targetDir;
     float yaw, targetYaw;
     float timer;
-    bool w, a, s, d;
+    bool w, a, s, d, sprint;
     
     Player()
     {
-        w = a = s = d = false;
+        w = a = s = d = sprint = false;
         yaw = targetYaw = 0.0f;
         position = glm::vec3(-8.43903, 0, 9.66477);
         dir = targetDir = glm::vec3(0,0,0);
