@@ -84,13 +84,11 @@ void ObjectCollection::initSceneCollectibles()
 
 void ObjectCollection::initSceneObjects()
 {
-    uploadMultipleShapes("/plant.obj", 1);
-    numPlants = glm::clamp(rand() % 100, 100, 150);
+    uploadMultipleShapes("/moon.obj", 2);
+    moon = new Moon(moonmin, moonmax, 0, GameObject::moon, gameplay);
 
-    if(numPlants%2 != 0)
-    {
-        numPlants-=1;
-    }
+    uploadMultipleShapes("/plant.obj", 1);
+    numPlants = glm::clamp(rand() % 100, 100*2, 150*2);
 
     for(int i = 0; i < numPlants; i++)
     {
@@ -101,12 +99,12 @@ void ObjectCollection::initSceneObjects()
             int num = glm::clamp(rand() % 6, 0, 6);
             plant = new Plant(plantmin, plantmax, num, GameObject::plant, gameplay);
             BoundingSphere *otherBS = plant->getBS();
-            for (int j = 0; j < objects.size(); j++)
+            for (int j = 0; j < plants.size(); j++)
             {
                 plant = new Plant(plantmin, plantmax, num, GameObject::plant, gameplay);
                 BoundingSphere *otherBS = plant->getBS();
 
-                if ((objects[j]->isCollided(otherBS)))
+                if ((plants[j]->isCollided(otherBS)))
                 {
                     delete plant;
                     delete otherBS;
@@ -115,29 +113,11 @@ void ObjectCollection::initSceneObjects()
             found_spot = true;
             delete otherBS;
         }
-        objects.push_back(plant);
+        plants.push_back(plant);
     }
 
 }
 
-//GameObject::objType selectRandomCrystal()
-//{
-//    int random = rand() % 3;
-//
-//    if(random == 0)
-//    {
-//        return GameObject::crystal1;
-//    }
-//    else if (random == 1)
-//    {
-//        return GameObject::crystal2;
-//    }
-//    else
-//    {
-//        return GameObject::crystal3;
-//    }
-//
-//}
 
 void ObjectCollection::uploadMultipleShapes(string objDir, int switchNum)
 {
@@ -207,6 +187,10 @@ void ObjectCollection::uploadMultipleShapes(string objDir, int switchNum)
                     plantmax = Gmax;
                     plantmin = Gmin;
                     plantShapes.push_back(s);
+                case 2:
+                    moonmax = Gmax;
+                    moonmin = Gmin;
+                    moonShapes.push_back(s);
             }
         }
     }

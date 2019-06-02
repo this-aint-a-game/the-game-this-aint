@@ -18,50 +18,23 @@ Plant::Plant(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGa
 {
     this->currentPos.x = 0.f;
     this->currentPos.z = 0.f;
-    this->scale = vec3(randFloat(0.4f, 0.7f));
+    this->scale = vec3(randFloat(0.05f, 0.1f));
 
     this->bs = new BoundingSphere(min, max, this->scale, 0.3f);
     this->type = type;
     this->ccg = ccg;
+    this->color = 3;
 
 
     currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
     currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
-    while(Terrain::getHeight(currentPos.x, currentPos.z)> -0.2f)
+    while(Terrain::getHeight(currentPos.x, currentPos.z)> -4.5f)
     {
         currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
         currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
     }
 
-    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.05f;
-
-    switch(num)
-    {
-        case 0:
-            //red
-            this->color = 0;
-            break;
-        case 1:
-            //orange
-            this->color = 1;
-            break;
-        case 2:
-            //yellow
-            this->color = 2;
-            break;
-        case 3:
-            //green
-            this->color = 3;
-            break;
-        case 4:
-            //blue
-            this->color = 4;
-            break;
-        case 5:
-            //violet
-            this->color = 5;
-            break;
-    }
+    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.35f;
 }
 
 void Plant::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> plantShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos, ColorCollectGameplay* ccg)

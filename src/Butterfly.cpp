@@ -5,7 +5,7 @@
 #define BUTTERFLY_HEIGHT 1.75
 #define BUTTERFLY_DISTANCE 0.5
 #define BUTTERFLY_SPEED 0.000001f
-#define BUTTERFLY_SIZE 0.04
+#define BUTTERFLY_SIZE 0.09
 
 void Butterfly::updateModelMatrix(double frametime, glm::vec3 origin)
 {
@@ -40,6 +40,7 @@ void Butterfly::initbutterfly()
     butterflyProg->addUniform("P");
     butterflyProg->addUniform("V");
     butterflyProg->addUniform("M");
+    butterflyProg->addUniform("MatDif");
     butterflyProg->addAttribute("vertPos");
     butterflyProg->addAttribute("vertNor");
     butterflyProg->addAttribute("vertTex");
@@ -56,13 +57,21 @@ void Butterfly::initbutterfly()
     butterflyShapeWingsUp->init();
 }
 
-void Butterfly::drawbutterfly(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting)
+void Butterfly::drawbutterfly(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, ColorCollectGameplay* ccg, Lighting* lighting)
 {
     butterflyProg->bind();
 
     glUniformMatrix4fv(butterflyProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
     glUniformMatrix4fv(butterflyProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
     glUniformMatrix4fv(butterflyProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
+
+    if (ccg->checkColor(2)) {
+
+        glm::vec3 d = ccg->yellowColor.diffuse;
+        glUniform3f(butterflyProg->getUniform("MatDif"), d.x, d.y, d.z);
+    } else{
+        glUniform3f(butterflyProg->getUniform("MatDif"), 1, 1, 1);
+    }
 
    /* glUniform3f(butterflyProg->getUniform("view"), view.x, view.y, view.z);
     glUniform3f(butterflyProg->getUniform("MatAmb"), 0.13, 0.13, 0.14);

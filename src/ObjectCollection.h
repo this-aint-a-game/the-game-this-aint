@@ -12,6 +12,7 @@
 #include "BoundingVolumeHierarchy.h"
 #include "Plant.h"
 #include "Player.h"
+#include "Moon.h"
 #include <irrKlang.h>
 
 class ObjectCollection {
@@ -25,6 +26,9 @@ public:
     BoundingVolumeHierarchy *bvh = new BoundingVolumeHierarchy();
 
     vector<GameObject*> objects;
+    vector<GameObject*> plants;
+    GameObject* moon;
+
     int numPlants;
 
     // Shape to be used (from obj file)
@@ -34,6 +38,9 @@ public:
     vector<shared_ptr<Shape>> plantShapes;
     glm::vec3 plantmin = glm::vec3(0);
     glm::vec3 plantmax = glm::vec3(0);
+    vector<shared_ptr<Shape>> moonShapes;
+    glm::vec3 moonmin = glm::vec3(0);
+    glm::vec3 moonmax = glm::vec3(0);
     vector<shared_ptr<Shape>> strawberryShapes;
     glm::vec3 strawMin = glm::vec3(0);
     glm::vec3 strawMax = glm::vec3(0);

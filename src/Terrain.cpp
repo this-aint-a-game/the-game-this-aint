@@ -35,18 +35,35 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
     glUniform1f(prog->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(prog->getUniform("lighting"));
 
-    if (ccg->checkColor(5)) {
+    if (ccg->checkColor(5) && ccg->checkColor(1)) {
 
         glm::vec3 d = ccg->violetColor.diffuse;
-        glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
-        glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.3);
+        glm::vec3 d_o  = ccg->orangeColor.diffuse;
+        glUniform3f(prog->getUniform("MatAmb"), 0.f, 0.f, 0.f);
+        glUniform3f(prog->getUniform("MatDif"), d_o.x, d_o.y, d_o.z);
         glUniform3f(prog->getUniform("MatSpec"), d.x, d.y, d.z);
+        glUniform1f(prog->getUniform("shine"), 50.f);
+    }
+    else if (ccg->checkColor(5)) {
+
+        glm::vec3 d = ccg->violetColor.diffuse;
+        glUniform3f(prog->getUniform("MatAmb"), 0.f, 0.f, 0.f);
+        glUniform3f(prog->getUniform("MatDif"), 0.5f, 0.5f, 0.5f);
+        glUniform3f(prog->getUniform("MatSpec"), d.x, d.y, d.z);
+        glUniform1f(prog->getUniform("shine"), 50.f);
+    }
+    else if (ccg->checkColor(1)) {
+
+        glm::vec3 d_o  = ccg->orangeColor.diffuse;
+        glm::vec3 d_a  = ccg->orangeColor.ambient;
+        glUniform3f(prog->getUniform("MatDif"), d_o.x, d_o.y, d_o.z);
+        glUniform3f(prog->getUniform("MatSpec"), 0, 0, 0);
         glUniform1f(prog->getUniform("shine"), 50.f);
     }
     else
     {
         glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.13);
-        glUniform3f(prog->getUniform("MatDif"), 1.f, 1.f, 1.f);
+        glUniform3f(prog->getUniform("MatDif"), 0.5f, 0.5f, 0.5f);
         glUniform3f(prog->getUniform("MatSpec"), 0, 0, 0);
 
     }
