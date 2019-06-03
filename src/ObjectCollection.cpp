@@ -37,6 +37,49 @@ void ObjectCollection::objectSetUp()
 
 }
 
+void ObjectCollection::drawScene(shared_ptr<Program> prog, MatrixStack* View, MatrixStack* Projection, glm::vec3 camera, glm::vec3 butterfly)
+{
+    auto Model = make_shared<MatrixStack>();
+
+    prog->bind();
+
+    glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+    glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+    //glUniform1f(oc->objProg->getUniform("numberLights"), lighting->numberLights);
+    //lighting->bind(oc->objProg->getUniform("lighting"));
+
+    Model->pushMatrix();
+    Model->loadIdentity();
+
+    for(int i = 0; i < this->objects.size(); i++)
+    {
+        MatrixStack *modelptr = Model.get();
+        this->objects[i]->drawObject(modelptr, this->strawberryShapes, prog, camera,
+                                   butterfly, this->gameplay);
+
+    }
+
+    for(int i = 0; i < this->plants.size(); i++)
+    {
+        CHECKED_GL_CALL(glEnable(GL_BLEND));
+        glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
+//					Model->rotate(randFloat(0, 360), vec3(0,1,0));
+        MatrixStack *modelptr = Model.get();
+        this->plants[i]->drawObject(modelptr, this->plantShapes, prog, camera,
+                                  butterfly, this->gameplay);
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
+    }
+
+    MatrixStack *modelptr = Model.get();
+    this->moon->drawObject(modelptr, this->moonShapes, prog, camera,
+                         butterfly, this->gameplay);
+
+    prog->unbind();
+
+    Model->popMatrix();
+    //lighting->unbind();
+}
+
 void ObjectCollection::initSceneCollectibles()
 {
     uploadMultipleShapes("/mushroom.obj", 0);

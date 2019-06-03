@@ -6,6 +6,7 @@ uniform mat4 LP;
 uniform mat4 LV;
 uniform mat4 M;
 
+
 void main() {
 
     /* transform into light space */

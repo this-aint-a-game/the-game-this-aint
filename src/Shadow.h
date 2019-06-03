@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Butterfly.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "ObjectCollection.h"
 
 
 class Shadow {
@@ -16,15 +17,13 @@ class Shadow {
     GLuint depthMap;
     int width;
     int height;
-    Lighting *lighting;
     glm::mat4 LS;
     float t;
 
 public:
-    Shadow(Lighting *l)
+    Shadow()
     {
-        this->lighting = l;
-        this-> t = 0.f;
+        this->t = 0.f;
     }
 
     glm::mat4 & getLS()
@@ -52,6 +51,16 @@ public:
         depthProg->addUniform("M");
         depthProg->addAttribute("vertPos");
 
+        // these aren't used, it's just to make drawing game objects into depth buffer simple
+        depthProg->addUniform("shine");
+        depthProg->addUniform("lightPos");
+        depthProg->addUniform("view");
+        depthProg->addUniform("MatSpec");
+        depthProg->addUniform("MatAmb");
+        depthProg->addUniform("MatDif");
+        depthProg->addUniform("P");
+        depthProg->addUniform("V");
+
         glGenFramebuffers(1, &depthMapFBO);
 
         //generate the texture
@@ -74,7 +83,7 @@ public:
 
     }
 
-    void render(Player & player, Butterfly & butterfly)
+    void render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera)
     {
         //glViewport(0, 0, S_WIDTH, S_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -85,16 +94,14 @@ public:
         //render scene
         depthProg->bind();
         glm::mat4 LP = SetOrthoMatrix();
-        //LA = glm::vec3(0, 0, 0)
-        //glm::vec3 lightPos = player.currentPos + glm::vec3(0, 3, 0);
-        //glm::vec3 lightPos = player.currentPos + glm::vec3(2*sin(t), 3, cos(t)*2);
         glm::vec3 lightPos = butterfly.currentPos;
         t += 0.001; // TODO frametime
-        //glm::vec3 look = glm::lookAt(lightPos, player.currentPos, glm::vec3(1, 0, 0));
-        glm::mat4 LV = SetLightView(lightPos, player.currentPos, glm::vec3(1, 0, 0));
+        glm::mat4 LV = SetLightView(lightPos, oc->player.currentPos, glm::vec3(1, 0, 0));
         LS = LP * LV;
 
-        player.drawShape(depthProg);
+        oc->player.drawShape(depthProg);
+        oc->drawScene(depthProg, view, projection, camera, butterfly.currentPos);
+
         depthProg->unbind();
         glCullFace(GL_BACK);  // TODO?
 
@@ -105,22 +112,18 @@ public:
     {
         // orthographic view volume - numbers set up extents
         //glm::mat4 ortho = glm::ortho(-15.f, 15.f, -15.f, 15.0f, 0.1f, 30.f);
-        //glm::mat4 ortho = glm::ortho(-7.f, 7.f, -7.f, 7.0f, 0.1f, 15.f);
-        glm::mat4 ortho = glm::ortho(-5.f, 5.f, -5.f, 5.0f, 0.1f, 12.f);
+        glm::mat4 ortho = glm::ortho(-7.f, 7.f, -7.f, 7.0f, 0.1f, 15.f);
+        //glm::mat4 ortho = glm::ortho(-5.f, 5.f, -5.f, 5.0f, 0.1f, 12.f);
 
         //fill in the glUniform call to send to the right shader!
-        glUniformMatrix4fv(depthProg->getUniform("LP"), 1, GL_FALSE, value_ptr(ortho)); // LV is uniform in shader
+        glUniformMatrix4fv(depthProg->getUniform("LP"), 1, GL_FALSE, value_ptr(ortho));
         return ortho;
     }
 
     glm::mat4 SetLightView(glm::vec3 lightPos, glm::vec3 LA, glm::vec3 up)
     {
-        // TODO multiple lights
-        //lightPos = lighting->positions.front();
-
         glm::mat4 Cam = glm::lookAt(lightPos, LA, up);
-        glUniformMatrix4fv(depthProg->getUniform("LV"), 1, GL_FALSE, value_ptr(Cam)); // LV is uniform in shader
-        //fill in the glUniform call to send to the right shader!
+        glUniformMatrix4fv(depthProg->getUniform("LV"), 1, GL_FALSE, value_ptr(Cam));
         return Cam;
     }
 

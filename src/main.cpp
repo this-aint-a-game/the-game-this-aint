@@ -46,7 +46,7 @@ public:
 	Butterfly butterfly = Butterfly();
 	Camera camera = Camera();
     Lighting* lighting = new Lighting();
-	Shadow shadow = Shadow(lighting);
+	Shadow shadow = Shadow();
 	Terrain terrain = Terrain(oc->gameplay);
 	Water water = Water(oc->gameplay);
 	Sky sky = Sky();
@@ -400,46 +400,7 @@ public:
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
-		auto Model = make_shared<MatrixStack>();
-
-        oc->objProg->bind();
-
-        glUniformMatrix4fv(oc->objProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-        glUniformMatrix4fv(oc->objProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-        glUniform1f(oc->objProg->getUniform("numberLights"), lighting->numberLights);
-        lighting->bind(oc->objProg->getUniform("lighting"));
-
-        Model->pushMatrix();
-        Model->loadIdentity();
-
-        for(int i = 0; i < oc->objects.size(); i++)
-        {
-            MatrixStack *modelptr = Model.get();
-            oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
-                                       butterfly.currentPos, oc->gameplay);
-
-        }
-
-        for(int i = 0; i < oc->plants.size(); i++)
-        {
-            CHECKED_GL_CALL(glEnable(GL_BLEND));
-            glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
-//					Model->rotate(randFloat(0, 360), vec3(0,1,0));
-            MatrixStack *modelptr = Model.get();
-            oc->plants[i]->drawObject(modelptr, oc->plantShapes, oc->objProg, camera.getPosition(),
-                                       butterfly.currentPos, oc->gameplay);
-            CHECKED_GL_CALL(glDisable(GL_BLEND));
-        }
-
-        MatrixStack *modelptr = Model.get();
-        oc->moon->drawObject(modelptr, oc->moonShapes, oc->objProg, camera.getPosition(),
-                                   butterfly.currentPos, oc->gameplay);
-
-		oc->objProg->unbind();
-
-		Model->popMatrix();
-		lighting->unbind();
-
+		oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
 	}
 
 //    void drawRooster(MatrixStack* View, MatrixStack* Projection)
@@ -612,7 +573,7 @@ public:
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
-		shadow.render(oc->player, butterfly);
+		shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition());
         CHECKED_GL_CALL(glDisable(GL_BLEND));
 		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
 		butterfly.drawbutterfly(userViewPtr, projectionPtr, camera.getPosition(), oc->gameplay, lighting);
