@@ -42,8 +42,7 @@ vec3 calcLight(vec3 light, vec3 viewVec, vec3 fragNor)
 vec3 calcLight(vec3 lightPosition, vec3 fragNor, vec3 viewVec)
 {
     float distance = distance(lightPosition, pos.xyz);
-    distance = pow(distance, 1.4);    
-    vec3 lightColor = vec3(0);
+    distance = pow(distance, 1.4);
     
     vec3 lightDirection = normalize(lightPosition - pos.xyz);
 
@@ -57,8 +56,7 @@ vec3 calcLight(vec3 lightPosition, vec3 fragNor, vec3 viewVec)
     vec3 halfVec = normalize(distance + viewVec);
     vec3 specular = MatSpec*pow((10/distance)*pow(clamp(dot(halfVec, fragNor), 0, 1), shine),2);
 
-    lightColor += diffuse * vec3(1,1,1) + specular;
-    return lightColor;
+    return diffuse * MatDif + specular;
 }
 
 /* returns 1 if shadowed */
@@ -91,7 +89,7 @@ void main()
     vec3 fdy = vec3(dFdy(pos.x), dFdy(pos.y), dFdy(pos.z));
     vec3 norm = normalize(cross(fdx, fdy));
     vec3 viewVec = normalize(cameraPos - (V * M * vec4(normalize(norm), 1.0)).xyz);
-    vec3 finalColor = vec3(0);//= MatAmb;
+    vec3 finalColor = vec3(0.f); //= MatAmb;
 
 //    highp int nl = int(numberLights);
 //    int i, j;

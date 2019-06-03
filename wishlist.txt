@@ -1,12 +1,12 @@
 For Christmas all I want is:
   - Rendering to a framebuffer to do a loading screen and post processing
-  - TONS of bloom because thats what this game needs 
-  - Animations imported via assimp
+  - TONS of bloom because thats what this game needs                                            - Al
+  - Animations imported via assimp                                                              - Derg
   - fixed VFC?
-  - all scene objects included in shadow map render pass
+  - all scene objects included in shadow map render pass                                        - Al
   - multiple butterflies?
   - light spots beneath the particles?
-  - some kind of juicy reward when the player collects all colors
+  - some kind of juicy reward when the player collects all colors/ every color gets effects    - Crow
   - more cinematic use of the camera/butterfly pathing
-  - soften shadows
+  - soften shadows                                                                              - Al
   - maybe some weird grass or something idk

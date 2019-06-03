@@ -414,24 +414,26 @@ public:
 
         for(int i = 0; i < oc->objects.size(); i++)
         {
-//            if(vfc->ViewFrustCull(oc->objects[i]->bs->midpt, -2.25))
-//            {
-                if (oc->objects[i]->type == GameObject::strawberry) {
-					MatrixStack *modelptr = Model.get();
-                    oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
-                                               butterfly.currentPos, oc->gameplay);
-                } else if (oc->objects[i]->type == GameObject::plant) {
-                    CHECKED_GL_CALL(glEnable(GL_BLEND));
-                    glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
-//					Model->rotate(randFloat(0, 360), vec3(0,1,0));
-					MatrixStack *modelptr = Model.get();
-                    oc->objects[i]->drawObject(modelptr, oc->plantShapes, oc->objProg, camera.getPosition(),
-                                               butterfly.currentPos, oc->gameplay);
-                    CHECKED_GL_CALL(glDisable(GL_BLEND));
-                }
-//            }
+            MatrixStack *modelptr = Model.get();
+            oc->objects[i]->drawObject(modelptr, oc->strawberryShapes, oc->objProg, camera.getPosition(),
+                                       butterfly.currentPos, oc->gameplay);
 
         }
+
+        for(int i = 0; i < oc->plants.size(); i++)
+        {
+            CHECKED_GL_CALL(glEnable(GL_BLEND));
+            glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
+//					Model->rotate(randFloat(0, 360), vec3(0,1,0));
+            MatrixStack *modelptr = Model.get();
+            oc->plants[i]->drawObject(modelptr, oc->plantShapes, oc->objProg, camera.getPosition(),
+                                       butterfly.currentPos, oc->gameplay);
+            CHECKED_GL_CALL(glDisable(GL_BLEND));
+        }
+
+        MatrixStack *modelptr = Model.get();
+        oc->moon->drawObject(modelptr, oc->moonShapes, oc->objProg, camera.getPosition(),
+                                   butterfly.currentPos, oc->gameplay);
 
 		oc->objProg->unbind();
 
@@ -510,7 +512,9 @@ public:
 		{		
 			butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
 		}
-		
+
+
+//        std::cout << oc->player.currentPos.x << "," << oc->player.currentPos.y << "," << oc->player.currentPos.z << std::endl;
 
         lightPos.x = cos(glfwGetTime()/100) * 500.f;
         lightPos.z = sin(glfwGetTime()/100) * 500.f;
@@ -611,7 +615,7 @@ public:
 		shadow.render(oc->player, butterfly);
         CHECKED_GL_CALL(glDisable(GL_BLEND));
 		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
-		butterfly.drawbutterfly(userViewPtr, projectionPtr, camera.getPosition(), lighting);
+		butterfly.drawbutterfly(userViewPtr, projectionPtr, camera.getPosition(), oc->gameplay, lighting);
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
