@@ -9,14 +9,15 @@
 
 void Butterfly::updateModelMatrix(double frametime, glm::vec3 origin)
 {
-    center = origin;
     angle += frametime *  BUTTERFLY_SPEED * BUTTERFLY_ANGLE_SCALE;
-    offsets = glm::vec3(BUTTERFLY_DISTANCE * cos(angle), sin(5*angle)*0.05 + BUTTERFLY_HEIGHT, BUTTERFLY_DISTANCE * sin(angle));
+    offsets = glm::vec3(BUTTERFLY_DISTANCE * cos(angle), /*sin(5*angle)*0.05 +*/ BUTTERFLY_HEIGHT, BUTTERFLY_DISTANCE * sin(angle));
     currentPos = origin + offsets;
     currentPos.y = std::max((float)(Terrain::getHeight(currentPos.x, currentPos.z) + BUTTERFLY_HEIGHT), currentPos.y);
     model = glm::translate(glm::mat4(1), currentPos) 
             * glm::rotate(glm::mat4(1), -1*angle, glm::vec3(0,1,0)) 
             * glm::scale(glm::mat4(1), glm::vec3(BUTTERFLY_SIZE));
+    center = origin;
+    center.y = (origin.y + currentPos.y) / 2.0;
 }
 
 void Butterfly::moveAlongPath(glm::vec3 a, glm::vec3 b, glm::vec3 control1, glm::vec3 control2, double frametime, double t)
