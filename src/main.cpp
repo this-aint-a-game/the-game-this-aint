@@ -25,6 +25,7 @@ obtain.
 #include "ObjectCollection.h"
 #include "ParticleCollection.h"
 #include "ViewFrustumCulling.h"
+#include "Moon.h"
 #include <irrKlang.h>
 
 #define MOVEMENT_SPEED 0.2f
@@ -43,6 +44,7 @@ public:
     irrklang::ISoundEngine* soundEngine;
     ParticleCollection *pc = new ParticleCollection();
     ObjectCollection *oc = new ObjectCollection();
+    Moon *moon = new Moon();
 	Butterfly butterfly = Butterfly();
 	Camera camera = Camera();
     Lighting* lighting = new Lighting();
@@ -401,6 +403,8 @@ public:
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
 		oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
+        moon->drawObject(View, Projection, camera.getPosition(),
+                               butterfly.currentPos, oc->gameplay);
 	}
 
 //    void drawRooster(MatrixStack* View, MatrixStack* Projection)
@@ -614,6 +618,7 @@ int main(int argc, char **argv)
 	application->init();
 	application->initTex();
 	application->pc->initParticles();
+	application->moon->initMoon();
 
     glfwSetInputMode(windowManager->getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 

@@ -70,9 +70,6 @@ void ObjectCollection::drawScene(shared_ptr<Program> prog, MatrixStack* View, Ma
         CHECKED_GL_CALL(glDisable(GL_BLEND));
     }
 
-    MatrixStack *modelptr = Model.get();
-    this->moon->drawObject(modelptr, this->moonShapes, prog, camera,
-                         butterfly, this->gameplay);
 
     prog->unbind();
 
@@ -127,9 +124,6 @@ void ObjectCollection::initSceneCollectibles()
 
 void ObjectCollection::initSceneObjects()
 {
-    uploadMultipleShapes("/moon.obj", 2);
-    moon = new Moon(moonmin, moonmax, 0, GameObject::moon, gameplay);
-
     uploadMultipleShapes("/plant.obj", 1);
     numPlants = glm::clamp(rand() % 100, 100*2, 150*2);
 
@@ -230,10 +224,6 @@ void ObjectCollection::uploadMultipleShapes(string objDir, int switchNum)
                     plantmax = Gmax;
                     plantmin = Gmin;
                     plantShapes.push_back(s);
-                case 2:
-                    moonmax = Gmax;
-                    moonmin = Gmin;
-                    moonShapes.push_back(s);
             }
         }
     }

@@ -26,6 +26,7 @@ class Butterfly
     std::shared_ptr<Shape>   butterflyShapeWingsUp;
     glm::mat4 model;
     glm::vec3 currentPos;
+    glm::vec3 scale;
 
     Butterfly()
     {

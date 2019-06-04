@@ -4,14 +4,35 @@
 
 #ifndef MOON_H
 #define MOON_H
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "glm/glm.hpp"
+#include "glm/vec4.hpp"
+#include "glm/mat4x4.hpp"
 
+#include "Program.h"
+#include "MatrixStack.h"
+#include "Shape.h"
 #include "GameObject.h"
-class Moon : public GameObject{
+#include "ColorCollectGameplay.h"
+#include "Lighting.h"
+
+class Moon{
 public:
 
-    void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>,  std::shared_ptr<Program>, glm::vec3 view, glm::vec3, ColorCollectGameplay* ccg);
+    std::shared_ptr<Program> moonProg;
+    glm::vec3 currentPos;
+    std::vector<std::shared_ptr<Shape>> moonShapes;
+    glm::vec3 moonmin = glm::vec3(0);
+    glm::vec3 moonmax = glm::vec3(0);
+    glm::vec3 scale;
+
+    void uploadMultipleShapes();
+    void drawObject(MatrixStack*,  MatrixStack*, glm::vec3 view, glm::vec3, ColorCollectGameplay* ccg);
     void setPosition(float, float);
-    Moon(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGameplay * ccg);
+    void setUp();
+    void initMoon();
+    Moon(){};
     virtual ~Moon() {};
 };
 
