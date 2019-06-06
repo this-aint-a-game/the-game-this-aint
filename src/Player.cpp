@@ -42,6 +42,10 @@ glm::mat4 Player::updateModelMatrix(double frametime,
         speed = MOVESPEED * frametime;
         targetDir = glm::vec4(camDir, 1) * glm::rotate(glm::mat4(1), PI / 2, glm::vec3(0,1,0));
     }
+
+    t += 7 * frametime;
+    if (t >= 4)
+        t = 0;
  
     // lerp the direction towards the target direction
     dir += (float)(frametime * PLAYER_ROTATION_SPRING) * (targetDir - dir);
@@ -96,16 +100,34 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     playerProg->addUniform("lighting");
     */
 
-
+    playerShape.push_back(nullptr);
+    playerShape.push_back(nullptr);
+    playerShape.push_back(nullptr);
+    playerShape.push_back(nullptr);
     // Initialize the obj mesh VBOs etc
-    playerShape = std::make_shared<Shape>();
-    playerShape->loadMesh("../resources/character.obj");
-    playerShape->resize();
-    playerShape->init();
+    playerShape[0] = std::make_shared<Shape>();
+    playerShape[0]->loadMesh("../resources/shape0.obj");
+    playerShape[0]->resize();
+    playerShape[0]->init();
+    // Initialize the obj mesh VBOs etc
+    playerShape[1] = std::make_shared<Shape>();
+    playerShape[1]->loadMesh("../resources/shape1.obj");
+    playerShape[1]->resize();
+    playerShape[1]->init();
+    // Initialize the obj mesh VBOs etc
+    playerShape[2] = std::make_shared<Shape>();
+    playerShape[2]->loadMesh("../resources/shape2.obj");
+    playerShape[2]->resize();
+    playerShape[2]->init();
+    // Initialize the obj mesh VBOs etc
+    playerShape[3] = std::make_shared<Shape>();
+    playerShape[3]->loadMesh("../resources/shape3.obj");
+    playerShape[3]->resize();
+    playerShape[3]->init();
 
     scale = glm::vec3(0.2,0.2,0.2);
 
-    this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale, 0.f);
+    this->bs = new BoundingSphere(playerShape[0]->min, playerShape[0]->max, scale, 0.f);
 }
 
 void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting, glm::vec3 butterflyPos)
@@ -126,7 +148,7 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 vi
     glUniform1f(playerProg->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(playerProg->getUniform("lighting"));
 */
-    playerShape->draw(playerProg);
+    playerShape[(int)t]->draw(playerProg);
 
     playerProg->unbind();
 }
@@ -146,7 +168,7 @@ void Player::updateView(double frametime,
 void Player::drawShape(std::shared_ptr<Program> prog)
 {
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
-    playerShape->draw(prog);
+    playerShape[(int)t]->draw(prog);
 }
 bool Player::checkForCollisions(std::vector<GameObject*> &objs, BoundingVolumeHierarchy* bvh)
 {
