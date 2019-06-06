@@ -22,6 +22,8 @@ class Camera
 public:  
     bool zoomIn;
     bool zoomOut;
+    bool inAnimation;
+    float t;
     float targetYaw; 
     float yawAngle;
     float targetDistance;
@@ -34,7 +36,11 @@ public:
     {
         targetYaw = yawAngle = 0.0;
         targetDistance = distance = 5.0;
+        inAnimation = false;
+        t = 0.0f;
     }
+
+    void startPullbackAnimation();
 
     glm::mat4 update
     (     

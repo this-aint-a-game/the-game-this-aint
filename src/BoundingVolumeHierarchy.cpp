@@ -57,6 +57,7 @@ bool BoundingVolumeHierarchy::checkForCollision(std::vector<GameObject*> &gameob
             auto hld = dynamic_cast<Strawberry*>(gameobjs[i]);
             if (!(hld->collected))
             {
+                camera->startPullbackAnimation();
                 soundEngine->play2D("../resources/sound9B.ogg", false);
             }
             hld->collect();

@@ -7,6 +7,7 @@
 
 #include "Strawberry.h"
 #include "Shape.h"
+#include "Camera.h"
 #include "ColorCollectGameplay.h"
 #include "BoundingVolumeHierarchy.h"
 #include "Plant.h"
@@ -41,6 +42,11 @@ public:
     void setSoundEngine(irrklang::ISoundEngine* soundEngine)
     {
         bvh->setSoundEngine(soundEngine);
+    }
+
+    void setCamera(Camera* camera)
+    {
+        bvh->setCamera(camera);
     }
 
     ~ObjectCollection() {};

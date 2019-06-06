@@ -30,6 +30,8 @@ obtain.
 
 #define MOVEMENT_SPEED 0.2f
 #define RENDER_SPEED 0.5f
+#define WINDOW_WIDTH 960
+#define WINDOW_HEIGHT 540
 
 using namespace std;
 using namespace glm;
@@ -297,6 +299,7 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
         oc->setSoundEngine(soundEngine);
+        oc->setCamera(&camera);
 		sky.skySetUp();
 //		gasSetUp(resourceDir);
 		oc->objectSetUp();
@@ -451,7 +454,7 @@ public:
 			glfwGetCursorPos(windowManager->getHandle(), &mousex, &mousey);
 
         updateGeom(deltaTime);
-  
+		
         oc->player.updateView(deltaTime * 0.000001f, 
 							mousex, 
 							mousey, 
@@ -611,7 +614,7 @@ int main(int argc, char **argv)
     soundEngine->play2D("../resources/tame.ogg", true);
  
 	WindowManager *windowManager = new WindowManager();
-	windowManager->init(1920, 1080);
+	windowManager->init(WINDOW_WIDTH, WINDOW_HEIGHT);
 	windowManager->setEventCallbacks(application);
 	application->windowManager = windowManager;
 
