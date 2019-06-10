@@ -2,7 +2,6 @@
 
 uniform vec3 MatDif;
 
-
 out vec4 Outcolor;
 
 

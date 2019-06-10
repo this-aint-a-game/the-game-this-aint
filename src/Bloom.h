@@ -49,11 +49,11 @@ public:
     {
         initQuad();
 
-        //initTexProg();
+        initTexProg();
 
         initCombProg();
 
-        /*
+
         glGenFramebuffers(2, frameBuf);
         glGenTextures(2, texBuf);
         //glGenRenderbuffers(1, &depthBuf);
@@ -73,7 +73,7 @@ public:
         //create another FBO so we can swap back and forth
         createFBO(frameBuf[1], texBuf[1], width, height);
         //this one doesn't need depth
-        */
+
 
         glGenFramebuffers(1, screenBuf);
         glGenTextures(1, screenTexBuf);
@@ -84,13 +84,16 @@ public:
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
 
+        /*
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, DrawBuffers);
+         */
     }
 
     GLuint getScreenBuf()
     {
         return screenTexBuf[0];
+        //return 0;
     }
 
     GLuint getBlurBuffer()
@@ -180,7 +183,7 @@ public:
             FirstTime = 0;
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, getScreenBuf());
     }
 
     void initTexProg()

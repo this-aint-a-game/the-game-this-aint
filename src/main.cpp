@@ -376,7 +376,7 @@ public:
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
-        //bloom.render(butterfly, oc, View, Projection, camera.getPosition());
+        bloom.render(butterfly, oc, View, Projection, camera.getPosition());
 	    oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
         moon->drawObject(View, Projection, camera.getPosition(), butterfly.currentPos, oc->gameplay);
 	}
@@ -387,7 +387,7 @@ public:
         glViewport(0, 0, width, height);
 
         glBindFramebuffer(GL_FRAMEBUFFER, bloom.getScreenBuf());
-       // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         //glEnable(GL_DEPTH_TEST);
@@ -530,12 +530,11 @@ public:
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
-		//shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition());
+		shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition(), bloom.getScreenBuf());
         CHECKED_GL_CALL(glDisable(GL_BLEND));
 		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
 
         butterfly.drawbutterfly(butterfly.butterflyProg, userViewPtr, projectionPtr, camera.getPosition(), oc->gameplay);
-
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
@@ -543,20 +542,9 @@ public:
         CHECKED_GL_CALL(glPointSize(25.0f));
         pc->drawParticles(userViewPtr, aspect, keyToggles, oc->player.position, oc->gameplay, y);
 
-
 		Projection->popMatrix();
 		ViewUser->popMatrix();
 		ViewUser->popMatrix();
-
-		/*
-		if (first % 20 == 0)
-        {
-            std::string filename = "screen" + std::to_string(first) + ".png";
-
-			assert(GLTextureWriter::WriteImage(bloom.getScreenBuf(), filename));
-        }
-        */
-
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

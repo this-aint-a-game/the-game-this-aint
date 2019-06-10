@@ -61,7 +61,7 @@ void Shadow::init(int w, int h)
 
 }
 
-void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera)
+void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, GLuint buffer)
 {
     //glViewport(0, 0, S_WIDTH, S_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -85,7 +85,7 @@ void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* vi
     depthProg->unbind();
     glCullFace(GL_BACK);  // TODO?
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 }
 
 glm::mat4 Shadow::SetOrthoMatrix()

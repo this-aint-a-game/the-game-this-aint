@@ -70,11 +70,11 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
 
     // TODO
 
-    //glActiveTexture(GL_TEXTURE3); // TODO? 2?
-    //glBindTexture(GL_TEXTURE_2D, depthMap);
+    glActiveTexture(GL_TEXTURE3); // TODO? 2?
+    glBindTexture(GL_TEXTURE_2D, depthMap);
 
-    //glUniform1i(prog->getUniform("shadowDepth"), 3); // TODO 1?
-    //glUniformMatrix4fv(prog->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
+    glUniform1i(prog->getUniform("shadowDepth"), 3); // TODO 1?
+    glUniformMatrix4fv(prog->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
 
     draw();
 
