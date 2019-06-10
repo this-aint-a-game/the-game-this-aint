@@ -68,11 +68,13 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
 
     }
 
-    glActiveTexture(GL_TEXTURE1); // TODO? 2?
-    glBindTexture(GL_TEXTURE_2D, depthMap);
+    // TODO
 
-    glUniform1i(prog->getUniform("shadowDepth"), 1); // TODO 1?
-    glUniformMatrix4fv(prog->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
+    //glActiveTexture(GL_TEXTURE3); // TODO? 2?
+    //glBindTexture(GL_TEXTURE_2D, depthMap);
+
+    //glUniform1i(prog->getUniform("shadowDepth"), 3); // TODO 1?
+    //glUniformMatrix4fv(prog->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
 
     draw();
 
@@ -258,7 +260,7 @@ void Terrain::unbind()
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
 
-    glActiveTexture(GL_TEXTURE0);
+    //glActiveTexture(GL_TEXTURE0);
 
     //glDisableVertexAttribArray(2);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

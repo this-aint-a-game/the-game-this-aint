@@ -83,6 +83,7 @@ void main()
     vec3 finalColor = vec3(0.f);
     finalColor += calcLight(lightPos, norm, viewVec);
 
-    float shade = TestShadow(fPosLS);
-    color = vec4((1.0 - shade)*finalColor, 1.0);
+    //float shade = TestShadow(fPosLS);
+    //color = vec4((1.0 - shade)*finalColor, 1.0);
+    color = vec4(finalColor, 1.0);
 }

@@ -23,7 +23,7 @@ void Shadow::init(int w, int h)
     depthProg = std::make_shared<Program>();
     depthProg->setVerbose(true);
     depthProg->setShaderNames("../resources/depth_vert.glsl", "../resources/depth_frag.glsl");
-    depthProg->init();
+    //depthProg->init();
     depthProg->init();
     depthProg->addUniform("LP");
     depthProg->addUniform("LV");
@@ -55,8 +55,8 @@ void Shadow::init(int w, int h)
     //bind with framebuffer's depth buffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
+    //glDrawBuffer(GL_NONE);
+    //glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
@@ -65,6 +65,8 @@ void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* vi
 {
     //glViewport(0, 0, S_WIDTH, S_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
     glClear(GL_DEPTH_BUFFER_BIT);
     glCullFace(GL_FRONT); // TODO?
 
