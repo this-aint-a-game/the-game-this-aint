@@ -18,7 +18,7 @@ glm::mat4 Camera::update(glm::vec3 lookat, double frametime,
             targetDistance += ZOOM_SENSITIVITY * frametime;
 
         // adjust target yaw based on mouse inputs. No constraints. 
-        targetYaw += YAW_ANGLE_SENSITIVITY * frametime * (width - 4.0 * mousex);
+        targetYaw += controlDir * (YAW_ANGLE_SENSITIVITY * frametime * (width - 4.0 * mousex));
     } 
     else // inAnimation, take control of the mouse
     {

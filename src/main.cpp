@@ -179,6 +179,9 @@ public:
 			} 
 			if (key == GLFW_KEY_P && action == GLFW_PRESS) {
 				oc->player.doSomersault();
+			}			
+			if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+				camera.controlDir *= -1;
 			}
 		
 		
