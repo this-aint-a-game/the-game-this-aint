@@ -13,6 +13,7 @@
 #include "Plant.h"
 #include "Player.h"
 #include <irrKlang.h>
+#include "ViewFrustumCulling.h"
 
 class ObjectCollection {
 
@@ -56,7 +57,7 @@ public:
     void initSceneObjects();
     void uploadMultipleShapes(string objDir, int switchNum);
     void initObjectHierarchy();
-    void drawScene(shared_ptr<Program> prog, MatrixStack* View, MatrixStack* Projection, glm::vec3 camera, glm::vec3 butterfly);
+    void drawScene(shared_ptr<Program> prog, MatrixStack* View, MatrixStack* Projection, glm::vec3 camera, glm::vec3 butterfly, ViewFrustumCulling*);
 };
 
 

@@ -27,6 +27,7 @@ obtain.
 #include "ViewFrustumCulling.h"
 #include "Moon.h"
 #include "Bloom.h"
+#include "Plank.h"
 #include <irrKlang.h>
 
 #define MOVEMENT_SPEED 0.2f
@@ -57,6 +58,7 @@ public:
 	Water water = Water(oc->gameplay);
 	Sky sky = Sky();
 	Bloom bloom = Bloom();
+    Plank plank = Plank();
 	ViewFrustumCulling* vfc = new ViewFrustumCulling();
 
 	WindowManager * windowManager = nullptr;
@@ -381,9 +383,10 @@ public:
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
-        //bloom.render(butterfly, oc, View, Projection, camera.getPosition(), moon);
-	    oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
-        moon->drawObject(View, Projection, camera.getPosition(), butterfly.currentPos, oc->gameplay);
+
+	    moon->drawObject(View, Projection, camera.getPosition(), butterfly.currentPos, oc->gameplay);
+		oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos, vfc);
+
 	}
 
     void render(float deltaTime)
@@ -545,9 +548,12 @@ public:
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
-		shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition(), bloom.getScreenBuf());
+
+		shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition(), bloom.getScreenBuf(), vfc);
+
         CHECKED_GL_CALL(glDisable(GL_BLEND));
 		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
+        plank.draw(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
 
         butterfly.drawbutterfly(butterfly.butterflyProg, userViewPtr, projectionPtr, camera.getPosition(), oc->gameplay);
 
@@ -585,6 +591,10 @@ int main(int argc, char **argv)
 	{
 		std::cerr << "Could not start irrKlang sound engine" << std::endl;
 	}
+
+
+    soundEngine->play2D("../resources/tame.ogg", true);
+
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -595,6 +605,7 @@ int main(int argc, char **argv)
 	application->initTex();
 	application->pc->initParticles();
 	application->moon->initMoon();
+    application->plank.init();
 
     glfwSetInputMode(windowManager->getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
