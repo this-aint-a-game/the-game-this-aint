@@ -10,8 +10,8 @@ void Plank::init()
     plankProg = std::make_shared<Program>();
     plankProg->setVerbose(true);
     plankProg->setShaderNames(
-            "../resources/player_vert.glsl",
-            "../resources/player_frag.glsl");
+            "../resources/plank_vert.glsl",
+            "../resources/plank_frag.glsl");
     if (! plankProg->init())
     {
         std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
