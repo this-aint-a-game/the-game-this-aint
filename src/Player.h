@@ -26,6 +26,7 @@ class Player : public GameObject
 
     std::shared_ptr<Program> playerProg;
     std::shared_ptr<Shape>   playerShape;
+    std::vector<std::shared_ptr<Shape>> idleframes;
     glm::mat4 model;
 
     glm::mat4 updateModelMatrix
@@ -42,7 +43,7 @@ class Player : public GameObject
 
     glm::vec3 oldPos, position, dir, targetDir;
     float yaw, targetYaw;
-    float timer;
+    float timer, animationTimer;
     bool w, a, s, d, sprint;
     
     Player()
@@ -52,7 +53,7 @@ class Player : public GameObject
         position = glm::vec3(-8.43903, 0, 9.66477);
         dir = targetDir = glm::vec3(0,0,0);
         oldPos = position;
-        timer = 0;
+        timer = animationTimer = 0;
     }
 
     void updateView(

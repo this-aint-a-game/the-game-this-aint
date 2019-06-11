@@ -11,6 +11,9 @@ glm::mat4 Player::updateModelMatrix(double frametime,
                                     std::vector<GameObject*> & objs,
                                     BoundingVolumeHierarchy * bvh)
 {
+    animationTimer += 4*frametime;
+    if(animationTimer >= 2)
+        animationTimer = 0;
     // set speed = 0 as default, will update value based on keypresses
     float speed = 0;
     // because the camera is always looking at the player when the player has control of the 
@@ -106,6 +109,15 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     scale = glm::vec3(0.2,0.2,0.2);
 
     this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale, 0.f);
+
+    // animations
+    for(int i = 0; i < 2; i++)
+    {
+        idleframes.push_back(std::make_shared<Shape>());
+        idleframes[i]->loadMesh("../resources/frame" + std::to_string(i) + ".obj");
+        idleframes[i]->resize();
+        idleframes[i]->init();
+    }
 }
 
 void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, Lighting* lighting, glm::vec3 butterflyPos)
@@ -126,7 +138,8 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 vi
     glUniform1f(playerProg->getUniform("numberLights"), lighting->numberLights);
     lighting->bind(playerProg->getUniform("lighting"));
 */
-    playerShape->draw(playerProg);
+    //playerShape->draw(playerProg);
+    idleframes[(int)animationTimer]->draw(playerProg);
 
     playerProg->unbind();
 }
@@ -146,7 +159,8 @@ void Player::updateView(double frametime,
 void Player::drawShape(std::shared_ptr<Program> prog)
 {
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
-    playerShape->draw(prog);
+    //playerShape->draw(prog);
+    idleframes[(int)animationTimer]->draw(prog);
 }
 bool Player::checkForCollisions(std::vector<GameObject*> &objs, BoundingVolumeHierarchy* bvh)
 {
