@@ -123,7 +123,7 @@ public:
         tex_prog->unbind();
     }
 
-    void render(Butterfly & butterfly, ObjectCollection* oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera)
+    void render(Butterfly & butterfly, ObjectCollection* oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, Moon* moon)
     {
         // frameBuf[0] is actually memory -> storing the data
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[0]);
@@ -142,6 +142,7 @@ public:
         // render scene
         oc->drawScene(oc->objProg, view, projection, camera, butterfly.currentPos);
         butterfly.drawbutterfly(butterfly.butterflyProg, view, projection, camera, oc->gameplay);
+        moon->drawObject(view, projection, camera, butterfly.currentPos, oc->gameplay);
         // unbind prog
 
         //regardless unbind the FBO
