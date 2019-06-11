@@ -7,6 +7,8 @@
 
 class Bloom
 {
+    float t;
+
     GLuint frameBuf[2];
     GLuint texBuf[2];
 
@@ -24,6 +26,13 @@ class Bloom
     std::shared_ptr<Program> tex_prog;
     std::shared_ptr<Program> comb_prog;
     std::shared_ptr<Program> bright_prog;
+    std::shared_ptr<Program> loading_prog;
+
+
+    std::shared_ptr<Texture> loadScreenF0;
+   std::shared_ptr<Texture> loadScreenF1;
+   std::shared_ptr<Texture> loadScreenF2;
+   std::shared_ptr<Texture> loadScreenF3;
 
 public:
 
@@ -84,6 +93,27 @@ public:
         combine();
     }
 
+    void showLoadScreen(float frametime)
+    {
+        t += frametime / 1000000.0f;
+        if(t >= 4)
+            t = 0;
+        std::cout << t << std::endl;
+
+        loading_prog->bind();
+        glUniform1i(loading_prog->getUniform("t"), (GLint)((int)t));
+        loadScreenF0->bind(loading_prog->getUniform("loadScreenF0"));
+        loadScreenF1->bind(loading_prog->getUniform("loadScreenF1"));
+        loadScreenF2->bind(loading_prog->getUniform("loadScreenF2"));
+        loadScreenF3->bind(loading_prog->getUniform("loadScreenF3"));
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);    //drawing a quad
+        glDisableVertexAttribArray(0);
+        loading_prog->unbind();
+    }
+
     void combine()
     {
         glActiveTexture(GL_TEXTURE0);
@@ -106,6 +136,8 @@ public:
 
     void init(int width, int height)
     {
+        t = 0;
+
         initQuad();
 
         initTexProg();
@@ -113,6 +145,10 @@ public:
         initCombProg();
 
         initBrightProg();
+
+        initLoadingProg();
+
+        initLoadScreenTextures();
 
         glGenFramebuffers(1, screenBuf);
         glGenTextures(1, screenTexBuf);
@@ -198,10 +234,31 @@ public:
         {
             std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
             exit(1);
-        }
+        }       
         comb_prog->addUniform("bloomBuf");
         comb_prog->addUniform("sceneBuf");
         comb_prog->addAttribute("vertPos");
+    }
+
+
+    void initLoadingProg()
+    {
+        //set up the shaders to blur the FBO decomposed just a placeholder pass thru now
+        //TODO - modify and possibly add other shaders to complete blur
+        loading_prog = make_shared<Program>();
+        loading_prog->setVerbose(true);
+        loading_prog->setShaderNames("../resources/blur_vert.glsl", "../resources/loading_frag.glsl");
+        if (! loading_prog->init())
+        {
+            std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+            exit(1);
+        }       
+        loading_prog->addUniform("t");
+        loading_prog->addUniform("loadScreenF0");
+        loading_prog->addUniform("loadScreenF1");
+        loading_prog->addUniform("loadScreenF2");
+        loading_prog->addUniform("loadScreenF3");
+        loading_prog->addAttribute("vertPos");
     }
 
     void initBrightProg()
@@ -238,6 +295,27 @@ public:
         glGenBuffers(1, &quad_vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+
+    }
+
+    void initLoadScreenTextures()
+    {
+        loadScreenF0 = std::make_shared<Texture>();
+        loadScreenF0->setFilename("../resources/0dots.png");
+        loadScreenF0->init();        
+        loadScreenF0->setUnit(0);
+        loadScreenF1 = std::make_shared<Texture>();
+        loadScreenF1->setFilename("../resources/1dots.png");
+        loadScreenF1->init(); 
+        loadScreenF1->setUnit(1);       
+        loadScreenF2 = std::make_shared<Texture>();
+        loadScreenF2->setFilename("../resources/2dots.png");
+        loadScreenF2->init();        
+        loadScreenF2->setUnit(2);
+        loadScreenF3 = std::make_shared<Texture>();
+        loadScreenF3->setFilename("../resources/3dots.png");
+        loadScreenF3->init();
+        loadScreenF3->setUnit(3);
 
     }
 

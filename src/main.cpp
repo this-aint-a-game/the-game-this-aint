@@ -177,6 +177,9 @@ public:
 			if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
 				oc->player.sprint = false;
 			} 
+			if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+				oc->player.doSomersault();
+			}
 		
 		
         }
@@ -267,6 +270,8 @@ public:
 
 		//glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
         oc->setSoundEngine(soundEngine);
         oc->setCamera(&camera);
@@ -386,6 +391,15 @@ public:
 
     void render(float deltaTime)
     {
+		if(!terrain.isDoneLoading())
+		{
+		    glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+        	glViewport(0, 0, width, height);
+		    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			bloom.showLoadScreen(deltaTime);
+		} else {
+
 	    glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
         glViewport(0, 0, width, height);
 
@@ -501,7 +515,10 @@ public:
 
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glDisable(GL_BLEND));
+		glDisable(GL_CULL_FACE);
         sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
         // view frustum culling
         vfc->ExtractVFPlanes(Projection->topMatrix(), ViewUser->topMatrix());
@@ -560,7 +577,7 @@ public:
         //bloom.combine();
         bloom.bloomPlz();
     }
-
+	}
 };
 
 int main(int argc, char **argv)
