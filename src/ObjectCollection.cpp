@@ -61,13 +61,14 @@ void ObjectCollection::drawScene(shared_ptr<Program> prog, MatrixStack* View, Ma
 
     for(int i = 0; i < this->plants.size(); i++)
     {
-        CHECKED_GL_CALL(glEnable(GL_BLEND));
-        glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
+        //CHECKED_GL_CALL(glEnable(GL_BLEND));
+        //glBlendFunc(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA);
 //					Model->rotate(randFloat(0, 360), vec3(0,1,0));
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
         MatrixStack *modelptr = Model.get();
         this->plants[i]->drawObject(modelptr, this->plantShapes, prog, camera,
                                   butterfly, this->gameplay);
-        CHECKED_GL_CALL(glDisable(GL_BLEND));
+        //CHECKED_GL_CALL(glDisable(GL_BLEND));
     }
 
 

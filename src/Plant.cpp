@@ -44,17 +44,10 @@ void Plant::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> p
     Model->scale(this->scale);
     for (size_t j = 0; j < plantShapes.size(); j++)
     {
-
         if(ccg->checkColor(this->color)) {
 
-            if (j == 0) {
-                SetMaterial(this->color, prog.get());
-            } else {
-                glUniform3f(prog.get()->getUniform("MatAmb"), 0.25f, 0.20725f, 0.20725f);
-                glUniform3f(prog.get()->getUniform("MatDif"), 1.0f, 0.829f, 0.829f);
-                glUniform3f(prog.get()->getUniform("MatSpec"), 0.296648f, 0.296648f, 0.296648f);
-                glUniform1f(prog.get()->getUniform("shine"), 12.0f);
-            }
+            SetMaterial(this->color, prog.get());
+
         } else {
             glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
             glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);

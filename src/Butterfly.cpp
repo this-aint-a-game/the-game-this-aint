@@ -58,20 +58,20 @@ void Butterfly::initbutterfly()
     butterflyShapeWingsUp->init();
 }
 
-void Butterfly::drawbutterfly(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, ColorCollectGameplay* ccg, Lighting* lighting)
+void Butterfly::drawbutterfly(std::shared_ptr<Program> prog, MatrixStack* View, MatrixStack* Projection, glm::vec3 view, ColorCollectGameplay* ccg)
 {
-    butterflyProg->bind();
+    prog->bind();
 
-    glUniformMatrix4fv(butterflyProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-    glUniformMatrix4fv(butterflyProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-    glUniformMatrix4fv(butterflyProg->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
+    glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
+    glUniformMatrix4fv(prog->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
+    glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
 
     if (ccg->checkColor(2)) {
 
         glm::vec3 d = ccg->yellowColor.diffuse;
-        glUniform3f(butterflyProg->getUniform("MatDif"), d.x, d.y, d.z);
+        glUniform3f(prog->getUniform("MatDif"), d.x, d.y, d.z);
     } else{
-        glUniform3f(butterflyProg->getUniform("MatDif"), 1, 1, 1);
+        glUniform3f(prog->getUniform("MatDif"), 1, 1, 1);
     }
 
    /* glUniform3f(butterflyProg->getUniform("view"), view.x, view.y, view.z);
@@ -83,11 +83,11 @@ void Butterfly::drawbutterfly(MatrixStack* View, MatrixStack* Projection, glm::v
     lighting->bind(butterflyProg->getUniform("lighting"));
 */
     if(sin(5*angle) < 0.75)
-        butterflyShape->draw(butterflyProg);
+        butterflyShape->draw(prog);
     else
-        butterflyShapeWingsUp->draw(butterflyProg);
+        butterflyShapeWingsUp->draw(prog);
     
-    butterflyProg->unbind();
+    prog->unbind();
 }
 
 void Butterfly::drawShape(std::shared_ptr<Program> prog)

@@ -26,6 +26,7 @@ obtain.
 #include "ParticleCollection.h"
 #include "ViewFrustumCulling.h"
 #include "Moon.h"
+#include "Bloom.h"
 #include <irrKlang.h>
 
 #define MOVEMENT_SPEED 0.2f
@@ -37,6 +38,7 @@ using namespace std;
 using namespace glm;
 
 bool debug = false;
+int first = 0;
 
 class Application : public EventCallbacks
 {
@@ -54,11 +56,8 @@ public:
 	Terrain terrain = Terrain(oc->gameplay);
 	Water water = Water(oc->gameplay);
 	Sky sky = Sky();
+	Bloom bloom = Bloom();
 	ViewFrustumCulling* vfc = new ViewFrustumCulling();
-
-//    shared_ptr<Program> roosterProg;
-//    shared_ptr<Texture> roosterTexture;
-//    shared_ptr<Shape> rooster;
 
 	WindowManager * windowManager = nullptr;
 	int width, height;
@@ -257,45 +256,14 @@ public:
 		pc->particleTexture->init();
 		pc->particleTexture->setUnit(4);
 		pc->particleTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-//        roosterTexture = make_shared<Texture>();
-//        roosterTexture->setFilename(resourceDir + "/prop_gas_station_baseColor.jpeg");
-//        roosterTexture->init();
-//        roosterTexture->setUnit(4);
-//        roosterTexture->setWrapModes(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
 	}
-
-//    void gasSetUp(const std::string& resourceDirectory)
-//    {
-//        //initialize the textures we might use
-//        roosterProg = make_shared<Program>();
-//        roosterProg->setVerbose(true);
-//        roosterProg->setShaderNames(
-//                resourceDirectory + "/rooster_tex_vert.glsl",
-//                resourceDirectory + "/rooster_tex_frag.glsl");
-//        if (! roosterProg->init())
-//        {
-//            std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
-//            exit(1);
-//        }
-//        roosterProg->addUniform("P");
-//        roosterProg->addUniform("V");
-//        roosterProg->addUniform("M");
-//        roosterProg->addUniform("Texture0");
-//        roosterProg->addUniform("texNum");
-//        roosterProg->addAttribute("vertPos");
-//        roosterProg->addAttribute("vertNor");
-//        roosterProg->addAttribute("vertTex");
-//        roosterProg->addUniform("lightPos");
-//    }
 
 	void init()
 	{
 		glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
 		GLSL::checkVersion();
 
-		glClearColor(.12f, .34f, .56f, 1.0f);
+		//glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 
         oc->setSoundEngine(soundEngine);
@@ -306,7 +274,10 @@ public:
 		pc->setUp();
 		terrain.initTerrain();
 		water.initWater();
-		shadow.init(width, height);
+		int w, h;
+        glfwGetFramebufferSize(windowManager->getHandle(), &w, &h);
+        bloom.init(w, h);
+        shadow.init(width, height);
 	}
 
 
@@ -405,45 +376,21 @@ public:
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
-		oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
-        moon->drawObject(View, Projection, camera.getPosition(),
-                               butterfly.currentPos, oc->gameplay);
+        //bloom.render(butterfly, oc, View, Projection, camera.getPosition(), moon);
+	    oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
+        moon->drawObject(View, Projection, camera.getPosition(), butterfly.currentPos, oc->gameplay);
 	}
-
-//    void drawRooster(MatrixStack* View, MatrixStack* Projection)
-//    {
-//
-//        auto Model = make_shared<MatrixStack>();
-//        roosterProg->bind();
-//        glUniformMatrix4fv(roosterProg->getUniform("P"), 1, GL_FALSE, value_ptr(Projection->topMatrix()));
-//        glUniformMatrix4fv(roosterProg->getUniform("V"), 1, GL_FALSE, value_ptr(View->topMatrix()));
-//        glUniform3f(roosterProg->getUniform("lightPos"), lightPos.x, lightPos.y, lightPos.z);
-//
-//        Model->pushMatrix();
-//        Model->loadIdentity();
-//
-//        Model->translate(vec3(0, 2, 0));
-//        Model->rotate(15, vec3(1,0,0));
-//
-//
-//        Model->pushMatrix();
-//        glUniformMatrix4fv(roosterProg->getUniform("M"), 1, GL_FALSE, value_ptr(Model->topMatrix()) );
-//        roosterTexture->bind(roosterProg->getUniform("Texture0"));
-//        glUniform1f(roosterProg->getUniform("texNum"), 1);
-//        rooster->draw(roosterProg);
-//        Model->popMatrix();
-//        roosterTexture->unbind();
-//
-//        Model->popMatrix();
-//        roosterProg->unbind();
-//    }
 
     void render(float deltaTime)
     {
-        glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+	    glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
         glViewport(0, 0, width, height);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, bloom.getScreenBuf());
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        //glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// need mouse position in order to use camera
 		double mousex = width / 4.0;
@@ -476,8 +423,9 @@ public:
 			t += deltaTime*0.0000001;
 			//std::cout << butterfly.center.x << "," << butterfly.center.y << "," << butterfly.center.z << std::endl;
 		}
+
 		else
-		{		
+		{
 			butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
 		}
 
@@ -547,6 +495,7 @@ public:
         Projection->perspective(radians(50.0f), aspect, 0.1f, 100.0f);
         MatrixStack *projectionPtr = Projection.get();
 
+
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
@@ -556,6 +505,7 @@ public:
 
         CHECKED_GL_CALL(glDisable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
+
         drawScene(userViewPtr, projectionPtr);
 
 		auto Model = make_shared<MatrixStack>();
@@ -573,17 +523,16 @@ public:
             terrain.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), shadow.getLS(), shadow.getDepthMap(), cameraPos, lighting, butterfly.currentPos);
         }
 
-//        drawRooster(userViewPtr, projectionPtr);
-
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		water.render(Projection->topMatrix(), ViewUser->topMatrix(), Model->topMatrix(), cameraPos);
 		Model->popMatrix();
 
-		shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition());
+		shadow.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition(), bloom.getScreenBuf());
         CHECKED_GL_CALL(glDisable(GL_BLEND));
 		oc->player.drawPlayer(userViewPtr, projectionPtr, camera.getPosition(), lighting, butterfly.currentPos);
-		butterfly.drawbutterfly(userViewPtr, projectionPtr, camera.getPosition(), oc->gameplay, lighting);
+
+        butterfly.drawbutterfly(butterfly.butterflyProg, userViewPtr, projectionPtr, camera.getPosition(), oc->gameplay);
 
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
@@ -591,10 +540,19 @@ public:
         CHECKED_GL_CALL(glPointSize(25.0f));
         pc->drawParticles(userViewPtr, aspect, keyToggles, oc->player.position, oc->gameplay, y);
 
-		Projection->popMatrix();
+        //bloom.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition());
+
+        Projection->popMatrix();
 		ViewUser->popMatrix();
 		ViewUser->popMatrix();
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
+        CHECKED_GL_CALL(glEnable(GL_BLEND));
+        //CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //bloom.combine();
+        bloom.bloomPlz();
     }
 
 };
@@ -610,8 +568,6 @@ int main(int argc, char **argv)
 	{
 		std::cerr << "Could not start irrKlang sound engine" << std::endl;
 	}
-
-    soundEngine->play2D("../resources/tame.ogg", true);
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -628,6 +584,8 @@ int main(int argc, char **argv)
     application->initGeom();
 	application->lighting->init();
     auto lastTime = chrono::high_resolution_clock::now();
+
+    soundEngine->play2D("../resources/tame.ogg", true);
 
 	// Loop until the user closes the window.
 	while (! glfwWindowShouldClose(windowManager->getHandle()))

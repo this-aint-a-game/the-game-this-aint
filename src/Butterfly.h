@@ -35,7 +35,7 @@ class Butterfly
 
     void updateModelMatrix(double frametime, glm::vec3 origin);
     void initbutterfly();
-    void drawbutterfly(MatrixStack* View, MatrixStack* Projection, glm::vec3 view, ColorCollectGameplay* ,Lighting* lighting);
+    void drawbutterfly(std::shared_ptr<Program> prog, MatrixStack* View, MatrixStack* Projection, glm::vec3 view, ColorCollectGameplay*);
     void moveAlongPath(glm::vec3 a, glm::vec3 b, glm::vec3 control1, glm::vec3 control2, double frametime, double t);
     // TODO this should be less specific
     void drawObject(MatrixStack*, std::vector<std::shared_ptr<Shape>>, std::shared_ptr<Program>, glm::vec3 view) {};

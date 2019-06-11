@@ -32,7 +32,7 @@ public:
 
     void init(int w, int h);
 
-    void render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera);
+    void render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, GLuint buffer);
 
     glm::mat4 SetOrthoMatrix();
 

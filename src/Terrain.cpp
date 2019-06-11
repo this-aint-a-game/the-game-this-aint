@@ -4,6 +4,7 @@
 
 Terrain::Terrain(ColorCollectGameplay * ccg)
 {
+    this->doneLoading = false;
     this->ccg = ccg;
     vertexArrayID = 0;
     generateGrid(INITIAL_WIDTH);
@@ -12,14 +13,9 @@ Terrain::Terrain(ColorCollectGameplay * ccg)
     t.detach();
 }
 
-void Terrain::initTex()
+bool Terrain::isDoneLoading()
 {
-    terrainTexture = std::make_shared<Texture>();
-    terrainTexture->setFilename("../resources/Onefacegrey.jpg");
-    terrainTexture->init();
-    terrainTexture->setUnit(0);
-    terrainTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    return doneLoading;
 }
 
 void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting* lighting, glm::vec3 lightPos) {
@@ -68,15 +64,16 @@ void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const &
 
     }
 
-    glActiveTexture(GL_TEXTURE1); // TODO? 2?
+    // TODO
+
+    glActiveTexture(GL_TEXTURE3); // TODO? 2?
     glBindTexture(GL_TEXTURE_2D, depthMap);
 
-    glUniform1i(prog->getUniform("shadowDepth"), 1); // TODO 1?
+    glUniform1i(prog->getUniform("shadowDepth"), 3); // TODO 1?
     glUniformMatrix4fv(prog->getUniform("LS"), 1, GL_FALSE, value_ptr(LS));
 
     draw();
 
-    //terrainTexture->unbind();
     prog->unbind();
 }
 
@@ -98,7 +95,6 @@ void Terrain::computeIndicesForClipVolume(int width, float clipx0, float clipx1,
     {
         for (int r = minRow; r < maxRow + 1; r++)
         {
-            // if not first strip, link to previous strip
             if (c > minCol && r == minRow)
             {
                 indices[index++] = c * width + r;
@@ -106,7 +102,6 @@ void Terrain::computeIndicesForClipVolume(int width, float clipx0, float clipx1,
             indices[index++] = c * width + r;
             indices[index++] = (c + 1) * width + r;
 
-            // link to next strip
             if (r == maxRow && c < maxCol)
             {
                 indices[index++] = (c + 1) * width + r;
@@ -114,7 +109,6 @@ void Terrain::computeIndicesForClipVolume(int width, float clipx0, float clipx1,
         }
     }
     numIndices = index;
-    //std::cout << "numIndices: " << numIndices << std::endl;
 }
 
 void Terrain::bindVAO()
@@ -139,12 +133,10 @@ void Terrain::bindVAO()
         glBufferData(GL_ARRAY_BUFFER, bytes, vertexData, GL_STATIC_DRAW);
         free(vertexData);
 
-        // TODO how does num index buffers affect this
         glGenBuffers(1, &vertexIndexBuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(int), indices,
                      GL_DYNAMIC_DRAW);
-
 
         glGenVertexArrays(1, &vertexArrayID);
         glBindVertexArray(vertexArrayID);
@@ -153,23 +145,6 @@ void Terrain::bindVAO()
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
-
-        /*
-        static GLfloat GrndTex[] = {
-                0, 0, // back
-                0, 1,
-                1, 1,
-                1, 0 };
-        glGenBuffers(1, &GrndTexBuffObj);
-        glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GrndTex), GrndTex, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ARRAY_BUFFER, GrndTexBuffObj);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-         */
-
-
     }
     else
     {
@@ -192,8 +167,8 @@ float Terrain::calcHeight(float x, float z)
 
 void Terrain::generateGrid(int width)
 {
-    int start = -width/2;//0;
-    int finish = width/2;//0;
+    int start = -width/2;
+    int finish = width/2;
 
     std::vector <glm::vec3> tempV;
 
@@ -233,7 +208,7 @@ void Terrain::generateGrid(int width)
 
 std::thread Terrain::threadedGenerateGrid()
 {
-    return std::thread([this] { this->generateGrid(); });
+    return std::thread([this] { this->generateGrid(); doneLoading = true;});
 }
 
 void Terrain::clean()
@@ -258,9 +233,6 @@ void Terrain::unbind()
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    //glDisableVertexAttribArray(2);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -281,9 +253,6 @@ void Terrain::initTerrain()
     prog->addUniform("V");
     prog->addUniform("M");
 
-    //prog->addUniform("Texture");
-    //initTex();
-
     prog->addUniform("MatAmb");
     prog->addUniform("MatDif");
     prog->addUniform("MatSpec");
@@ -297,5 +266,4 @@ void Terrain::initTerrain()
 
     prog->addAttribute("vertPos");
     prog->addAttribute("vertNor");
-    //prog->addAttribute("vertTex");
 }
