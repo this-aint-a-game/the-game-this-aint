@@ -30,14 +30,12 @@ class Terrain {
     std::vector<glm::vec3> vertices;
     unsigned *indices;
     unsigned numIndices;
-    std::shared_ptr<Texture> terrainTexture;
-    //unsigned indexBuffer[3]; // TODO 3?
+    bool doneLoading;
 
     std::shared_ptr<Program> prog;
     GLuint vertexArrayID;
     GLuint vertexBuffer;
     GLuint vertexIndexBuffer;
-    //GLuint GrndTexBuffObj;
 
     void initTex();
     void unbind();
@@ -55,6 +53,7 @@ public:
     void initTerrain();
     static float getHeight(float x, float z);
     ~Terrain() { clean(); }
+    bool isDoneLoading();
 
 };
 

@@ -383,7 +383,7 @@ public:
 
     void render(float deltaTime)
     {
-        glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+	    glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
         glViewport(0, 0, width, height);
 
         glBindFramebuffer(GL_FRAMEBUFFER, bloom.getScreenBuf());
@@ -413,7 +413,6 @@ public:
 
 		// TODO: make this better
 		static float t = 0;
-		/*
 		if(t < 1)
 		{
 			glm::vec3 a = glm::vec3(0,0,0);
@@ -427,9 +426,8 @@ public:
 
 		else
 		{
-		 */
 			butterfly.updateModelMatrix(deltaTime, oc->player.currentPos);
-		//}
+		}
 
 
 //        std::cout << oc->player.currentPos.x << "," << oc->player.currentPos.y << "," << oc->player.currentPos.z << std::endl;
@@ -570,8 +568,6 @@ int main(int argc, char **argv)
 	{
 		std::cerr << "Could not start irrKlang sound engine" << std::endl;
 	}
-
-    //soundEngine->play2D("../resources/tame.ogg", true);
  
 	WindowManager *windowManager = new WindowManager();
 	windowManager->init(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -588,6 +584,8 @@ int main(int argc, char **argv)
     application->initGeom();
 	application->lighting->init();
     auto lastTime = chrono::high_resolution_clock::now();
+
+    soundEngine->play2D("../resources/tame.ogg", true);
 
 	// Loop until the user closes the window.
 	while (! glfwWindowShouldClose(windowManager->getHandle()))

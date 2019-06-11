@@ -4,6 +4,7 @@
 
 Terrain::Terrain(ColorCollectGameplay * ccg)
 {
+    this->doneLoading = false;
     this->ccg = ccg;
     vertexArrayID = 0;
     generateGrid(INITIAL_WIDTH);
@@ -12,14 +13,9 @@ Terrain::Terrain(ColorCollectGameplay * ccg)
     t.detach();
 }
 
-void Terrain::initTex()
+bool Terrain::isDoneLoading()
 {
-    terrainTexture = std::make_shared<Texture>();
-    terrainTexture->setFilename("../resources/Onefacegrey.jpg");
-    terrainTexture->init();
-    terrainTexture->setUnit(0);
-    terrainTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    return doneLoading;
 }
 
 void Terrain::render(glm::mat4 const & P, glm::mat4 const & V, glm::mat4 const & M, glm::mat4 & LS, GLuint depthMap, glm::vec3 cameraPos, Lighting* lighting, glm::vec3 lightPos) {
@@ -235,7 +231,7 @@ void Terrain::generateGrid(int width)
 
 std::thread Terrain::threadedGenerateGrid()
 {
-    return std::thread([this] { this->generateGrid(); });
+    return std::thread([this] { this->generateGrid(); doneLoading = true;});
 }
 
 void Terrain::clean()
