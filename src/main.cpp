@@ -376,7 +376,7 @@ public:
 
 	void drawScene(MatrixStack* View, MatrixStack* Projection)
 	{
-        bloom.render(butterfly, oc, View, Projection, camera.getPosition(), moon);
+        //bloom.render(butterfly, oc, View, Projection, camera.getPosition(), moon);
 	    oc->drawScene(oc->objProg, View, Projection, camera.getPosition(), butterfly.currentPos);
         moon->drawObject(View, Projection, camera.getPosition(), butterfly.currentPos, oc->gameplay);
 	}
@@ -553,7 +553,8 @@ public:
         CHECKED_GL_CALL(glEnable(GL_BLEND));
         //CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        bloom.combine();
+        //bloom.combine();
+        bloom.bloomPlz();
     }
 
 };

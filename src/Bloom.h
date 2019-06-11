@@ -15,15 +15,76 @@ class Bloom
     GLuint screenBuf[1];
     GLuint screenTexBuf[1];
 
+    GLuint brightnessBuf[1];
+    GLuint brightnessTexBuf[1];
+
     GLuint quad_VertexArrayID;
     GLuint quad_vertexbuffer;
 
     std::shared_ptr<Program> tex_prog;
     std::shared_ptr<Program> comb_prog;
-
-    bool FirstTime = true;
-
+    std::shared_ptr<Program> bright_prog;
+    
 public:
+
+    void doBrightnessBuf()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, brightnessBuf[0]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, screenTexBuf[0]);
+
+        // example applying of 'drawing' the FBO texture
+        bright_prog->bind();
+        glUniform1i(bright_prog->getUniform("sceneBuf"), 0);
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);    //drawing a quad
+        glDisableVertexAttribArray(0);
+        bright_prog->unbind();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void blur()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        bool horizontal = true;
+        bool first = true;
+        for (int i = 0; i <10; i++)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[(i+1)%2]);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            //Blur(texBuf[i%2], horizontal);
+            if (first)
+            {
+                Blur(brightnessTexBuf[i%2], horizontal);
+                first = false;
+            } else {
+                Blur(texBuf[i%2], horizontal);
+            }
+
+            horizontal = !horizontal;
+        }
+
+        //glBindFramebuffer(GL_FRAMEBUFFER, getScreenBuf());
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void bloomPlz()
+    {
+        doBrightnessBuf();
+
+        blur();
+
+        combine();
+    }
 
     void combine()
     {
@@ -53,6 +114,8 @@ public:
 
         initCombProg();
 
+        initBrightProg();
+
         glGenFramebuffers(1, screenBuf);
         glGenTextures(1, screenTexBuf);
         glGenRenderbuffers(1, &depthBuf);
@@ -64,16 +127,15 @@ public:
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        glGenFramebuffers(1, brightnessBuf);
+        glGenTextures(1, brightnessTexBuf);
+        createFBO(brightnessBuf[0], brightnessTexBuf[0], width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         glGenFramebuffers(2, frameBuf);
         glGenTextures(2, texBuf);
         //glGenRenderbuffers(1, &depthBuf);
         createFBO(frameBuf[0], texBuf[0], width, height);
-
-        // TODO depth buffer???
-        //set up depth necessary since we are rendering a mesh that needs depth test
-        //glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
-        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -85,24 +147,12 @@ public:
         createFBO(frameBuf[1], texBuf[1], width, height);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //this one doesn't need depth
 
-        /*
-        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, DrawBuffers);
-         */
-        //glBindFramebuffer(GL_FRAMEBUFFER, getScreenBuf());
     }
 
     GLuint getScreenBuf()
     {
-        return screenTexBuf[0];
-        //return 0;
-    }
-
-    GLuint getBlurBuffer()
-    {
-        return texBuf[1];
+        return screenBuf[0];
     }
 
     /* To call the blur on the specificed texture */
@@ -121,78 +171,6 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, 6);    //drawing a quad
         glDisableVertexAttribArray(0);
         tex_prog->unbind();
-    }
-
-    void render(Butterfly & butterfly, ObjectCollection* oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, Moon* moon)
-    {
-        // frameBuf[0] is actually memory -> storing the data
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[0]);
-
-        //glEnable(GL_BLEND);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glEnable(GL_DEPTH_TEST);
-
-        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, DrawBuffers);
-
-        // Clear framebuffer.
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // bind prog
-        // render scene
-        oc->drawScene(oc->objProg, view, projection, camera, butterfly.currentPos);
-        butterfly.drawbutterfly(butterfly.butterflyProg, view, projection, camera, oc->gameplay);
-        moon->drawObject(view, projection, camera, butterfly.currentPos, oc->gameplay);
-        // unbind prog
-
-        //regardless unbind the FBO
-        // framebuffer 0 means the screen, default behavior
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        /* code to write out the FBO (texture) just once */
-        if (FirstTime) {
-            // textures used as input, framebuffer used as output
-            assert(GLTextureWriter::WriteImage(texBuf[0],"Texture_output.png"));
-            //FirstTime = 0;
-        }
-
-        bool horizontal = true;
-        for (int i = 0; i <10; i++)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[(i+1)%2]);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            Blur(texBuf[i%2], horizontal);
-            horizontal = !horizontal;
-        }
-
-        /*
-        for (int i = 0; i < 5; i++)
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[(i+1)%2]);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            Blur(texBuf[i%2], false);
-        }
-         */
-
-        if (FirstTime) {
-            // textures used as input, framebuffer used as output
-            assert(GLTextureWriter::WriteImage(texBuf[0],"Texture_output_blur0.png"));
-            //FirstTime = 0;
-        }
-
-        if (FirstTime) {
-            // textures used as input, framebuffer used as output
-            assert(GLTextureWriter::WriteImage(texBuf[0],"Texture_output_after.png"));
-            //FirstTime = 0;
-        }
-        if (FirstTime) {
-            // textures used as input, framebuffer used as output
-            assert(GLTextureWriter::WriteImage(texBuf[1],"Texture_output_blur1.png"));
-            FirstTime = 0;
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, getScreenBuf());
     }
 
     void initTexProg()
@@ -227,6 +205,22 @@ public:
         comb_prog->addUniform("bloomBuf");
         comb_prog->addUniform("sceneBuf");
         comb_prog->addAttribute("vertPos");
+    }
+
+    void initBrightProg()
+    {
+        //set up the shaders to blur the FBO decomposed just a placeholder pass thru now
+        //TODO - modify and possibly add other shaders to complete blur
+        bright_prog = make_shared<Program>();
+        bright_prog->setVerbose(true);
+        bright_prog->setShaderNames("../resources/blur_vert.glsl", "../resources/brightness_frag.glsl");
+        if (! bright_prog->init())
+        {
+            std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+            exit(1);
+        }
+        bright_prog->addUniform("sceneBuf");
+        bright_prog->addAttribute("vertPos");
     }
 
     void initQuad() {
@@ -275,8 +269,6 @@ public:
             cout << "Error setting up frame buffer - exiting" << endl;
             exit(0);
         }
-
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 };
 
