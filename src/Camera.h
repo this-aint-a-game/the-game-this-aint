@@ -30,10 +30,12 @@ public:
     float distance;
     float pitchOffSet;
     float targetPitchOffset;
+    int controlDir;
     glm::vec3 position;
 
     Camera()
     {
+        controlDir = -1;
         targetYaw = yawAngle = 0.0;
         targetDistance = distance = 5.0;
         inAnimation = false;
