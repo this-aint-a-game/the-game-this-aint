@@ -41,8 +41,6 @@ void Butterfly::initbutterfly()
     butterflyProg->addUniform("P");
     butterflyProg->addUniform("V");
     butterflyProg->addUniform("M");
-    butterflyProg->addUniform("bloom");
-    butterflyProg->addUniform("bloomBuf");
     butterflyProg->addUniform("MatDif");
     butterflyProg->addAttribute("vertPos");
     butterflyProg->addAttribute("vertNor");

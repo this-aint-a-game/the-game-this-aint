@@ -53,28 +53,6 @@ public:
 
         initCombProg();
 
-
-        glGenFramebuffers(2, frameBuf);
-        glGenTextures(2, texBuf);
-        //glGenRenderbuffers(1, &depthBuf);
-        createFBO(frameBuf[0], texBuf[0], width, height);
-
-        // TODO depth buffer???
-        //set up depth necessary since we are rendering a mesh that needs depth test
-        glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
-
-
-        //more FBO set up
-        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, DrawBuffers);
-
-        //create another FBO so we can swap back and forth
-        createFBO(frameBuf[1], texBuf[1], width, height);
-        //this one doesn't need depth
-
-
         glGenFramebuffers(1, screenBuf);
         glGenTextures(1, screenTexBuf);
         glGenRenderbuffers(1, &depthBuf);
@@ -84,10 +62,36 @@ public:
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glGenFramebuffers(2, frameBuf);
+        glGenTextures(2, texBuf);
+        //glGenRenderbuffers(1, &depthBuf);
+        createFBO(frameBuf[0], texBuf[0], width, height);
+
+        // TODO depth buffer???
+        //set up depth necessary since we are rendering a mesh that needs depth test
+        //glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
+        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        //more FBO set up
+        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, DrawBuffers);
+
+        //create another FBO so we can swap back and forth
+        createFBO(frameBuf[1], texBuf[1], width, height);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //this one doesn't need depth
+
         /*
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, DrawBuffers);
          */
+        //glBindFramebuffer(GL_FRAMEBUFFER, getScreenBuf());
     }
 
     GLuint getScreenBuf()
@@ -123,6 +127,10 @@ public:
     {
         // frameBuf[0] is actually memory -> storing the data
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[0]);
+
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glEnable(GL_DEPTH_TEST);
 
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, DrawBuffers);
@@ -193,7 +201,11 @@ public:
         tex_prog = make_shared<Program>();
         tex_prog->setVerbose(true);
         tex_prog->setShaderNames("../resources/blur_vert.glsl", "../resources/blur_frag.glsl");
-        tex_prog->init();
+        if (! tex_prog->init())
+        {
+            std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+            exit(1);
+        }
         tex_prog->addUniform("texBuf");
         tex_prog->addUniform("horizontal");
         tex_prog->addAttribute("vertPos");
@@ -206,7 +218,11 @@ public:
         comb_prog = make_shared<Program>();
         comb_prog->setVerbose(true);
         comb_prog->setShaderNames("../resources/blur_vert.glsl", "../resources/comb_frag.glsl");
-        comb_prog->init();
+        if (! comb_prog->init())
+        {
+            std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+            exit(1);
+        }
         comb_prog->addUniform("bloomBuf");
         comb_prog->addUniform("sceneBuf");
         comb_prog->addAttribute("vertPos");
@@ -244,7 +260,9 @@ public:
         //set up texture
         glBindTexture(GL_TEXTURE_2D, tex);
 
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -257,7 +275,7 @@ public:
             exit(0);
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 };
 

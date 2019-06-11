@@ -24,7 +24,11 @@ void Shadow::init(int w, int h)
     depthProg->setVerbose(true);
     depthProg->setShaderNames("../resources/depth_vert.glsl", "../resources/depth_frag.glsl");
     //depthProg->init();
-    depthProg->init();
+    if (! depthProg->init())
+    {
+        std::cerr << "One or more shaders failed to compile... exiting!" << std::endl;
+        exit(1);
+    }
     depthProg->addUniform("LP");
     depthProg->addUniform("LV");
     depthProg->addUniform("M");

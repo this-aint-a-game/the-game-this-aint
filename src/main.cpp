@@ -542,11 +542,16 @@ public:
         CHECKED_GL_CALL(glPointSize(25.0f));
         pc->drawParticles(userViewPtr, aspect, keyToggles, oc->player.position, oc->gameplay, y);
 
-		Projection->popMatrix();
+        //bloom.render(butterfly, oc, userViewPtr, projectionPtr, camera.getPosition());
+
+        Projection->popMatrix();
 		ViewUser->popMatrix();
 		ViewUser->popMatrix();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        CHECKED_GL_CALL(glDisable(GL_BLEND));
+        //CHECKED_GL_CALL(glEnable(GL_BLEND));
+        //CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         bloom.combine();
     }
