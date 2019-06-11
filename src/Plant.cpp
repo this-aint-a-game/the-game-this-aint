@@ -28,13 +28,13 @@ Plant::Plant(glm::vec3 min, glm::vec3 max, int num, objType type, ColorCollectGa
 
     currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
     currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
-    while(Terrain::getHeight(currentPos.x, currentPos.z)> -4.5f)
+    while(Terrain::getHeight(currentPos.x, currentPos.z)> -4.4f)
     {
         currentPos.x = getRand(-GROUND_SIZE+0.1f, GROUND_SIZE-0.1f);
         currentPos.z = getRand(-GROUND_SIZE, GROUND_SIZE);
     }
 
-    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.35f;
+    currentPos.y = (Terrain::getHeight(currentPos.x, currentPos.z)) - 0.4f;
 }
 
 void Plant::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> plantShapes, std::shared_ptr<Program> prog, glm::vec3 view, glm::vec3 butterflyPos, ColorCollectGameplay* ccg)

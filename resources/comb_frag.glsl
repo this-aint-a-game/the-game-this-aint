@@ -15,5 +15,6 @@ void main() {
     vec3 sceneCol = texture(sceneBuf, texCoord).rgb;
 
     vec3 color = bloomCol + sceneCol;
+
     Outcolor = vec4(color, 1.0);
 }

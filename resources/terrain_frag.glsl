@@ -22,12 +22,11 @@ out vec4 color;
 in float water;
 in vec4 pos;
 
-vec3 calcLight(vec3 lightPosition, vec3 fragNor, vec3 viewVec)
+vec3 calcLight(float distance, vec3 fragNor, vec3 viewVec)
 {
-    float distance = distance(lightPosition, pos.xyz);
-    distance = pow(distance, 1.4);
+    distance = pow(distance, 1.5);
     
-    vec3 lightDirection = normalize(lightPosition - pos.xyz);
+    vec3 lightDirection = normalize(lightPos - pos.xyz);
 
     // get basic diffuse by dotting normal with light direction
     float diffuse = clamp(dot(vec3(fragNor), lightDirection), 0, 1);
@@ -75,14 +74,21 @@ float TestShadow(vec4 LSfPos) {
 
 void main()
 {
+    float distance = distance(lightPos, pos.xyz);
+    if(distance < 20)
+    {
+        vec3 fdx = vec3(dFdx(pos.x), dFdx(pos.y), dFdx(pos.z));
+        vec3 fdy = vec3(dFdy(pos.x), dFdy(pos.y), dFdy(pos.z));
+        vec3 norm = normalize(cross(fdx, fdy));
+        vec3 viewVec = normalize(cameraPos - (V * M * vec4(normalize(norm), 1.0)).xyz);
+        vec3 finalColor = vec3(0.f);
+        finalColor += calcLight(distance, norm, viewVec);
 
-    vec3 fdx = vec3(dFdx(pos.x), dFdx(pos.y), dFdx(pos.z));
-    vec3 fdy = vec3(dFdy(pos.x), dFdy(pos.y), dFdy(pos.z));
-    vec3 norm = normalize(cross(fdx, fdy));
-    vec3 viewVec = normalize(cameraPos - (V * M * vec4(normalize(norm), 1.0)).xyz);
-    vec3 finalColor = vec3(0.f);
-    finalColor += calcLight(lightPos, norm, viewVec);
-
-    float shade = TestShadow(fPosLS);
-    color = vec4((1.0 - shade)*finalColor, 1.0);
+        float shade = TestShadow(fPosLS);
+        color = vec4((1.0 - shade)*finalColor, 1.0);
+    }
+    else
+    {
+        color = vec4(0,0,0,1);
+    }
 }

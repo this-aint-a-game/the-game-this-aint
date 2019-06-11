@@ -385,6 +385,15 @@ public:
 
     void render(float deltaTime)
     {
+		if(!terrain.isDoneLoading())
+		{
+		    glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+        	glViewport(0, 0, width, height);
+		    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			bloom.showLoadScreen(deltaTime);
+		} else {
+
 	    glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
         glViewport(0, 0, width, height);
 
@@ -559,7 +568,7 @@ public:
         //bloom.combine();
         bloom.bloomPlz();
     }
-
+	}
 };
 
 int main(int argc, char **argv)
