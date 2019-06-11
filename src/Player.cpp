@@ -11,9 +11,13 @@ glm::mat4 Player::updateModelMatrix(double frametime,
                                     std::vector<GameObject*> & objs,
                                     BoundingVolumeHierarchy * bvh)
 {
-    animationTimer += 4*frametime;
-    if(animationTimer >= 2)
+    animationTimer += 6*frametime;
+    if(animationTimer >= 9)     
+    {
+        if(inSomersault)
+            inSomersault = false;
         animationTimer = 0;
+    }
     // set speed = 0 as default, will update value based on keypresses
     float speed = 0;
     // because the camera is always looking at the player when the player has control of the 
@@ -111,12 +115,19 @@ void Player::initPlayer(ColorCollectGameplay * ccg)
     this->bs = new BoundingSphere(playerShape->min, playerShape->max, scale, 0.f);
 
     // animations
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 9; i++)
     {
         idleframes.push_back(std::make_shared<Shape>());
         idleframes[i]->loadMesh("../resources/frame" + std::to_string(i) + ".obj");
         idleframes[i]->resize();
         idleframes[i]->init();
+    }
+        for(int i = 0; i < 9; i++)
+    {
+        somersaultframes.push_back(std::make_shared<Shape>());
+        somersaultframes[i]->loadMesh("../resources/somersault" + std::to_string(i) + ".obj");
+        somersaultframes[i]->resize();
+        somersaultframes[i]->init();
     }
 }
 
@@ -139,7 +150,10 @@ void Player::drawPlayer(MatrixStack* View, MatrixStack* Projection, glm::vec3 vi
     lighting->bind(playerProg->getUniform("lighting"));
 */
     //playerShape->draw(playerProg);
-    idleframes[(int)animationTimer]->draw(playerProg);
+    if(!inSomersault)
+        idleframes[(int)animationTimer]->draw(playerProg);
+    else
+        somersaultframes[(int)animationTimer]->draw(playerProg);
 
     playerProg->unbind();
 }
@@ -160,8 +174,12 @@ void Player::drawShape(std::shared_ptr<Program> prog)
 {
     glUniformMatrix4fv(prog->getUniform("M"), 1, GL_FALSE, (GLfloat*)&model);
     //playerShape->draw(prog);
-    idleframes[(int)animationTimer]->draw(prog);
+    if(!inSomersault)
+        idleframes[(int)animationTimer]->draw(prog);
+    else
+        somersaultframes[(int)animationTimer]->draw(prog);
 }
+
 bool Player::checkForCollisions(std::vector<GameObject*> &objs, BoundingVolumeHierarchy* bvh)
 {
     bool collided = false;
@@ -173,5 +191,9 @@ bool Player::checkForCollisions(std::vector<GameObject*> &objs, BoundingVolumeHi
     }
 
     return false;
-
+}
+void Player::doSomersault()
+{
+    inSomersault = true;
+    animationTimer = 0;
 }

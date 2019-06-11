@@ -27,6 +27,7 @@ class Player : public GameObject
     std::shared_ptr<Program> playerProg;
     std::shared_ptr<Shape>   playerShape;
     std::vector<std::shared_ptr<Shape>> idleframes;
+    std::vector<std::shared_ptr<Shape>> somersaultframes;
     glm::mat4 model;
 
     glm::mat4 updateModelMatrix
@@ -44,11 +45,11 @@ class Player : public GameObject
     glm::vec3 oldPos, position, dir, targetDir;
     float yaw, targetYaw;
     float timer, animationTimer;
-    bool w, a, s, d, sprint;
+    bool w, a, s, d, sprint, inSomersault;
     
     Player()
     {
-        w = a = s = d = sprint = false;
+        w = a = s = d = sprint = inSomersault = false;
         yaw = targetYaw = 0.0f;
         position = glm::vec3(-8.43903, 0, 9.66477);
         dir = targetDir = glm::vec3(0,0,0);
@@ -74,6 +75,7 @@ class Player : public GameObject
     bool checkForCollisions(std::vector<GameObject*> & objs, BoundingVolumeHierarchy* bvh);
 
     void drawShape(std::shared_ptr<Program> prog);
+    void doSomersault();
 };
 
 #endif
