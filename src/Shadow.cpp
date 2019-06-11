@@ -65,7 +65,7 @@ void Shadow::init(int w, int h)
 
 }
 
-void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, GLuint buffer)
+void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, GLuint buffer, ViewFrustumCulling* vfc)
 {
     //glViewport(0, 0, S_WIDTH, S_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -84,7 +84,7 @@ void Shadow::render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* vi
     LS = LP * LV;
 
     oc->player.drawShape(depthProg);
-    oc->drawScene(depthProg, view, projection, camera, butterfly.currentPos);
+    oc->drawScene(depthProg, view, projection, camera, butterfly.currentPos, vfc);
 
     depthProg->unbind();
     glCullFace(GL_BACK);  // TODO?

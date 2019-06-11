@@ -8,6 +8,7 @@
 #include "Butterfly.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "ObjectCollection.h"
+#include "ViewFrustumCulling.h"
 
 
 class Shadow {
@@ -32,7 +33,7 @@ public:
 
     void init(int w, int h);
 
-    void render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, GLuint buffer);
+    void render(Butterfly & butterfly, ObjectCollection *oc, MatrixStack* view, MatrixStack* projection, glm::vec3 camera, GLuint buffer, ViewFrustumCulling* vfc);
 
     glm::mat4 SetOrthoMatrix();
 
