@@ -45,27 +45,9 @@ void Plant::drawObject(MatrixStack* Model, std::vector<std::shared_ptr<Shape>> p
     for (size_t j = 0; j < plantShapes.size(); j++)
     {
         if(ccg->checkColor(this->color)) {
-            //std::cout << "GREEN" << std::endl;
-            glm::vec3 a;
-            glm::vec3 d;
-            glm::vec3 s;
-            a = ccg->greenColor.ambient;
-            d = ccg->greenColor.diffuse;
-            s = ccg->greenColor.specular;
 
-            glUniform3f(prog->getUniform("MatAmb"), a.x, a.y, a.z);
-            glUniform3f(prog->getUniform("MatDif"), d.x, d.y, d.z);
-            glUniform3f(prog->getUniform("MatSpec"), s.x, s.y, s.z);
-            glUniform1f(prog->getUniform("shine"), 4.0f);
-            //if (j == 0) {
+            SetMaterial(this->color, prog.get());
 
-                //SetMaterial(this->color, prog.get());
-            //} else {
-                //glUniform3f(prog.get()->getUniform("MatAmb"), 0.25f, 0.20725f, 0.20725f);
-                //glUniform3f(prog.get()->getUniform("MatDif"), 1.0f, 0.829f, 0.829f);
-                //glUniform3f(prog.get()->getUniform("MatSpec"), 0.296648f, 0.296648f, 0.296648f);
-                //glUniform1f(prog.get()->getUniform("shine"), 12.0f);
-            //}
         } else {
             glUniform3f(prog->getUniform("MatAmb"), 0.13, 0.13, 0.14);
             glUniform3f(prog->getUniform("MatDif"), 0.3, 0.3, 0.4);

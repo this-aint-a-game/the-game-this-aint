@@ -24,7 +24,7 @@ class Bloom
     std::shared_ptr<Program> tex_prog;
     std::shared_ptr<Program> comb_prog;
     std::shared_ptr<Program> bright_prog;
-    
+
 public:
 
     void doBrightnessBuf()
@@ -72,7 +72,6 @@ public:
             horizontal = !horizontal;
         }
 
-        //glBindFramebuffer(GL_FRAMEBUFFER, getScreenBuf());
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

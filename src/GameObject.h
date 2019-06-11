@@ -102,7 +102,7 @@ public:
                 s = ccg->greenColor.specular;
 
                 glUniform3f(prog->getUniform("MatAmb"), a.x, a.y, a.z);
-                glUniform3f(prog->getUniform("MatDif"), d.x, d.y, d.z);
+                glUniform3f(prog->getUniform("MatDif"), d.x-0.2, d.y-0.2, d.z-0.2);
                 glUniform3f(prog->getUniform("MatSpec"), s.x, s.y, s.z);
                 glUniform1f(prog->getUniform("shine"), 47.0f);
 
