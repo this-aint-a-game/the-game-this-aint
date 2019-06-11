@@ -47,7 +47,6 @@ bool Program::init()
 	std::string fShaderString = readFileAsString(fShaderName);
 	const char *vshader = vShaderString.c_str();
 	const char *fshader = fShaderString.c_str();
-	std::cout << "vShaderName: " << vShaderName << std::endl;
 	CHECKED_GL_CALL(glShaderSource(VS, 1, &vshader, NULL));
 	CHECKED_GL_CALL(glShaderSource(FS, 1, &fshader, NULL));
 

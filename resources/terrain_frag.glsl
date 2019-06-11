@@ -85,5 +85,4 @@ void main()
 
     float shade = TestShadow(fPosLS);
     color = vec4((1.0 - shade)*finalColor, 1.0);
-    //color = vec4(finalColor, 1.0);
 }

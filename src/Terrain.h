@@ -37,7 +37,6 @@ class Terrain {
     GLuint vertexBuffer;
     GLuint vertexIndexBuffer;
 
-    void initTex();
     void unbind();
     void draw();
     void computeIndicesForClipVolume(int width, float clipx0, float clipx1, float clipz0, float clipz1);

@@ -60,7 +60,6 @@ public:
         {
             glBindFramebuffer(GL_FRAMEBUFFER, frameBuf[(i+1)%2]);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            //Blur(texBuf[i%2], horizontal);
             if (first)
             {
                 Blur(brightnessTexBuf[i%2], horizontal);
@@ -163,7 +162,6 @@ public:
         tex_prog->bind();
         glUniform1i(tex_prog->getUniform("texBuf"), 0);
         glUniform1i(tex_prog->getUniform("horizontal"), horizontal);
-        //glUniform1f(tex_prog->getUniform("time"), glfwGetTime());
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
