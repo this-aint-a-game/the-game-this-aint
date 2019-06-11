@@ -265,6 +265,8 @@ public:
 
 		//glClearColor(.12f, .34f, .56f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
         oc->setSoundEngine(soundEngine);
         oc->setCamera(&camera);
@@ -498,7 +500,10 @@ public:
 
         CHECKED_GL_CALL(glDisable(GL_DEPTH_TEST));
         CHECKED_GL_CALL(glDisable(GL_BLEND));
+		glDisable(GL_CULL_FACE);
         sky.drawSky(userViewPtr, projectionPtr, lightPos, glfwGetTime()/1000);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
         // view frustum culling
         vfc->ExtractVFPlanes(Projection->topMatrix(), ViewUser->topMatrix());
